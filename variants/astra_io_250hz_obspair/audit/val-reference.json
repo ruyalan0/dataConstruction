@@ -1,0 +1,27 @@
+{
+  "passed": true,
+  "source": "/data/lanruya/robodojo/Astra-Robodojo-new/val.jsonl",
+  "sha256": "93eaf271e3befd4974630e3499add5eeaf76ffd6d61baefe5a5609e405b72bdc",
+  "counts": {
+    "rows": 4163,
+    "first_decision": 20,
+    "memory_present": 0,
+    "history_available": 4143
+  },
+  "image_count_distribution": {
+    "3": 20,
+    "6": 4143
+  },
+  "tasks": {
+    "Task: Cover the three blocks from left to right, then uncover them again in the order of red, green, and blue.": 815,
+    "Task: Pick up the test tubes on the table and insert them into the test tube rack.": 536,
+    "Task: Pick up the two slices of bread from the bowl and place them into the toaster, then place the two small bowls on the plate.": 918,
+    "Task: Take the cutting board out and place it on the table. Then place the steak and the knife on the cutting board, put the vegetables and shrimp into the pot, place the pot on the stove, and finally cover it with the lid.": 956,
+    "Task: Place all the fruits into the blue bowl, then pour the fruits from the blue bowl into the large white bowl.": 485,
+    "Task: Place all the objects into the safe, then close the safe.": 453
+  },
+  "duration_ms_min": 60.0,
+  "duration_ms_max": 500.0,
+  "image_bytes_verified": false,
+  "scope": "JSON structure and placeholder order checked; referenced remote image paths are not local"
+}

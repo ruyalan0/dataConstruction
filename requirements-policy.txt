@@ -1,0 +1,3 @@
+# Keep the actual f policy environment pins; install IsaacSim separately.
+-r release/requirements-policy.txt
+PyYAML==6.0.2

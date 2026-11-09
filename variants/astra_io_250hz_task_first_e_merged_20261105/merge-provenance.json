@@ -1,0 +1,78 @@
+{
+  "schema_version": 1,
+  "variant": "astra_io_250hz_task_first_e_merged_20261105",
+  "date": "2026-11-05",
+  "base": "variants/astra_io_250hz_task_first_e_full_tool_speed",
+  "parent_speed_files": 328,
+  "source_updates": {
+    "release/harness/skills/play-tic-tac-toe/SKILL.md": {
+      "previous_sha256": "76f3833e9ba8c89b34f589c98b905bbceb91b1d04933b9d89b4c0f776f4b5822",
+      "sha256": "2c5e1cef7df24400b820496487067db0139dc51eefaa29ed4365d404894a939c"
+    },
+    "variants/astra_io_250hz_task_first_e/harness/skills/stack-bowls/SKILL.md": {
+      "previous_sha256": "a05aa76e0bf638ee38294aab1f0713ed09ef315c82ac0a6fc208d9a1f916ccfd",
+      "sha256": "594fcc289a5831449fd2e8995d7379788528e5324da7c3fcdf9d56d175c957c1"
+    }
+  },
+  "changes": {
+    "speed": {
+      "reference_velocity_limit_rad_s": 3.75,
+      "max_motion_seconds": 0.8,
+      "settle_window_seconds": 0.1
+    },
+    "tic_tac_toe": {
+      "source": "release/harness/skills/play-tic-tac-toe/SKILL.md",
+      "source_sha256": "2c5e1cef7df24400b820496487067db0139dc51eefaa29ed4365d404894a939c",
+      "adaptation": "Use control_arms left:null and right:null to hold measured poses; internal arms:{}; hold window 0.24 s; no verify_completion tool."
+    },
+    "stack_bowls": {
+      "source": "variants/astra_io_250hz_task_first_e/harness/skills/stack-bowls/SKILL.md",
+      "sha256": "594fcc289a5831449fd2e8995d7379788528e5324da7c3fcdf9d56d175c957c1",
+      "change": "Slightly tilt the empty gripper before descending to the radial rim grasp."
+    },
+    "push_T": {
+      "skill": "harness/skills/push-t/SKILL.md",
+      "previous_sha256": "42431f07ed139c2cc17c0b66bde831af7ed1898b41f39cd8645936ec1767a67d",
+      "sha256": "20d50202a0267c1407ee41c8b996b46c222666bb6f54b25d39dfd31d4ddf7819",
+      "change": "Compute both alignment errors from supplied poses; distinguish local withdrawal from final return; select concrete corrections and estimate correction/withdrawal/home budget using current controller bounds.",
+      "controller_update": {
+        "date": "2026-11-06",
+        "previous_reference_velocity_limit_rad_s": 3.75,
+        "reference_velocity_limit_rad_s": 0.6,
+        "task_config": "task-configs/push_T.json",
+        "previous_task_config_sha256": "759419ccb8a6ae4cdbc5e115952c102fb0534c037e1311c809da00263e85e8ee",
+        "scope": "Only push_T; shared controller settings and all other task limits remain unchanged."
+      }
+    },
+    "put_bottles_into_dustbin": {
+      "skill": "harness/skills/put-bottles-into-dustbin/SKILL.md",
+      "previous_sha256": "ca3fe6c810d15e6c6e7ba5abd60c2ca5669d64c6424bae6d57c842ea7a451f67",
+      "sha256": "e7d0bf484daff10785c009423248b652c9f8958e0d1731f0ee243107824af4bf",
+      "change": "Standing: clear overhead alignment then vertical descent. Lying: verify vertical approach and grasp channel parallel to body, with closing axis transverse, before descending."
+    }
+  },
+  "release_verification": "Only the pinned release tic-tac-toe skill hash differs from the frozen inventory; all remaining release hashes and dependency pins remain checked.",
+  "task_configs": {
+    "play_tic_tac_toe": {
+      "source": "runs/astra-e-seven-tasks-L20-L22-20261103-093609/configs/e/linear/play_tic_tac_toe.json",
+      "sha256": "d5d9d281075964ce826e357e36ab70b7ede3a4aa26a7123a05e16a02483f27b2",
+      "adaptation": "Use merged identity, v7 protocol, scene feedback, 3.75 rad/s and both common coordination skills."
+    },
+    "stack_bowls": {
+      "source": "runs/astra-e-seven-tasks-L20-L22-20261103-093609/configs/e/linear/stack_bowls.json",
+      "sha256": "7dfa60b3da3952fd347f5ac6456c471a7f38b82fbfb2e75964e0f50d6ac6d273",
+      "adaptation": "Use merged identity, v7 protocol, scene feedback, 3.75 rad/s and both common coordination skills."
+    },
+    "push_T": {
+      "source": "runs/astra-e-seven-tasks-L20-L22-20261103-093609/configs/e/linear/push_T.json",
+      "sha256": "728194dadf35135828445bfd6d77c4dd46f1431e239c0cfeed1bd11c4f924fbe",
+      "adaptation": "Use merged identity, v7 protocol, scene feedback, push_T-only 0.6 rad/s and both common coordination skills; load the revised task skill."
+    },
+    "put_bottles_into_dustbin": {
+      "source": "runs/astra-e-seven-tasks-L20-L22-20261103-093609/configs/e/linear/put_bottles_into_dustbin.json",
+      "sha256": "7c5f15e27e6d62cfe67eef00517c046d780e93a9bd7c2394cd47f75589ae24eb",
+      "adaptation": "Use merged identity, v7 protocol, scene feedback, 3.75 rad/s and both common coordination skills; load the revised task skill."
+    }
+  },
+  "revision": "push-t-velocity-20261106"
+}

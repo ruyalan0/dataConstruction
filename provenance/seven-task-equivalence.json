@@ -1,0 +1,54 @@
+{
+  "comparison_batch": "sol-terra-f-seven-tasks-L20-L22-20261107-235245",
+  "tasks": {
+    "general_pickup": {
+      "system_sha256": "9b54856e17a911d6eef0ce9dda2ff66312bf3ce99ad1558ab2b48c5cbb5396cf",
+      "matches_recorded_f": true,
+      "reference_velocity_limit_rad_s": 3.75,
+      "max_model_calls": 400,
+      "input_protocol": "observation_pair_joint_goal_privileged_v7"
+    },
+    "play_tic_tac_toe": {
+      "system_sha256": "9b43cbba8b0511c0924e3da3a0d52788b63dc683fc286f4eea7c91d63b1df2f2",
+      "matches_recorded_f": true,
+      "reference_velocity_limit_rad_s": 3.75,
+      "max_model_calls": 400,
+      "input_protocol": "observation_pair_joint_goal_privileged_v7"
+    },
+    "put_bottles_into_dustbin": {
+      "system_sha256": "1a5c4d2fa77dfda7e067e3c915c9b55ed7a4875eb116a9b171f0f6085ceedd73",
+      "matches_recorded_f": true,
+      "reference_velocity_limit_rad_s": 3.75,
+      "max_model_calls": 400,
+      "input_protocol": "observation_pair_joint_goal_privileged_v7"
+    },
+    "stack_bowls": {
+      "system_sha256": "a448c9ffcd5574dbc5ac1f578217805f7a53cae28167961564dc137fafe461f0",
+      "matches_recorded_f": true,
+      "reference_velocity_limit_rad_s": 3.75,
+      "max_model_calls": 400,
+      "input_protocol": "observation_pair_joint_goal_privileged_v7"
+    },
+    "stack_blocks": {
+      "system_sha256": "7baeec2ce9b3f78fe1cfabb398fd237db903def1c99da4f9ac36b1a2c2c1b265",
+      "matches_recorded_f": true,
+      "reference_velocity_limit_rad_s": 3.75,
+      "max_model_calls": 400,
+      "input_protocol": "observation_pair_joint_goal_privileged_v7"
+    },
+    "push_T": {
+      "system_sha256": "f0f4fb016b679976c3353c8262cdcb44fbc367e6bcc1fd96f5e17d8d1000c209",
+      "matches_recorded_f": true,
+      "reference_velocity_limit_rad_s": 0.6,
+      "max_model_calls": 400,
+      "input_protocol": "observation_pair_joint_goal_privileged_v7"
+    },
+    "classify_objects": {
+      "system_sha256": "c2ad801322001ebd7d599f6722bd0139419d36a5f35c6ace00fb0fe10969b052",
+      "matches_recorded_f": true,
+      "reference_velocity_limit_rad_s": 3.75,
+      "max_model_calls": 400,
+      "input_protocol": "observation_pair_joint_goal_privileged_v7"
+    }
+  }
+}

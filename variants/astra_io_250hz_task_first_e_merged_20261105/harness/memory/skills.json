@@ -1,0 +1,76 @@
+{
+  "version": "rgb-v12",
+  "status": "candidate_not_evaluated",
+  "source": "exploration-privileged-v0; geometry may be learned in development, dynamic object positions are never retained",
+  "gripper_tip_local": [
+    0.145,
+    0.0,
+    0.0
+  ],
+  "basket_egg_center_z": 0.803,
+  "table_egg_center_z": 0.784,
+  "holder_slot_plane_z": 0.77,
+  "grasp_offset": 0.138,
+  "transfer_height": 1.12,
+  "place_pitch_degrees": 55,
+  "place_yaw_degrees": 90,
+  "back_release_z": 0.875,
+  "front_release_z": 0.845,
+  "evidence": {
+    "angled_place": "attempt-005: target1, target2, target3 successfully seated; task not completed",
+    "grasp_center_correction": "attempt-005/006 successful cycles, failures also retained",
+    "lid_closure": "attempt-005 steps640-686 closed lid with three eggs unchanged",
+    "v2_candidate": "rgb-dev-001: yaw -130 produced 13-15cm tracking error; third egg displaced during descent. Normalize symmetric yaw and reobserve before close. Higher back release is an unverified collision hypothesis."
+  },
+  "uncertainties": [
+    "Grasp slip remains unresolved on some basket contacts",
+    "RGB localization and generalization have not been evaluated"
+  ],
+  "head_camera": {
+    "intrinsic": [
+      [
+        288.13254096884566,
+        0.0,
+        320.0
+      ],
+      [
+        0.0,
+        288.13254096884566,
+        240.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "world_from_camera": [
+      [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.8660253435950835,
+        -0.5000001052916332,
+        -0.4099999964237213
+      ],
+      [
+        0.0,
+        0.5000001052916332,
+        0.8660253435950835,
+        1.3079999685287476
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "convention": "OpenGL camera: ray [(u-cx)/fx, -(v-cy)/fy, -1]",
+    "provenance": "development attempt-005 initial camera metadata; fixed hardware geometry, no per-episode positions"
+  }
+}

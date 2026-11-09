@@ -1,0 +1,42 @@
+{
+  "model": "gpt-6-astra",
+  "reasoning_effort": "high",
+  "request_timeout": 300,
+  "controller": "skills",
+  "max_model_calls": 400,
+  "task": "stack_bowls_random",
+  "skill_names": [
+    "observation-grounding",
+    "visual-contact-control",
+    "upright-grasp-approach",
+    "transport-retention",
+    "stack-bowls"
+  ],
+  "motion_op": "move_local",
+  "robodojo_revision": "550059d7c883fa54280227abbb48710a6926fbb7",
+  "robodojo_required_submodules": {
+    "XPolicyLab": "7dd88aea74c92bbeb88d74324d4294aeab4836c5"
+  },
+  "action_interface": "joint",
+  "astra_provider": "zzy-astra",
+  "public_task_requirements": {
+    "task": "stack_bowls",
+    "url": "https://robodojo-benchmark.com/doc/sim-tasks/stack-bowls/",
+    "fetched_at": "2026-09-17T04:56:29.777895+00:00",
+    "rows": [
+      [
+        "Instruction",
+        "Stack the three bowls together."
+      ],
+      [
+        "Description",
+        "There are three bowls. The robot needs to stack all the bowls together."
+      ],
+      [
+        "Completion",
+        "All three bowls are stacked together, all bowls are upright, the bottom bowl is strictly and stably placed on the table, and the robot returns to origin."
+      ]
+    ],
+    "sha256": "651c9a138c0a0e4898659a558497e1547cb6853dd0d62ac9d5ec976c896baeb9"
+  }
+}

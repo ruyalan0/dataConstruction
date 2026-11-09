@@ -1,0 +1,30 @@
+{
+  "agent_version": "f",
+  "variant_identity": "astra_io_250hz_task_first_e_merged_20261105",
+  "source_repository": "https://github.com/Gabrielinger/Astra-Robodojo.git",
+  "source_selection": "Current f frozen by the f+ parent inventory; snapshot date 2026-11-06",
+  "portable_export_date": "2026-11-09",
+  "original_f_files": 336,
+  "unchanged_agent_components": [
+    "harness/egg_harness",
+    "harness/configs",
+    "harness/skills",
+    "harness/memory",
+    "policy.py",
+    "export_swift.py",
+    "device_routing.py"
+  ],
+  "portable_adaptations": [
+    "Explicit simulator/assets/runtime checkout/API paths and shared GPU lock directory",
+    "Optional model and reasoning effort overrides; default episode timeout 0 as used in f campaigns",
+    "Automatic task configuration selection plus two public configs from the recorded seven-task campaign",
+    "One historical test input replaced with a small repository fixture"
+  ],
+  "not_included": [
+    "f+ agent variant",
+    "API credentials",
+    "simulation runtime binary environment",
+    "simulation assets",
+    "episode logs, videos and datasets"
+  ]
+}

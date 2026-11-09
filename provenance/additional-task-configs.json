@@ -1,0 +1,33 @@
+{
+  "stack_blocks": {
+    "source_batch": "sol-terra-f-seven-tasks-L20-L22-20261107-235245",
+    "source_config": "configs/sol/linear/stack_blocks.json",
+    "source_sha256": "3cbfea913dc92df93a96b6e0df55d2976bc0a596547d6dbdd8a71a061d742186",
+    "public_task_config": "task-configs/stack_blocks.json",
+    "changes": [
+      "model reset to gpt-6-astra baseline",
+      "runtime and API locations replaced by public template values"
+    ]
+  },
+  "classify_objects": {
+    "source_batch": "sol-terra-f-seven-tasks-L20-L22-20261107-235245",
+    "source_config": "configs/sol/linear/classify_objects.json",
+    "source_sha256": "6ed6831d7692b96f50cd95b5951acc8349c7272057e36ec3e6b6549dc2c84af9",
+    "public_task_config": "task-configs/classify_objects.json",
+    "changes": [
+      "model reset to gpt-6-astra baseline",
+      "runtime and API locations replaced by public template values"
+    ]
+  },
+  "general_pickup": {
+    "source_batch": "sol-terra-f-seven-tasks-L20-L22-20261107-235245",
+    "source_config": "configs/sol/linear/general_pickup.json",
+    "source_sha256": "261904a759be71bb75f1e57c2ad07d11014c69f37356124ab237cb3c3a84d4c8",
+    "public_task_config": "task-configs/general_pickup.json",
+    "changes": [
+      "model reset to gpt-6-astra baseline",
+      "runtime and API locations replaced by public template values"
+    ],
+    "reason": "Use the exact skill selection/order of the recorded seven-task f campaign."
+  }
+}

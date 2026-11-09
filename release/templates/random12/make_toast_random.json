@@ -1,0 +1,42 @@
+{
+  "model": "gpt-6-astra",
+  "reasoning_effort": "high",
+  "request_timeout": 300,
+  "controller": "skills",
+  "max_model_calls": 400,
+  "task": "make_toast_random",
+  "skill_names": [
+    "observation-grounding",
+    "visual-contact-control",
+    "upright-grasp-approach",
+    "transport-retention",
+    "make-toast"
+  ],
+  "motion_op": "move_local",
+  "robodojo_revision": "550059d7c883fa54280227abbb48710a6926fbb7",
+  "robodojo_required_submodules": {
+    "XPolicyLab": "7dd88aea74c92bbeb88d74324d4294aeab4836c5"
+  },
+  "action_interface": "joint",
+  "astra_provider": "zzy-astra",
+  "public_task_requirements": {
+    "task": "make_toast",
+    "url": "https://robodojo-benchmark.com/doc/sim-tasks/make-toast/",
+    "fetched_at": "2026-09-17T04:56:29.850989+00:00",
+    "rows": [
+      [
+        "Instruction",
+        "Pick up two slices of bread, place them into the toaster, and press the lever down."
+      ],
+      [
+        "Description",
+        "There is a basket containing multiple slices of bread and a toaster. The robot needs to pick up two slices one by one, place them into the toaster, and then press the lever down to start toasting."
+      ],
+      [
+        "Completion",
+        "Both toaster slots are filled, exactly two bread slices remain on the shelf, the toaster control is pressed down, and the robot returns to origin."
+      ]
+    ],
+    "sha256": "85cdb43c67d29dea65ca780d34c5e4975ad0c5eae2035e8c3b79f07bc4a89ae3"
+  }
+}

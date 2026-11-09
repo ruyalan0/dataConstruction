@@ -1,0 +1,20 @@
+name: f offline checks
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  policy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+      - run: python -m pip install -r requirements-policy.txt
+      - run: python -B scripts/check_f.py
+      - run: python -B scripts/restore_f_sources.py
+      - run: python -B scripts/run_f.py --help
+      - run: python -B -m unittest discover -s variants/astra_io_250hz_task_first_e_merged_20261105/tests -q
