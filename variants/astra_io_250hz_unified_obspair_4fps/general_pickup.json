@@ -1,0 +1,125 @@
+{
+  "model": "gpt-6-astra",
+  "reasoning_effort": "high",
+  "request_timeout": 300,
+  "robot_runtime": "/tmp/robodojo-uv/bin/python",
+  "robodojo_root": "dependencies/RoboDojo",
+  "assets": "local/assets/Assets",
+  "object_assets": "local/assets/Assets/Object/RoboDojo",
+  "memory": "memory/skills.json",
+  "controller": "skills",
+  "max_model_calls": 400,
+  "task": "general_pickup",
+  "skill_names": [
+    "visual-contact-control",
+    "general-pickup",
+    "upright-grasp-approach",
+    "transport-retention"
+  ],
+  "motion_op": "move_local",
+  "contract_local_ik": true,
+  "public_posture_feedback": true,
+  "robodojo_revision": "550059d7c883fa54280227abbb48710a6926fbb7",
+  "robodojo_required_submodules": {
+    "XPolicyLab": "7dd88aea74c92bbeb88d74324d4294aeab4836c5"
+  },
+  "provider_base_urls": {
+    "azure-astra": "https://azure-astra.example.invalid/v1",
+    "zzz-astra": "https://zzz-astra.example.invalid/v1",
+    "zzy-astra": "https://zzy-astra.example.invalid/v1"
+  },
+  "action_interface": "joint",
+  "public_task_requirements": {
+    "task": "general_pickup",
+    "url": "https://robodojo-benchmark.com/doc/sim-tasks/general-pickup/",
+    "fetched_at": "2026-09-14T16:06:41.474482+00:00",
+    "sha256": "0a49e047935c066389aeb3b7ea211653da0258e0adb2ea8ba94d8bf4a6fde2cf",
+    "rows": [
+      [
+        "Instruction",
+        "Pick up the target object by 10 cm."
+      ],
+      [
+        "Description",
+        "There are multiple objects. The robot needs to understand the language instruction, identify the target object, and pick it up."
+      ],
+      [
+        "Platform",
+        "Simulation"
+      ],
+      [
+        "Category",
+        "Open"
+      ],
+      [
+        "Data Source",
+        "null (eval-only)"
+      ],
+      [
+        "Usage",
+        "Eval"
+      ],
+      [
+        "Score",
+        "Condition"
+      ],
+      [
+        "0",
+        "The target object is not lifted high enough."
+      ],
+      [
+        "100",
+        "The target object is lifted at least 10 cm."
+      ]
+    ]
+  },
+  "transport_retry": {
+    "enabled": true,
+    "max_attempts": null,
+    "initial_delay_seconds": 60,
+    "maximum_backoff_seconds": 300,
+    "retry_http_statuses": [
+      408,
+      409,
+      429,
+      "5xx"
+    ],
+    "connection_and_request_timeouts": true,
+    "same_request": true,
+    "failed_transport_attempts_consume_decision_budget": false
+  },
+  "tool_ablation": {
+    "mode": "control_only",
+    "enabled_tools": [
+      "control_arms"
+    ],
+    "disabled_tools": [
+      "project_pixels",
+      "review_frames",
+      "stop_episode",
+      "triangulate_point",
+      "triangulate_temporal_point",
+      "verify_completion"
+    ],
+    "decision_format": "native_function",
+    "rgb_memory_enabled": true
+  },
+  "io_variant": "astra_io_250hz_unified_obspair_4fps",
+  "action_hz": 250,
+  "observation_hz": 250,
+  "timing_protocol": "timed_joint_250hz_unified_v1",
+  "max_action_steps": 2500,
+  "numeric_output_decimal_places": 4,
+  "model_output_phase": false,
+  "history_deduplication": false,
+  "explicit_episode_memory": true,
+  "model_history_replay": false,
+  "rgb_memory_enabled": true,
+  "input_protocol": "visual_history_5s_4fps_v1",
+  "memory_location": "observation.memory",
+  "task_hz": 250,
+  "reward_hz": 250,
+  "camera_hz": 250,
+  "visual_history_window_ms": 5000,
+  "visual_history_fps": 4
+}

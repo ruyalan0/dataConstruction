@@ -1,0 +1,50 @@
+{
+  "scope": "Offline conversion of historical 25 Hz data; no new model call or 250 Hz execution",
+  "name": "control_arms",
+  "arguments": {
+    "assessment": "The last descent advanced only 5.5 mm with a 9.7 mm residual, suggesting contact or obstruction near the table. The car remains centered between open pads and supported; do not push farther down. Retention is not yet established.",
+    "left": null,
+    "memory": "Step43 right wrist (.132,-.165,.923); descent limited to 5.5mm with 9.7mm residual, possible finger/table contact. White striped 53 car centered, still supported. Stop descent and close at measured joint pose; next test lift must verify retention. Right close command0 now; no reset required.",
+    "plan": "Remove downward target pressure by targeting measured joints and close the right fingers around the car; inspect before test lift.",
+    "right": {
+      "control": "joint",
+      "gripper": 0,
+      "joints": [
+        0.5335,
+        1.8691,
+        1.2439,
+        -0.9306,
+        -0.0012,
+        2.0979
+      ]
+    },
+    "settle": 1,
+    "steps": 4
+  },
+  "decision": {
+    "assessment": "The last descent advanced only 5.5 mm with a 9.7 mm residual, suggesting contact or obstruction near the table. The car remains centered between open pads and supported; do not push farther down. Retention is not yet established.",
+    "plan": "Remove downward target pressure by targeting measured joints and close the right fingers around the car; inspect before test lift.",
+    "memory": "Step43 right wrist (.132,-.165,.923); descent limited to 5.5mm with 9.7mm residual, possible finger/table contact. White striped 53 car centered, still supported. Stop descent and close at measured joint pose; next test lift must verify retention. Right close command0 now; no reset required.",
+    "action": {
+      "control_arms": {
+        "arms": {
+          "right": {
+            "control": "joint",
+            "joints": [
+              0.5335,
+              1.8691,
+              1.2439,
+              -0.9306,
+              -0.0012,
+              2.0979
+            ],
+            "gripper": 0.0
+          }
+        },
+        "steps": 4,
+        "settle": 1
+      }
+    }
+  },
+  "source_response": "/data/lanruya/robodojo/Astra-Robodojo-new/runs/general-pickup-control-only-20261015-155448/general_pickup/L20/policy-20/model/0007.response.json"
+}

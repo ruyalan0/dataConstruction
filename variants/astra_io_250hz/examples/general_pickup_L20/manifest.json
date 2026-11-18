@@ -1,0 +1,179 @@
+{
+  "scope": "Offline format preview only, not a new rollout or task result",
+  "source": "/data/lanruya/robodojo/Astra-Robodojo-new/runs/general-pickup-control-only-20261015-155448/general_pickup/L20/policy-20/model",
+  "source_action_hz": 25,
+  "target_action_hz": 250,
+  "observations_and_feedback": "Historical measurements, not regenerated or re-executed",
+  "outputs": "Historical tool arguments with phase removed and numeric precision normalized",
+  "rounds": [
+    {
+      "round": 1,
+      "source_step": 0,
+      "source_current_images": 3,
+      "new_current_images": 3,
+      "removed": [],
+      "input_file": "0001.input.json",
+      "output_file": "0001.output.json"
+    },
+    {
+      "round": 2,
+      "source_step": 11,
+      "source_current_images": 5,
+      "new_current_images": 3,
+      "removed": [
+        "previous_observation.state",
+        "previous_arm_posture",
+        "memory",
+        "previous_result",
+        "previous_head",
+        "previous_right_wrist"
+      ],
+      "input_file": "0002.input.json",
+      "output_file": "0002.output.json"
+    },
+    {
+      "round": 3,
+      "source_step": 22,
+      "source_current_images": 5,
+      "new_current_images": 3,
+      "removed": [
+        "previous_observation.state",
+        "previous_arm_posture",
+        "memory",
+        "previous_result",
+        "previous_head",
+        "previous_right_wrist"
+      ],
+      "input_file": "0003.input.json",
+      "output_file": "0003.output.json"
+    },
+    {
+      "round": 4,
+      "source_step": 23,
+      "source_current_images": 5,
+      "new_current_images": 3,
+      "removed": [
+        "previous_observation.state",
+        "previous_arm_posture",
+        "memory",
+        "previous_result",
+        "previous_head",
+        "previous_right_wrist"
+      ],
+      "input_file": "0004.input.json",
+      "output_file": "0004.output.json"
+    },
+    {
+      "round": 5,
+      "source_step": 36,
+      "source_current_images": 5,
+      "new_current_images": 3,
+      "removed": [
+        "previous_observation.state",
+        "previous_arm_posture",
+        "memory",
+        "previous_result",
+        "previous_head",
+        "previous_right_wrist"
+      ],
+      "input_file": "0005.input.json",
+      "output_file": "0005.output.json"
+    },
+    {
+      "round": 6,
+      "source_step": 40,
+      "source_current_images": 5,
+      "new_current_images": 3,
+      "removed": [
+        "previous_observation.state",
+        "previous_arm_posture",
+        "memory",
+        "previous_result",
+        "previous_head",
+        "previous_right_wrist"
+      ],
+      "input_file": "0006.input.json",
+      "output_file": "0006.output.json"
+    },
+    {
+      "round": 7,
+      "source_step": 43,
+      "source_current_images": 5,
+      "new_current_images": 3,
+      "removed": [
+        "previous_observation.state",
+        "previous_arm_posture",
+        "memory",
+        "previous_result",
+        "previous_head",
+        "previous_right_wrist"
+      ],
+      "input_file": "0007.input.json",
+      "output_file": "0007.output.json"
+    },
+    {
+      "round": 8,
+      "source_step": 48,
+      "source_current_images": 5,
+      "new_current_images": 3,
+      "removed": [
+        "previous_observation.state",
+        "previous_arm_posture",
+        "memory",
+        "previous_result",
+        "previous_head",
+        "previous_right_wrist"
+      ],
+      "input_file": "0008.input.json",
+      "output_file": "0008.output.json"
+    },
+    {
+      "round": 9,
+      "source_step": 52,
+      "source_current_images": 5,
+      "new_current_images": 3,
+      "removed": [
+        "previous_observation.state",
+        "previous_arm_posture",
+        "memory",
+        "previous_result",
+        "previous_head",
+        "previous_right_wrist"
+      ],
+      "input_file": "0009.input.json",
+      "output_file": "0009.output.json"
+    },
+    {
+      "round": 10,
+      "source_step": 56,
+      "source_current_images": 5,
+      "new_current_images": 3,
+      "removed": [
+        "previous_observation.state",
+        "previous_arm_posture",
+        "memory",
+        "previous_result",
+        "previous_head",
+        "previous_right_wrist"
+      ],
+      "input_file": "0010.input.json",
+      "output_file": "0010.output.json"
+    },
+    {
+      "round": 11,
+      "source_step": 61,
+      "source_current_images": 5,
+      "new_current_images": 3,
+      "removed": [
+        "previous_observation.state",
+        "previous_arm_posture",
+        "memory",
+        "previous_result",
+        "previous_head",
+        "previous_right_wrist"
+      ],
+      "input_file": "0011.input.json",
+      "output_file": "0011.output.json"
+    }
+  ]
+}

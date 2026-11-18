@@ -1,0 +1,35 @@
+{
+  "harness_commit": "0a062b4bd61e7ebffede8d553d95b0c75b2140de",
+  "liquid_skill": {
+    "source_commit": "b04f9b4bffb692af9fc708ee3b55e9cc1bbbfd11",
+    "path": "skills-upstream/pour-liquid-into-cup/SKILL.md",
+    "sha256": "cc047453abe8b5a7fbc250457e7eb7fb32faf0a4f3283f42a205fa08c3e0d5ff"
+  },
+  "robodojo": {
+    "commit": "550059d7c883fa54280227abbb48710a6926fbb7",
+    "bundle": "bundles/robodojo.bundle",
+    "upstream": "https://github.com/robodojo-benchmark/RoboDojo.git",
+    "bundle_sha256": "db87b92fd9e0fdd06a2390ae8117e7ae9f8c410433735f51e6564d2797a423a0",
+    "bundle_bytes": 626687,
+    "source_commit": "36fe87c7a0f31bc2eb90eb49fd7bd3b314e9f16f"
+  },
+  "xpolicylab": {
+    "commit": "7dd88aea74c92bbeb88d74324d4294aeab4836c5",
+    "bundle": "bundles/xpolicylab.bundle",
+    "bundle_sha256": "5db468072fe51a5794d8da3566ff2b8749cc7865d27fe1cfaff40e519ed584e3",
+    "bundle_bytes": 49087818,
+    "source_commit": "fa9b5c2cc41a9facc0f940aa1f7a3f329cfd87e1"
+  },
+  "asset_revision": "91f76c28d93dd20c5fa46ce6a5a1d96a4f384acd",
+  "download_probe": {
+    "sha256": "31c3a984da22878c838ce36443af7d74aa624fa27219b144fe84f118d72128a3",
+    "bytes": 6231072,
+    "verified_readback": true,
+    "at": "2026-09-26T13:09:31.257453+00:00"
+  },
+  "hdfs_access_required": true,
+  "runtime_install_prefix": "/tmp/robodojo-uv",
+  "release_scope": "Frozen Harness, latest skills-upstream, and the exact random12 L20 cohort inputs. Original dated campaigns remain historical.",
+  "private_config_required": true,
+  "harness_source_commit": "6c69fb92f76acce3619e9f9600ba410a6e44fcfc"
+}

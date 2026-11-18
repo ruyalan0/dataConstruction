@@ -1,0 +1,16 @@
+---
+name: build-tower
+description: Assemble the eight-piece tower in supported layers, verify stability after release, and repair displaced supports before adding weight.
+---
+
+Identify four support blocks, two broad boards, the small top board and the final top block from current RGB. The demonstrated assembly is two upright supports, a centered lower board, two upright supports on that board, a centered middle board, the small top board, then the final block. Compare pieces by their visible shape and size rather than memorized colors or scene coordinates.
+
+Choose a base location reachable for the upper layers as well as the first pickup. Arrange each support pair under the future board footprint with room for fingers to release and withdraw. Before a board hides the supports, compare their visible faces with their original upright appearance and inspect their support contacts from an unobstructed view. Resolve uncertain or visibly sideways placement while the supports are still accessible; a board can remain steady on misoriented supports. Seat the lower board across both supports. Inspect its levelness and both contacts after release before placing the next pair of supports. Center each new layer on the layer beneath it, using the support footprint rather than the apparent center of a raised object in the head image.
+
+Keep boards broad-face down, with their long edges following the common direction shown in the public demonstration. Check the small top board's orientation and centered support before the final block hides it. A level board alone does not establish both underlying contacts. When a placed board occludes them, obtain an oblique permitted view and resolve support uncertainty before adding the next layer; check that release and withdrawal left the supports in place.
+
+For a wide board, choose grasp locations that leave the fingers' opening and withdrawal paths clear of the support columns and other layers. Fingers extending below the board can crowd a column even when the board itself is aligned. Check this before seating; use clear supported staging to change the grip if release clearance cannot be established. Two separated end grasps can limit tipping if both grasps and the entire carrying path are visible. Single-arm carrying is also usable when a stable grasp and clearance are established. Descend with the board approximately level, inspect both supported ends, release without lateral motion, then withdraw above or outside the support columns. An aligned upper board cannot compensate for a displaced block below it.
+
+If a block falls or a board tilts, identify the highest intact supported layer before repair. Put a held board down in a clear supported staging area when holding it obstructs inspection or recovery. Rebuild from the displaced support upward. Keep hands and carried boards out of the completed tower's side sweep.
+
+Use the visible upper support's actual height for each placement; different grasp heights make copying an earlier wrist height unreliable. Verify the final block remains upright and supported after release and withdrawal. All eight pieces, open grippers and return to the observed home configuration are required for completion; reserve clear side corridors and steps for that return.

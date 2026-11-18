@@ -1,0 +1,78 @@
+{
+  "model": "gpt-6-astra",
+  "reasoning_effort": "high",
+  "request_timeout": 300,
+  "credentials": "local/credentials/azure.py",
+  "robot_runtime": "/tmp/robodojo-uv/bin/python",
+  "robodojo_root": "dependencies/RoboDojo",
+  "assets": "local/assets/Assets",
+  "object_assets": "local/assets/Assets/Object/RoboDojo",
+  "memory": "/workspace/Astra-Robodojo-RSI-0914/artifacts/releases/classify-language-bilateral-v1/memory/skills.json",
+  "controller": "skills",
+  "max_model_calls": 320,
+  "task": "classify_objects_by_language",
+  "skill_names": [
+    "visual-contact-control",
+    "classify-by-language"
+  ],
+  "motion_op": "move_local",
+  "public_task_requirements": {
+    "task": "classify_objects_by_language",
+    "url": "https://robodojo-benchmark.com/doc/sim-tasks/classify-objects-by-language/",
+    "fetched_at": "2026-09-14T16:06:45.243895+00:00",
+    "sha256": "81d63238b7bc4aed3daf3cc7ed9d60ddaabfe75bf4e90c59b24750f46d6c98b9",
+    "rows": [
+      [
+        "Instruction",
+        "Put category₁ objects into the left basket, category₂ objects into the middle basket, and category₃ objects into the right basket, then reset the robot arm."
+      ],
+      [
+        "Description",
+        "There are three baskets and three categories of unseen objects. The robot needs to understand the language instruction, identify the category of each object, and place the objects into the specified baskets from left to right."
+      ],
+      [
+        "Platform",
+        "Simulation"
+      ],
+      [
+        "Category",
+        "Open"
+      ],
+      [
+        "Data Source",
+        "null (eval-only)"
+      ],
+      [
+        "Usage",
+        "Eval"
+      ],
+      [
+        "Score",
+        "Condition"
+      ],
+      [
+        "0",
+        "No specified category is placed into its assigned basket."
+      ],
+      [
+        "10",
+        "One specified category is placed into its assigned basket, no other objects are in that basket, and the gripper is open."
+      ],
+      [
+        "40",
+        "Two specified categories are placed into their assigned baskets, with no extra objects in those baskets."
+      ],
+      [
+        "100",
+        "All three specified categories are placed into the left, middle, and right baskets as instructed, no basket contains objects from another category, and the robot returns to origin."
+      ]
+    ]
+  },
+  "skills_root": "/workspace/Astra-Robodojo-RSI-0914/artifacts/releases/classify-language-bilateral-v1/skills",
+  "probe": "bilateral",
+  "provider_base_urls": {
+    "azure-astra": "https://azure-astra.example.invalid/v1",
+    "zzz-astra": "https://zzz-astra.example.invalid/v1",
+    "zzy-astra": "https://zzy-astra.example.invalid/v1"
+  }
+}

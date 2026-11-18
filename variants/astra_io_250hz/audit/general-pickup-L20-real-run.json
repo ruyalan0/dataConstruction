@@ -1,0 +1,49 @@
+{
+  "run": "/data/lanruya/robodojo/Astra-Robodojo-new/runs/general_pickup-io-250hz-20261019-164450",
+  "report": "/data/lanruya/robodojo/Astra-Robodojo-new/runs/general_pickup-io-250hz-20261019-164450/RUN_REPORT.md",
+  "io_audit": {
+    "verified_at": "2026-10-19T08:55:27.907235+00:00",
+    "passed": true,
+    "task": "general_pickup",
+    "layout": 20,
+    "native_result": {
+      "steps": 200,
+      "success": false,
+      "score": 0.0,
+      "raw_native_score": 0.0,
+      "valid_sample": true,
+      "unstable": false,
+      "native_terminal": true
+    },
+    "model_calls": 21,
+    "enabled_tools": [
+      "control_arms"
+    ],
+    "action_hz": 250,
+    "numeric_output_decimal_places": 4,
+    "output_phase_absent": true,
+    "memory_nonempty_in_all_outputs": true,
+    "prior_cycle_replayed_in_all_20_followup_requests": true,
+    "five_duplicate_groups_removed_when_present": true,
+    "rounds_requiring_local_precision_rounding": 0,
+    "input_measurements_not_rounded": true,
+    "actual_gpu_selection": {
+      "ISAACSIM_GPU": "4",
+      "env_gpu": 4,
+      "isaac_launcher_device": "cuda:4",
+      "robodojo_device_id": 4,
+      "cuda_visible_devices_present": false,
+      "physics_device": "cpu",
+      "use_fabric": false
+    },
+    "original_integrity": {
+      "passed": true,
+      "original_source_files": 546,
+      "historical_log_files": 4711,
+      "differences": []
+    },
+    "video_full_decode": "PASS",
+    "episodes_rerun_after_valid_native_result": 0
+  },
+  "unit_tests_passed": 11
+}

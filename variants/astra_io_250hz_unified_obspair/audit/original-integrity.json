@@ -1,0 +1,16 @@
+{
+  "passed": true,
+  "protected_files": 1328,
+  "differences": [],
+  "parent_integrity": {
+    "passed": true,
+    "previous_variant_files": 333,
+    "previous_variant_differences": [],
+    "original_sources_and_logs": {
+      "passed": true,
+      "original_source_files": 546,
+      "historical_log_files": 4711,
+      "differences": []
+    }
+  }
+}

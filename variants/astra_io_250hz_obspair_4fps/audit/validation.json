@@ -1,0 +1,37 @@
+{
+  "passed": true,
+  "created_at": "2026-10-20T05:16:52.316910+00:00",
+  "variant": "/data/lanruya/robodojo/Astra-Robodojo-new/variants/astra_io_250hz_obspair_4fps",
+  "input_protocol": "visual_history_5s_4fps_v1",
+  "tests": {
+    "passed": true,
+    "total": 34,
+    "seconds": 4.014,
+    "command": ".venv-policy/bin/python -B -m unittest discover -s variants/astra_io_250hz_obspair_4fps/tests -p test_*.py -v",
+    "coverage": [
+      "native queue and timed controller",
+      "mid-segment captures",
+      "5s window and 4fps quantization",
+      "chronological image union",
+      "66-image actual request assembly",
+      "previous/current exact states",
+      "observation.memory",
+      "zero-motion rejection",
+      "tracking/gripper guards",
+      "new episode isolation",
+      "real server/client IPC",
+      "Swift export roundtrip and tampering rejection"
+    ]
+  },
+  "protected_files": 1675,
+  "originals_unchanged": true,
+  "reference_audit_passed": true,
+  "active_source_files": 293,
+  "max_input_images": 66,
+  "memory_location": "observation.memory",
+  "model_history_replay": false,
+  "real_api_tested": false,
+  "isaac_physics_tested": false,
+  "new_real_training_samples": 0,
+  "model_training_template_tested": false
+}

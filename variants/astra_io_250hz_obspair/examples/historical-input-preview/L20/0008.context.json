@@ -1,0 +1,1071 @@
+{
+  "input_protocol": "observation_pair_v1",
+  "instruction": "Pick up the white toy car by 10 cm.",
+  "history": {
+    "available": true,
+    "duration_ms": 408.0,
+    "previous_observation": {
+      "step": 577,
+      "state": {
+        "left_arm_joint_state": [
+          1.0581485687666259e-10,
+          -2.3831490166686953e-13,
+          4.363482604484003e-15,
+          1.5994344249644493e-13,
+          -2.0504743736271536e-10,
+          5.125106450343253e-10
+        ],
+        "left_ee_pose": [
+          -0.2995290756225586,
+          -0.35229986906051636,
+          0.921500027179718,
+          0.7069999575614929,
+          -4.327419134142474e-08,
+          -6.000607299938565e-08,
+          0.7072135210037231
+        ],
+        "left_gripper_measured_joints": [
+          0.043999698013067245,
+          0.043999701738357544
+        ],
+        "left_ee_joint_state": [
+          1.0
+        ],
+        "right_arm_joint_state": [
+          0.6711996793746948,
+          1.8550422191619873,
+          1.3855929374694824,
+          -1.063588261604309,
+          -0.007396109402179718,
+          -0.951999843120575
+        ],
+        "right_ee_pose": [
+          0.08774834126234055,
+          -0.1824531853199005,
+          0.9613812565803528,
+          -0.009583119302988052,
+          -0.6966137886047363,
+          -0.0277720857411623,
+          0.7168444991111755
+        ],
+        "right_gripper_measured_joints": [
+          0.04399830475449562,
+          0.04399753361940384
+        ],
+        "right_ee_joint_state": [
+          1.0
+        ]
+      },
+      "arm_posture": {
+        "definition": "link2 is joint2-origin to joint3-origin; tilt0 vertical,90 horizontal, direction sign ignored",
+        "scope": "Measured public robot geometry; not object state, contact sensing or path feasibility",
+        "arms": {
+          "left": {
+            "link2_tilt_from_vertical_deg": 89.99999864551448,
+            "joint2_origin_world_m": [
+              -0.3000060115105672,
+              -0.43000001532665433,
+              0.8655000289442232
+            ],
+            "joint3_origin_world_m": [
+              -0.2999262771422551,
+              -0.6940000032858027,
+              0.8655000227032019
+            ]
+          },
+          "right": {
+            "link2_tilt_from_vertical_deg": 16.286050471069796,
+            "joint2_origin_world_m": [
+              0.28755670070363376,
+              -0.43434226177374163,
+              0.8654997827520413
+            ],
+            "joint3_origin_world_m": [
+              0.24149538597134435,
+              -0.37638162448151824,
+              1.1189064121243062
+            ]
+          }
+        }
+      }
+    }
+  },
+  "observation": {
+    "step": 679,
+    "state": {
+      "left_arm_joint_state": [
+        1.244425812396699e-10,
+        -2.80230753966354e-13,
+        5.132888370254236e-15,
+        1.8807165839875711e-13,
+        -2.4112334351400477e-10,
+        6.026760757116278e-10
+      ],
+      "left_ee_pose": [
+        -0.2995290756225586,
+        -0.35229986906051636,
+        0.921500027179718,
+        0.7069999575614929,
+        -4.327419134142474e-08,
+        -6.000607299938565e-08,
+        0.7072135210037231
+      ],
+      "left_gripper_measured_joints": [
+        0.043999698013067245,
+        0.043999701738357544
+      ],
+      "left_ee_joint_state": [
+        1.0
+      ],
+      "right_arm_joint_state": [
+        0.6712002158164978,
+        1.8550410270690918,
+        1.3855940103530884,
+        -1.0635892152786255,
+        -0.00739611079916358,
+        -0.9520005583763123
+      ],
+      "right_ee_pose": [
+        0.08774818480014801,
+        -0.18245334923267365,
+        0.9613818526268005,
+        -0.009583513252437115,
+        -0.696613609790802,
+        -0.02777283266186714,
+        0.7168445587158203
+      ],
+      "right_gripper_measured_joints": [
+        0.0,
+        0.0
+      ],
+      "right_ee_joint_state": [
+        0.0
+      ]
+    },
+    "memory": "Target white number-53 car with red/blue stripes, head near(376,265), wrist near(360,295) at577. Still table-supported. Right wrist z0.9614/contact prior0.8235 after25mm descent with0.13mm residual. Left home/open. Now command right close0 at fixed pose; no retention confirmed. Earlier off-center descent residual14mm was withdrawn; corrected approach tracks. Next inspect closure then short test lift.",
+    "home": {
+      "left": [
+        -0.2995290756225586,
+        -0.35229986906051636,
+        0.921500027179718,
+        0.7069999575614929,
+        -4.327419134142474e-08,
+        -6.000607299938565e-08,
+        0.7072135210037231
+      ],
+      "right": [
+        0.3004709482192993,
+        -0.35229986906051636,
+        0.921500027179718,
+        0.7069999575614929,
+        -4.327419134142474e-08,
+        -6.000607299938565e-08,
+        0.7072135210037231
+      ]
+    },
+    "home_joints": {
+      "left": [
+        5.115578100012286e-13,
+        -1.156115904982105e-15,
+        1.767066072491508e-17,
+        7.853062682560905e-16,
+        -9.987136985467604e-13,
+        2.5006576670483227e-12
+      ],
+      "right": [
+        5.115569426394906e-13,
+        -1.1561103992679478e-15,
+        1.7667572032507807e-17,
+        7.853009213606109e-16,
+        -9.98713048025457e-13,
+        2.5006572333674537e-12
+      ]
+    },
+    "joint_semantics": {
+      "sign_convention": "Positive radians rotate about the URDF axis by the right-hand rule; previews use each measured arm base",
+      "preview_delta_rad": 0.05,
+      "arms": {
+        "left": [
+          {
+            "control_name": "joint1",
+            "urdf_name": "joint1",
+            "topology_role": "base yaw",
+            "axis_joint_frame": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "axis_world": [
+              -1.4665945875425736e-07,
+              -2.368421853440353e-08,
+              0.9999999999999892
+            ],
+            "origin_world_m": [
+              -0.29999996515917193,
+              -0.45000001346708274,
+              0.8255000284713794
+            ],
+            "angle_rad": 1.244425812396699e-10,
+            "limits_rad": [
+              -10.0,
+              10.0
+            ],
+            "preview": {
+              "positive": {
+                "available": true,
+                "elbow_delta_world_m": [
+                  0.012194824647687175,
+                  0.0003086196084760573,
+                  1.7957958453607148e-09
+                ],
+                "wrist_delta_world_m": [
+                  -0.004883560675601362,
+                  -9.856437119365458e-05,
+                  -7.185545491950052e-10
+                ],
+                "finger_delta_world_m": [
+                  -0.011780633632038129,
+                  -0.0002731115284702601,
+                  -1.7342095537387081e-09
+                ]
+              },
+              "negative": {
+                "available": true,
+                "elbow_delta_world_m": [
+                  -0.012195008844000876,
+                  0.00030125329096453157,
+                  -1.78137837814063e-09
+                ],
+                "wrist_delta_world_m": [
+                  0.0048823836618033245,
+                  -0.000145635114254139,
+                  7.12598868801706e-10
+                ],
+                "finger_delta_world_m": [
+                  0.011779560794926869,
+                  -0.0003160160722349148,
+                  1.720099729318747e-09
+                ]
+              }
+            }
+          },
+          {
+            "control_name": "joint2",
+            "urdf_name": "joint2",
+            "topology_role": "shoulder pitch",
+            "axis_joint_frame": [
+              0.0,
+              1.0,
+              0.0
+            ],
+            "axis_world": [
+              -0.999999954390714,
+              -0.0003020240863147987,
+              -1.4666660526968824e-07
+            ],
+            "origin_world_m": [
+              -0.3000060115072766,
+              -0.430000015326637,
+              0.8655000289441774
+            ],
+            "angle_rad": -2.80230753966354e-13,
+            "limits_rad": [
+              -10.0,
+              10.0
+            ],
+            "preview": {
+              "positive": {
+                "available": true,
+                "elbow_delta_world_m": [
+                  -1.0158228441747852e-07,
+                  0.0003299309281757923,
+                  0.013194500695258626
+                ],
+                "wrist_delta_world_m": [
+                  -8.154072915766974e-07,
+                  0.002701728498598177,
+                  -0.003953366801751401
+                ],
+                "finger_delta_world_m": [
+                  -7.623074610996206e-07,
+                  0.002529264604325787,
+                  -0.01085049216518208
+                ]
+              },
+              "negative": {
+                "available": true,
+                "elbow_delta_world_m": [
+                  -9.771208775433138e-08,
+                  0.00032993155318605805,
+                  -0.013194500679659327
+                ],
+                "wrist_delta_world_m": [
+                  8.740837768028697e-07,
+                  -0.002895938021047595,
+                  0.0038133959705817233
+                ],
+                "finger_delta_world_m": [
+                  9.251605499471793e-07,
+                  -0.003068402242032614,
+                  0.010710521325858147
+                ]
+              }
+            }
+          },
+          {
+            "control_name": "joint3",
+            "urdf_name": "joint3",
+            "topology_role": "elbow pitch",
+            "axis_joint_frame": [
+              0.0,
+              1.0,
+              0.0
+            ],
+            "axis_world": [
+              0.9999999543648065,
+              0.0003020240864806446,
+              -7.1997436013777775e-06
+            ],
+            "origin_world_m": [
+              -0.2999262771484886,
+              -0.6940000032857883,
+              0.8655000227031638
+            ],
+            "angle_rad": 5.132888370254236e-15,
+            "limits_rad": [
+              -10.0,
+              10.0
+            ],
+            "preview": {
+              "positive": {
+                "available": true,
+                "elbow_delta_world_m": [
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                "wrist_delta_world_m": [
+                  1.096742900386083e-06,
+                  -0.0032258697201559827,
+                  0.017007896645208076
+                ],
+                "finger_delta_world_m": [
+                  1.1984887833271785e-06,
+                  -0.0033983339258376877,
+                  0.023905022000305753
+                ]
+              },
+              "negative": {
+                "available": true,
+                "elbow_delta_world_m": [
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                "wrist_delta_world_m": [
+                  -8.398003261689269e-07,
+                  0.002371797716034074,
+                  -0.017147867501158265
+                ],
+                "finger_delta_world_m": [
+                  -8.373696054886359e-07,
+                  0.00219933380645837,
+                  -0.024044992864410197
+                ]
+              }
+            }
+          },
+          {
+            "control_name": "joint4",
+            "urdf_name": "joint4",
+            "topology_role": "wrist pitch",
+            "axis_joint_frame": [
+              0.0,
+              1.0,
+              0.0
+            ],
+            "axis_world": [
+              0.9999999543648065,
+              0.0003020240864806446,
+              -7.1997436013777775e-06
+            ],
+            "origin_world_m": [
+              -0.29999986986361343,
+              -0.4490000156621406,
+              0.9215000284935634
+            ],
+            "angle_rad": 1.8807165839875711e-13,
+            "limits_rad": [
+              -10.0,
+              10.0
+            ],
+            "preview": {
+              "positive": {
+                "available": true,
+                "elbow_delta_world_m": [
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                "wrist_delta_world_m": [
+                  7.129584694842706e-08,
+                  -0.00012084991803928968,
+                  0.004832985665492506
+                ],
+                "finger_delta_world_m": [
+                  1.730417298895226e-07,
+                  -0.00029331412372099464,
+                  0.011730111020590184
+                ]
+              },
+              "negative": {
+                "available": true,
+                "elbow_delta_world_m": [
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                "wrist_delta_world_m": [
+                  1.7032658616855656e-09,
+                  -0.00012084971055054128,
+                  -0.004832985671206158
+                ],
+                "finger_delta_world_m": [
+                  4.133986541976498e-09,
+                  -0.0002933136201262454,
+                  -0.01173011103445809
+                ]
+              }
+            }
+          },
+          {
+            "control_name": "joint5",
+            "urdf_name": "joint5",
+            "topology_role": "wrist yaw",
+            "axis_joint_frame": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "axis_world": [
+              -7.199750412971751e-06,
+              2.1465899138688307e-08,
+              -0.9999999999740817
+            ],
+            "origin_world_m": [
+              -0.29951970923986837,
+              -0.381249869596926,
+              1.0080000264930864
+            ],
+            "angle_rad": -2.4112334351400477e-10,
+            "limits_rad": [
+              -10.0,
+              10.0
+            ],
+            "preview": {
+              "positive": {
+                "available": true,
+                "elbow_delta_world_m": [
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                "wrist_delta_world_m": [
+                  0.0014469078115851852,
+                  -3.5742961837004206e-05,
+                  -1.0418142348811443e-08
+                ],
+                "finger_delta_world_m": [
+                  0.008344084944530039,
+                  -0.00020612391981664202,
+                  -6.007975361654871e-08
+                ]
+              },
+              "negative": {
+                "available": true,
+                "elbow_delta_world_m": [
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                "wrist_delta_world_m": [
+                  -0.0014468859571280523,
+                  -3.6616957994117794e-05,
+                  1.0416431828197403e-08
+                ],
+                "finger_delta_world_m": [
+                  -0.00834395891338613,
+                  -0.00021116411527188905,
+                  6.006988884088571e-08
+                ]
+              }
+            }
+          },
+          {
+            "control_name": "joint6",
+            "urdf_name": "joint6",
+            "topology_role": "wrist roll",
+            "axis_joint_frame": [
+              1.0,
+              0.0,
+              0.0
+            ],
+            "axis_world": [
+              -0.00030202432744169666,
+              0.9999999543906515,
+              2.364039793648053e-08
+            ],
+            "origin_world_m": [
+              -0.29952907562255854,
+              -0.3522998690605164,
+              0.9215000271797178
+            ],
+            "angle_rad": 6.026760757116278e-10,
+            "limits_rad": [
+              -3.14,
+              3.14
+            ],
+            "preview": {
+              "positive": {
+                "available": true,
+                "elbow_delta_world_m": [
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                "wrist_delta_world_m": [
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                "finger_delta_world_m": [
+                  0.0,
+                  -2.7755575615628914e-17,
+                  0.0
+                ]
+              },
+              "negative": {
+                "available": true,
+                "elbow_delta_world_m": [
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                "wrist_delta_world_m": [
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                "finger_delta_world_m": [
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            }
+          }
+        ],
+        "right": [
+          {
+            "control_name": "joint1",
+            "urdf_name": "joint1",
+            "topology_role": "base yaw",
+            "axis_joint_frame": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "axis_world": [
+              -7.702403065804247e-08,
+              -3.918315487628828e-08,
+              0.9999999999999961
+            ],
+            "origin_world_m": [
+              0.3000000402519284,
+              -0.4500000327110418,
+              0.8254999610512734
+            ],
+            "angle_rad": 0.6712002158164978,
+            "limits_rad": [
+              -10.0,
+              10.0
+            ],
+            "preview": {
+              "positive": {
+                "available": true,
+                "elbow_delta_world_m": [
+                  -0.0036062645915363456,
+                  -0.003016011108640415,
+                  -3.959459426994272e-10
+                ],
+                "wrist_delta_world_m": [
+                  -0.013106501710557092,
+                  -0.010942534581741797,
+                  -1.438278496301848e-09
+                ],
+                "finger_delta_world_m": [
+                  -0.013273564029016777,
+                  -0.011148752768726566,
+                  -1.4592266284196853e-09
+                ]
+              },
+              "negative": {
+                "available": true,
+                "elbow_delta_world_m": [
+                  0.0037524954295710122,
+                  0.0028320037716534907,
+                  3.999991449177287e-10
+                ],
+                "wrist_delta_world_m": [
+                  0.013637020784397103,
+                  0.010273807195357199,
+                  1.4529386582751158e-09
+                ],
+                "finger_delta_world_m": [
+                  0.013814180932134906,
+                  0.010471418027413387,
+                  1.474327215866822e-09
+                ]
+              }
+            }
+          },
+          {
+            "control_name": "joint2",
+            "urdf_name": "joint2",
+            "topology_role": "shoulder pitch",
+            "axis_joint_frame": [
+              0.0,
+              1.0,
+              0.0
+            ],
+            "axis_world": [
+              -0.7828883348494169,
+              -0.6221622418282072,
+              -8.467949454167231e-08
+            ],
+            "origin_world_m": [
+              0.287556792334403,
+              -0.43434226758137956,
+              0.8654999607063651
+            ],
+            "angle_rad": 1.8550410270690918,
+            "limits_rad": [
+              -10.0,
+              10.0
+            ],
+            "preview": {
+              "positive": {
+                "available": true,
+                "elbow_delta_world_m": [
+                  -0.007822153902166618,
+                  0.00984288819191903,
+                  -0.004016859892636004
+                ],
+                "wrist_delta_world_m": [
+                  -0.0027314704705403287,
+                  0.003437106265000933,
+                  -0.016188843373694306
+                ],
+                "finger_delta_world_m": [
+                  0.0015605350709234356,
+                  -0.0019636732072358665,
+                  -0.016276874298073674
+                ]
+              },
+              "negative": {
+                "available": true,
+                "elbow_delta_world_m": [
+                  0.007937283157212344,
+                  -0.009987759241752714,
+                  0.003383475201014674
+                ],
+                "wrist_delta_world_m": [
+                  0.003231451403639257,
+                  -0.004066249587370008,
+                  0.015949188578278095
+                ],
+                "finger_delta_world_m": [
+                  -0.0010524529363974272,
+                  0.0013243358151276696,
+                  0.016381892337368198
+                ]
+              }
+            }
+          },
+          {
+            "control_name": "joint3",
+            "urdf_name": "joint3",
+            "topology_role": "elbow pitch",
+            "axis_joint_frame": [
+              0.0,
+              1.0,
+              0.0
+            ],
+            "axis_world": [
+              0.782892722083709,
+              0.622156721175429,
+              2.1448520828151197e-06
+            ],
+            "origin_world_m": [
+              0.24149549501212075,
+              -0.37638177355118363,
+              1.1189066260108989
+            ],
+            "angle_rad": 1.3855940103530884,
+            "limits_rad": [
+              -10.0,
+              10.0
+            ],
+            "preview": {
+              "positive": {
+                "available": true,
+                "elbow_delta_world_m": [
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                "wrist_delta_world_m": [
+                  -0.004705810281094749,
+                  0.005921526752967837,
+                  0.012565713479153362
+                ],
+                "finger_delta_world_m": [
+                  -0.008989677246755992,
+                  0.011312141733980874,
+                  0.012998416876012109
+                ]
+              },
+              "negative": {
+                "available": true,
+                "elbow_delta_world_m": [
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                "wrist_delta_world_m": [
+                  0.005090657912334928,
+                  -0.006405802247946346,
+                  -0.012171983581475976
+                ],
+                "finger_delta_world_m": [
+                  0.009382625440428657,
+                  -0.011806611783529875,
+                  -0.012260014148879783
+                ]
+              }
+            }
+          },
+          {
+            "control_name": "joint4",
+            "urdf_name": "joint4",
+            "topology_role": "wrist pitch",
+            "axis_joint_frame": [
+              0.0,
+              1.0,
+              0.0
+            ],
+            "axis_world": [
+              0.782892722083709,
+              0.622156721175429,
+              2.1448520828151197e-06
+            ],
+            "origin_world_m": [
+              0.08979538994160585,
+              -0.18548929458809332,
+              1.0580121303900227
+            ],
+            "angle_rad": -1.0635892152786255,
+            "limits_rad": [
+              -10.0,
+              10.0
+            ],
+            "preview": {
+              "positive": {
+                "available": true,
+                "elbow_delta_world_m": [
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                "wrist_delta_world_m": [
+                  -0.0030018686518947235,
+                  0.0037774091155604594,
+                  0.0003032117414034641
+                ],
+                "finger_delta_world_m": [
+                  -0.0072857356175559385,
+                  0.009168024096573496,
+                  0.0007359151382622109
+                ]
+              },
+              "negative": {
+                "available": true,
+                "elbow_delta_world_m": [
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                "wrist_delta_world_m": [
+                  0.0030075450243460117,
+                  -0.0037845528280124607,
+                  -6.168636953851614e-05
+                ],
+                "finger_delta_world_m": [
+                  0.007299512552439727,
+                  -0.009185362363595989,
+                  -0.00014971693694232346
+                ]
+              }
+            }
+          },
+          {
+            "control_name": "joint5",
+            "urdf_name": "joint5",
+            "topology_role": "wrist yaw",
+            "axis_joint_frame": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "axis_world": [
+              0.621713294443085,
+              -0.782334604618692,
+              -0.0377511050015968
+            ],
+            "origin_world_m": [
+              0.03481749874102551,
+              -0.11550382690661788,
+              0.9935758960762275
+            ],
+            "angle_rad": -0.00739611079916358,
+            "limits_rad": [
+              -10.0,
+              10.0
+            ],
+            "preview": {
+              "positive": {
+                "available": true,
+                "elbow_delta_world_m": [
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                "wrist_delta_world_m": [
+                  0.001133541956505349,
+                  0.0008995854953205984,
+                  2.5462602113890398e-05
+                ],
+                "finger_delta_world_m": [
+                  0.006536954391660285,
+                  0.005187765058507016,
+                  0.00014683873654286472
+                ]
+              },
+              "negative": {
+                "available": true,
+                "elbow_delta_world_m": [
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                "wrist_delta_world_m": [
+                  -0.0011314236131065164,
+                  -0.0009013911715247402,
+                  4.684376434349602e-05
+                ],
+                "finger_delta_world_m": [
+                  -0.0065247382455314445,
+                  -0.005198178103145101,
+                  0.00027014046484119536
+                ]
+              }
+            }
+          },
+          {
+            "control_name": "joint6",
+            "urdf_name": "joint6",
+            "topology_role": "wrist roll",
+            "axis_joint_frame": [
+              1.0,
+              0.0,
+              0.0
+            ],
+            "axis_world": [
+              -0.02927509188961472,
+              0.024954092347536615,
+              -0.999259857229322
+            ],
+            "origin_world_m": [
+              0.087748184800148,
+              -0.18245334923267353,
+              0.9613818526268005
+            ],
+            "angle_rad": -0.9520005583763123,
+            "limits_rad": [
+              -3.14,
+              3.14
+            ],
+            "preview": {
+              "positive": {
+                "available": true,
+                "elbow_delta_world_m": [
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                "wrist_delta_world_m": [
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                "finger_delta_world_m": [
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              },
+              "negative": {
+                "available": true,
+                "elbow_delta_world_m": [
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                "wrist_delta_world_m": [
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                "finger_delta_world_m": [
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            }
+          }
+        ]
+      }
+    },
+    "arm_posture": {
+      "definition": "link2 is joint2-origin to joint3-origin; tilt0 vertical,90 horizontal, direction sign ignored",
+      "scope": "Measured public robot geometry; not object state, contact sensing or path feasibility",
+      "arms": {
+        "left": {
+          "link2_tilt_from_vertical_deg": 89.99999864551614,
+          "joint2_origin_world_m": [
+            -0.3000060115072766,
+            -0.430000015326637,
+            0.8655000289441774
+          ],
+          "joint3_origin_world_m": [
+            -0.2999262771484886,
+            -0.6940000032857883,
+            0.8655000227031638
+          ]
+        },
+        "right": {
+          "link2_tilt_from_vertical_deg": 16.28602266276229,
+          "joint2_origin_world_m": [
+            0.287556792334403,
+            -0.43434226758137956,
+            0.8654999607063651
+          ],
+          "joint3_origin_world_m": [
+            0.24149549501212075,
+            -0.37638177355118363,
+            1.1189066260108989
+          ]
+        }
+      }
+    },
+    "desired_gripper_commands": {
+      "left": 1.0,
+      "right": 0.0
+    },
+    "contact_estimates": {
+      "left": [
+        -0.29957075497974556,
+        -0.21429987535460643,
+        0.9215000304420929
+      ],
+      "right": [
+        0.08370822211938117,
+        -0.1790096844887136,
+        0.8234839923291541
+      ]
+    }
+  },
+  "control_timing": {
+    "protocol": "timed_joint_v1",
+    "action_hz": 250,
+    "action_interval_seconds": 0.004,
+    "physics_hz": 250,
+    "physics_steps_per_action": 1,
+    "observation_hz": 25,
+    "task_step_seconds": 0.04,
+    "control_ticks_per_task_step": 10,
+    "render_interval": 10,
+    "max_action_steps": 2500,
+    "steps_unit": "250 Hz control ticks",
+    "settle_unit": "250 Hz control ticks"
+  },
+  "budget": {
+    "total_native_steps": 200,
+    "executed_native_steps": 67,
+    "remaining_native_steps": 133,
+    "native_step_unit": "25 Hz task periods",
+    "total_control_ticks": 2000,
+    "executed_control_ticks": 679,
+    "remaining_control_ticks": 1321,
+    "step_unit": "250 Hz control ticks",
+    "task_horizon_seconds": 8.0,
+    "elapsed_simulation_seconds": 2.716,
+    "model_calls_remaining": 393
+  },
+  "action_interface": "joint",
+  "public_task_requirements": {
+    "task": "general_pickup",
+    "url": "https://robodojo-benchmark.com/doc/sim-tasks/general-pickup/",
+    "fetched_at": "2026-09-14T16:06:41.474482+00:00",
+    "sha256": "0a49e047935c066389aeb3b7ea211653da0258e0adb2ea8ba94d8bf4a6fde2cf",
+    "rows": [
+      [
+        "Instruction",
+        "Pick up the target object by 10 cm."
+      ],
+      [
+        "Description",
+        "There are multiple objects. The robot needs to understand the language instruction, identify the target object, and pick it up."
+      ],
+      [
+        "Platform",
+        "Simulation"
+      ],
+      [
+        "Category",
+        "Open"
+      ],
+      [
+        "Data Source",
+        "null (eval-only)"
+      ],
+      [
+        "Usage",
+        "Eval"
+      ],
+      [
+        "Score",
+        "Condition"
+      ],
+      [
+        "0",
+        "The target object is not lifted high enough."
+      ],
+      [
+        "100",
+        "The target object is lifted at least 10 cm."
+      ]
+    ]
+  }
+}

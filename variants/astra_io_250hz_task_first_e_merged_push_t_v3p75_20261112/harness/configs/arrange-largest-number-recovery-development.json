@@ -1,0 +1,36 @@
+{
+  "model": "gpt-6-astra",
+  "reasoning_effort": "high",
+  "request_timeout": 300,
+  "credentials": "local/credentials/azure.py",
+  "robot_runtime": "/tmp/robodojo-uv/bin/python",
+  "robodojo_root": "dependencies/RoboDojo",
+  "assets": "local/assets/Assets",
+  "object_assets": "local/assets/Assets/Object/RoboDojo",
+  "memory": "memory/skills.json",
+  "controller": "skills",
+  "max_model_calls": 400,
+  "task": "arrange_largest_number",
+  "skill_names": [
+    "visual-contact-control",
+    "cross-side-handoff",
+    "arrange-largest-number",
+    "upright-grasp-approach",
+    "transport-retention",
+    "direct-posture-adjustment"
+  ],
+  "motion_op": "move_local",
+  "contract_local_ik": true,
+  "public_posture_feedback": true,
+  "robodojo_revision": "e9c78abaf44e3aec68a3b265f3c374588be9f900",
+  "robodojo_required_submodules": {
+    "XPolicyLab": "724e4bb73a1a70df3570406e469144d07da55d1a"
+  },
+  "direct_posture_action": true,
+  "posture_recovery_program": true,
+  "provider_base_urls": {
+    "azure-astra": "https://azure-astra.example.invalid/v1",
+    "zzz-astra": "https://zzz-astra.example.invalid/v1",
+    "zzy-astra": "https://zzy-astra.example.invalid/v1"
+  }
+}

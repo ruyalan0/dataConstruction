@@ -1,0 +1,49 @@
+{
+  "scope": "Offline conversion of historical 25 Hz data; no new model call or 250 Hz execution",
+  "name": "control_arms",
+  "arguments": {
+    "assessment": "The one-step prefix tracked within 1 mm, but roll lag triggered the interpolation bound. Images show the hand remains clear above the supported car, with no contact.",
+    "left": null,
+    "memory": "Step23 prefix only: right wrist (.106,-.132,.966), roll1.015, open1. Last rotation stopped on measured-state increment bound, not contact; use slower interpolation. Target white striped car still supported. Desired overhead alignment joints [.535,1.84,1.37,-1.1008,0,2.1]. No reset.",
+    "plan": "Complete the same clear overhead alignment with smaller per-step roll increments, then inspect alignment before descent.",
+    "right": {
+      "control": "joint",
+      "gripper": null,
+      "joints": [
+        0.535,
+        1.84,
+        1.37,
+        -1.1008,
+        0,
+        2.1
+      ]
+    },
+    "settle": 1,
+    "steps": 12
+  },
+  "decision": {
+    "assessment": "The one-step prefix tracked within 1 mm, but roll lag triggered the interpolation bound. Images show the hand remains clear above the supported car, with no contact.",
+    "plan": "Complete the same clear overhead alignment with smaller per-step roll increments, then inspect alignment before descent.",
+    "memory": "Step23 prefix only: right wrist (.106,-.132,.966), roll1.015, open1. Last rotation stopped on measured-state increment bound, not contact; use slower interpolation. Target white striped car still supported. Desired overhead alignment joints [.535,1.84,1.37,-1.1008,0,2.1]. No reset.",
+    "action": {
+      "control_arms": {
+        "arms": {
+          "right": {
+            "control": "joint",
+            "joints": [
+              0.535,
+              1.84,
+              1.37,
+              -1.1008,
+              0.0,
+              2.1
+            ]
+          }
+        },
+        "steps": 12,
+        "settle": 1
+      }
+    }
+  },
+  "source_response": "/data/lanruya/robodojo/Astra-Robodojo-new/runs/general-pickup-control-only-20261015-155448/general_pickup/L20/policy-20/model/0004.response.json"
+}

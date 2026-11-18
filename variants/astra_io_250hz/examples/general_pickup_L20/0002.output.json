@@ -1,0 +1,49 @@
+{
+  "scope": "Offline conversion of historical 25 Hz data; no new model call or 250 Hz execution",
+  "name": "control_arms",
+  "arguments": {
+    "assessment": "The first segment tracked closely and the right wrist view clearly identifies the white car, including its dark windows and colored racing stripe. It remains on the table ahead of the open fingers; there is no retention yet. The raised elbow leaves room for further approach.",
+    "left": null,
+    "memory": "White car target head ~376,268; right wrist confirms white striped toy car. Step11 right wrist (.217,-.314,.997), open1, no contact. Initial raised approach tracked <2mm. Estimated car region x~.09,y~-.1; refine from next downward view. No reset required.",
+    "plan": "Extend through the clear space above the car to a downward-facing pregrasp, keeping the fingers open and stopping above contact for alignment inspection.",
+    "right": {
+      "control": "joint",
+      "gripper": null,
+      "joints": [
+        0.55,
+        2,
+        1.6,
+        -1.1708,
+        0,
+        0.9
+      ]
+    },
+    "settle": 1,
+    "steps": 10
+  },
+  "decision": {
+    "assessment": "The first segment tracked closely and the right wrist view clearly identifies the white car, including its dark windows and colored racing stripe. It remains on the table ahead of the open fingers; there is no retention yet. The raised elbow leaves room for further approach.",
+    "plan": "Extend through the clear space above the car to a downward-facing pregrasp, keeping the fingers open and stopping above contact for alignment inspection.",
+    "memory": "White car target head ~376,268; right wrist confirms white striped toy car. Step11 right wrist (.217,-.314,.997), open1, no contact. Initial raised approach tracked <2mm. Estimated car region x~.09,y~-.1; refine from next downward view. No reset required.",
+    "action": {
+      "control_arms": {
+        "arms": {
+          "right": {
+            "control": "joint",
+            "joints": [
+              0.55,
+              2.0,
+              1.6,
+              -1.1708,
+              0.0,
+              0.9
+            ]
+          }
+        },
+        "steps": 10,
+        "settle": 1
+      }
+    }
+  },
+  "source_response": "/data/lanruya/robodojo/Astra-Robodojo-new/runs/general-pickup-control-only-20261015-155448/general_pickup/L20/policy-20/model/0002.response.json"
+}

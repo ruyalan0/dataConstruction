@@ -1,0 +1,557 @@
+{
+  "schema_version": 1,
+  "variant": "astra_io_250hz_task_first_g_tube_order_20261117",
+  "date": "2026-11-17",
+  "base": "variants/astra_io_250hz_task_first_e_merged_20261105",
+  "parent_speed_files": 328,
+  "source_updates": {
+    "release/harness/skills/play-tic-tac-toe/SKILL.md": {
+      "previous_sha256": "76f3833e9ba8c89b34f589c98b905bbceb91b1d04933b9d89b4c0f776f4b5822",
+      "sha256": "2c5e1cef7df24400b820496487067db0139dc51eefaa29ed4365d404894a939c"
+    },
+    "variants/astra_io_250hz_task_first_e/harness/skills/stack-bowls/SKILL.md": {
+      "previous_sha256": "a05aa76e0bf638ee38294aab1f0713ed09ef315c82ac0a6fc208d9a1f916ccfd",
+      "sha256": "594fcc289a5831449fd2e8995d7379788528e5324da7c3fcdf9d56d175c957c1"
+    },
+    "variants/astra_io_250hz_task_first_e/harness/skills/put-bottles-into-dustbin/SKILL.md": {
+      "previous_sha256": "ca3fe6c810d15e6c6e7ba5abd60c2ca5669d64c6424bae6d57c842ea7a451f67",
+      "sha256": "0160e56cfea6cbc7c5bf935e46de69ba79789a15cfef6f169e90e7d6f1e5c6c3",
+      "date": "2026-11-12",
+      "reason": "Previously admitted exact upstream e bottle skill hash; now also copied byte-for-byte from e-plus into g. No upstream file or shared pin is rewritten."
+    }
+  },
+  "changes": {
+    "speed": {
+      "reference_velocity_limit_rad_s": 3.75,
+      "max_motion_seconds": 0.8,
+      "settle_window_seconds": 0.1
+    },
+    "tic_tac_toe": {
+      "source": "release/harness/skills/play-tic-tac-toe/SKILL.md",
+      "source_sha256": "2c5e1cef7df24400b820496487067db0139dc51eefaa29ed4365d404894a939c",
+      "adaptation": "Use control_arms left:null and right:null to hold measured poses; internal arms:{}; hold window 0.24 s; no verify_completion tool."
+    },
+    "stack_bowls": {
+      "source": "variants/astra_io_250hz_task_first_e/harness/skills/stack-bowls/SKILL.md",
+      "sha256": "594fcc289a5831449fd2e8995d7379788528e5324da7c3fcdf9d56d175c957c1",
+      "change": "Slightly tilt the empty gripper before descending to the radial rim grasp."
+    },
+    "push_T": {
+      "skill": "harness/skills/push-t/SKILL.md",
+      "previous_sha256": "20d50202a0267c1407ee41c8b996b46c222666bb6f54b25d39dfd31d4ddf7819",
+      "sha256": "f2543512ce205f5d327b2eac0b01430999681b53ab3953b7b1656aa76400145a",
+      "change": "User-requested coarse-to-fine: short horizontal translation pushes linear while T-to-target planar distance exceeds 0.0200 m; latch quintic fine alignment at or below 0.0200 m. Contact acquisition/unloading/withdrawal remain quintic.",
+      "controller_update": {
+        "date": "2026-11-12",
+        "previous_reference_velocity_limit_rad_s": 0.6,
+        "reference_velocity_limit_rad_s": 3.75,
+        "task_config": "task-configs/push_T.json",
+        "interpolation_profile": "quintic",
+        "stage_profiles": {
+          "initial_reach": "linear",
+          "coarse_push": "linear",
+          "manipulation": "quintic",
+          "home_return": "linear"
+        },
+        "settle_window_seconds": 0.1,
+        "max_motion_seconds": 0.8,
+        "scope": "Only push_T defaults to the hybrid quintic-based profile; other task interpolation defaults are unchanged."
+      },
+      "previous_controller_update": {
+        "date": "2026-11-06",
+        "previous_reference_velocity_limit_rad_s": 3.75,
+        "reference_velocity_limit_rad_s": 0.6,
+        "task_config": "task-configs/push_T.json",
+        "previous_task_config_sha256": "759419ccb8a6ae4cdbc5e115952c102fb0534c037e1311c809da00263e85e8ee",
+        "scope": "Only push_T; shared controller settings and all other task limits remain unchanged."
+      }
+    },
+    "put_bottles_into_dustbin": {
+      "skill": "harness/skills/put-bottles-into-dustbin/SKILL.md",
+      "previous_sha256": "e7d0bf484daff10785c009423248b652c9f8958e0d1731f0ee243107824af4bf",
+      "sha256": "0160e56cfea6cbc7c5bf935e46de69ba79789a15cfef6f169e90e7d6f1e5c6c3",
+      "change": "Merge the exact e-plus skill: retain e body/neck grasps for standing bottles; verify a vertical downward approach and channel parallel to the body for lying bottles. Shared 3.75 rad/s already matches e-plus."
+    },
+    "insert_tubes": {
+      "skill": "harness/skills/insert-tubes/SKILL.md",
+      "previous_sha256": "421c2d817e85822b7e45de5531cd11246514288f708422dd181e6a7badf48d45",
+      "sha256": "3d66b42318bc006628c9e1a70e3e057f94727bc438630e13db5d1ab319296383",
+      "maximum_approach_deviation_deg": 10,
+      "maximum_closing_deviation_deg": 10,
+      "maximum_angle_regrasps_per_tube": 1,
+      "confirmation": "Two distinct settled observations after an independent test lift; no unsupported release.",
+      "implementation": "Task skill only; model computes from existing same-step poses; no automatic executor gate or added feedback field. Choose one rack-relative sweep direction and insert into the ordered openings without end-end-middle placement.",
+      "simulation_evaluated": false,
+      "analysis": "INSERT_TUBES_ANALYSIS.zh.md"
+    },
+    "pour_liquid_into_cup": {
+      "skill": "harness/skills/pour-liquid-into-cup/SKILL.md",
+      "previous_sha256": "a08a193b2f1dcce9144b1f1c3ea511b05f0c0d8af4db7045fa5432a3be30fc76",
+      "sha256": "eca9671673c08d5ba59a658fbf86a1b71cf257d4058c40184a9613dc593fd0fe",
+      "change": "Grasp-dependent pouring with a 45-degree mouth-down residual-drainage checkpoint, successive fresh no-flow observations and a 5-10-degree trial return while keeping the outlet over the cup; further tilt only for observed residual drainage.",
+      "task_config": "task-configs/pour_liquid_into_cup.json",
+      "interpolation_profile": "linear",
+      "implementation": "Model-selected grasp, contact and insertion using existing observations and control_arms; original linear executor, no automatic contact or insertion gate.",
+      "simulation_evaluated": false
+    }
+  },
+  "release_verification": "Only the pinned release tic-tac-toe skill hash differs from the frozen inventory; all remaining release hashes and dependency pins remain checked.",
+  "task_configs": {
+    "play_tic_tac_toe": {
+      "source": "runs/astra-e-seven-tasks-L20-L22-20261103-093609/configs/e/linear/play_tic_tac_toe.json",
+      "sha256": "9f31ead998195e79226d7e863ce93a334fc59278fdba307444fa083415e6e2f1",
+      "adaptation": "Use merged identity, v7 protocol, scene feedback, 3.75 rad/s and both common coordination skills."
+    },
+    "stack_bowls": {
+      "source": "runs/astra-e-seven-tasks-L20-L22-20261103-093609/configs/e/linear/stack_bowls.json",
+      "sha256": "e491be5cf38e85b48fbe01f6e281cee389277945e9c8c7929482ce3bbec0b5b8",
+      "adaptation": "Use merged identity, v7 protocol, scene feedback, 3.75 rad/s and both common coordination skills."
+    },
+    "push_T": {
+      "source": "variants/astra_io_250hz_push_t_hybrid_20261112/task-configs/push_T.json",
+      "sha256": "bc80eac8769a10037ff1abe6dd63dbe06a3f73c02408978d67ec83d1a0ebd850",
+      "adaptation": "Keep g identity, existing model and budgets; merge 3.75 rad/s quintic-based task settings with stage-specific linear reach/home and dynamic home budgets.",
+      "source_sha256": "3ece38e4fdc6bc010a3831d1f69621c4091dca89b777cd193ebf352ddc29ea40"
+    },
+    "put_bottles_into_dustbin": {
+      "source": "runs/astra-e-seven-tasks-L20-L22-20261103-093609/configs/e/linear/put_bottles_into_dustbin.json",
+      "sha256": "c8eb4860ee5786a7b04c3e0290c40558df5c0cdd341bd63604bcc0c5344bf597",
+      "adaptation": "Use merged identity, v7 protocol, scene feedback, 3.75 rad/s and both common coordination skills; load the revised task skill."
+    },
+    "insert_tubes": {
+      "source": "runs/sol61-f-additional-seven-tasks-L20-L22-20261109-215604/configs/sol/linear/insert_tubes.json",
+      "source_sha256": "24eab38ef98eb9f1e57fbb3db9b66c165e9113a0410481d44cdafd30203f5163",
+      "sha256": "58a795fab7b79209f6f39ef1c864e3788d3102f1094071d4ff30450f31215d94",
+      "adaptation": "Only io_variant changes to g; Sol 6.1/high, controller, tools and budgets stay identical to the recorded f configuration."
+    },
+    "pour_liquid_into_cup": {
+      "source": "runs/sol61-f-additional-seven-tasks-L20-L22-20261109-215604/configs/sol/linear/pour_liquid_into_cup.json",
+      "source_sha256": "90d6cfcbd3398922a952b8824b2a28d85c011fbed3397689c1c55006921f66ec",
+      "sha256": "b735b122379c72993a8d80fe6cab536880797d8c69baf6c2d9c5bf619d36f9af",
+      "adaptation": "Only g identity; retain original linear profile, controller settings, pouring model, tools, public requirements and budgets."
+    },
+    "align_blocks": {
+      "source": "runs/sol61-f-additional-seven-tasks-L20-L22-20261109-215604/configs/sol/linear/align_blocks.json",
+      "source_sha256": "45040a499ffea5ea50fe20991d267450e8f81f23276faf17b21871257f757e81",
+      "sha256": "ab0195358dfb2997132452c3dd0311cbb34af010c704d4a4fcb0a16f59233771",
+      "adaptation": "Use g identity and a task-specific 1.2 rad/s reference velocity; retain linear interpolation, model, selected skills, budgets and native horizon. The align-blocks skill now requires a short trial push and observed tool following before extending contact motion."
+    }
+  },
+  "revision": "g-insert-tubes-monotonic-opening-order-20261117",
+  "inherited_base": "variants/astra_io_250hz_task_first_e_full_tool_speed",
+  "parent_f_files": 337,
+  "g_launch_validation": {
+    "previous_integrity_block": "Unrelated upstream e bottle skill changed during g creation.",
+    "resolution": "Exact old-to-current source pin, limited to the named file; never skip verification.",
+    "insert_tubes_skill_changed": false
+  },
+  "merged_at": "2026-11-12T09:06:04.297237+00:00",
+  "merge_20261112": {
+    "previous_g_snapshot": "/data/lanruya/robodojo/Astra-Robodojo-new/runs/g-merge-bottles-push-t-20261112-170409/source-snapshot-g-before-merge",
+    "bottle_source": "variants/astra_io_250hz_task_first_e_plus_20261112",
+    "push_t_source": "variants/astra_io_250hz_push_t_hybrid_20261112",
+    "donor_files": {
+      "harness/egg_harness/client.py": {
+        "source": "variants/astra_io_250hz_push_t_hybrid_20261112/harness/egg_harness/client.py",
+        "sha256": "198bbb675fa9393f168149ae9fa6fb4574526298986d4cdfecadab21a83df8d4"
+      },
+      "harness/egg_harness/input_contract.py": {
+        "source": "variants/astra_io_250hz_push_t_hybrid_20261112/harness/egg_harness/input_contract.py",
+        "sha256": "9beea8457688305e4980ec5b72cbc8733048fcf9a12e8e4e2b28df441a21e777"
+      },
+      "harness/egg_harness/interpolation_profiles.py": {
+        "source": "variants/astra_io_250hz_push_t_hybrid_20261112/harness/egg_harness/interpolation_profiles.py",
+        "sha256": "58b07746418aedc74fdb4df1e7df54a5ebaf3204fc6c776b967bd333a6ce78c1"
+      },
+      "harness/egg_harness/joint_goal.py": {
+        "source": "variants/astra_io_250hz_push_t_hybrid_20261112/harness/egg_harness/joint_goal.py",
+        "sha256": "6ec78871692e51ea75f6890c9dbe6e8c21aa45504fd6ce151c08c90d5c37b5a9"
+      },
+      "harness/egg_harness/native_tools.py": {
+        "source": "variants/astra_io_250hz_push_t_hybrid_20261112/harness/egg_harness/native_tools.py",
+        "sha256": "e9b5d6ab4a3f7af2ed2e7df72d876e4d11ffcd9c3048c848ea4f68fbad4579f1"
+      },
+      "harness/egg_harness/observation_pair.py": {
+        "source": "variants/astra_io_250hz_push_t_hybrid_20261112/harness/egg_harness/observation_pair.py",
+        "sha256": "3f3cfb25700ad769cc6c98ee4949007ce8cf6fc13b15a0bdf0988305422e728d"
+      },
+      "harness/egg_harness/push_t_motion.py": {
+        "source": "variants/astra_io_250hz_push_t_hybrid_20261112/harness/egg_harness/push_t_motion.py",
+        "sha256": "6cfd623d793fae78ab644ecd92f8035b5ef0868af896ac5a97e2c45da866a0c5"
+      },
+      "harness/skills/push-t/SKILL.md": {
+        "source": "variants/astra_io_250hz_push_t_hybrid_20261112/harness/skills/push-t/SKILL.md",
+        "sha256": "45c24b09b85f5d66a9608104b5798bf159d3239acdbe3024fd387c3ab34e0b42"
+      },
+      "tests/test_push_t_motion.py": {
+        "source": "variants/astra_io_250hz_push_t_hybrid_20261112/tests/test_push_t_motion.py",
+        "sha256": "be2375d5525d3582e6a41f98bcb7559dea10d969722cf838dbd1be657b71ef72"
+      },
+      "tests/test_push_t_velocity.py": {
+        "source": "variants/astra_io_250hz_push_t_hybrid_20261112/tests/test_push_t_velocity.py",
+        "sha256": "62516a7e2f467883fea3872709be7d61c30b582f1f18aa997c8d01c7daba08bd"
+      },
+      "harness/skills/put-bottles-into-dustbin/SKILL.md": {
+        "source": "variants/astra_io_250hz_task_first_e_plus_20261112/harness/skills/put-bottles-into-dustbin/SKILL.md",
+        "sha256": "0160e56cfea6cbc7c5bf935e46de69ba79789a15cfef6f169e90e7d6f1e5c6c3"
+      }
+    },
+    "retained_insert_tubes_sha256": "d65c0b3d282bd3b59ac49ac986f9431b3f5c1ac61f6a29b64b33b762dd775b2f",
+    "shared_controller_sha256": "1dd63e31e4aa3252b68e5e509844b9886937279cf31cbb8bef5a36270432fcf4",
+    "shared_controller_already_matches_e_plus": true,
+    "default_interpolation_profiles": {
+      "push_T": "quintic",
+      "put_bottles_into_dustbin": "linear",
+      "insert_tubes": "linear"
+    },
+    "historical_experiments_modified": false,
+    "new_experiments_started": false,
+    "validation": {
+      "full_tests": {
+        "passed": 154,
+        "total": 154
+      },
+      "targeted_tests": {
+        "passed": 35,
+        "total": 35
+      },
+      "protected_files": 2268,
+      "release_verified": true,
+      "cli_help_checked": [
+        "run_local.py",
+        "export_swift.py"
+      ],
+      "insert_tubes_skill_unchanged": true,
+      "new_experiments_started": false
+    }
+  },
+  "push_t_coarse_to_fine_update": {
+    "updated_at": "2026-11-12T10:36:39.910869+00:00",
+    "previous_g_snapshot": "/data/lanruya/robodojo/Astra-Robodojo-new/runs/g-push-t-coarse-to-fine-update-20261112-183507/source-snapshot-g-before-update",
+    "changed_files": {
+      "CHANGELOG.zh.md": {
+        "previous_sha256": "d8dbe79b772a4bb1e8010dd40fb4363790f2842f2a65df037ac98a87974c14a3",
+        "sha256": "109801bc86b632f756cbfde7653c02715b2141d11c5c2914c8294f1f9544b594"
+      },
+      "README.md": {
+        "previous_sha256": "5226dbf5efd2673390b0cce10d450093fbc828b3b5573d8c25c2ee25ec4ffdc7",
+        "sha256": "617021289e8718d1b9541d248014caae9d4842123a6e215ee8f5d68f4e707852"
+      },
+      "harness/egg_harness/native_tools.py": {
+        "previous_sha256": "e9b5d6ab4a3f7af2ed2e7df72d876e4d11ffcd9c3048c848ea4f68fbad4579f1",
+        "sha256": "13a2ea1530c6298dd0a5b47b55cdf5eb6f6e0be72100695e38f088e71076f27d"
+      },
+      "harness/egg_harness/push_t_motion.py": {
+        "previous_sha256": "6cfd623d793fae78ab644ecd92f8035b5ef0868af896ac5a97e2c45da866a0c5",
+        "sha256": "e1e40eee3f91791f99a51f30a6e6d438040d0e9d61e5695ebf508c43300dfb5a"
+      },
+      "harness/skills/push-t/SKILL.md": {
+        "previous_sha256": "45c24b09b85f5d66a9608104b5798bf159d3239acdbe3024fd387c3ab34e0b42",
+        "sha256": "f2543512ce205f5d327b2eac0b01430999681b53ab3953b7b1656aa76400145a"
+      },
+      "tests/test_g_merge.py": {
+        "previous_sha256": "fad3f7e734ce8adb4dbe04332f7f51960210e401a2751ff4248ddd7f9ad21339",
+        "sha256": "0d2f4e2f01bfde3ceab937bf8069fe405028d4e9cae92fb7f50cb7b682880b7a"
+      },
+      "tests/test_push_t_motion.py": {
+        "previous_sha256": "be2375d5525d3582e6a41f98bcb7559dea10d969722cf838dbd1be657b71ef72",
+        "sha256": "693c3b2de74a5c6e32149df52689a3da4c6b82e1a899beace4394358689438fc"
+      }
+    },
+    "planar_switch_distance_m": 0.02,
+    "stage_profiles": {
+      "initial_reach": "linear",
+      "coarse_push": "linear",
+      "manipulation": "quintic",
+      "home_return": "linear"
+    },
+    "selection": "Model-selected skill stages, checked against actual executed profile; not a within-goal automatic distance gate.",
+    "historical_experiments_modified": false,
+    "other_task_skills_unchanged": true
+  },
+  "pour_liquid_contact_quintic_update": {
+    "updated_at": "2026-11-12T11:37:06.646691+00:00",
+    "previous_g_snapshot": "/data/lanruya/robodojo/Astra-Robodojo-new/runs/g-pour-liquid-contact-quintic-update-20261112-193438/source-snapshot-g-before-update",
+    "previous_revision": "g-push-t-coarse-to-fine-20261112",
+    "changed_files": {
+      "CHANGELOG.zh.md": {
+        "previous_sha256": "109801bc86b632f756cbfde7653c02715b2141d11c5c2914c8294f1f9544b594",
+        "sha256": "0903757a5578fcaf15cb307d1bffe8c5fae4c646fb6cca159c7adea42e2a798c"
+      },
+      "README.md": {
+        "previous_sha256": "617021289e8718d1b9541d248014caae9d4842123a6e215ee8f5d68f4e707852",
+        "sha256": "2063c3da784085a7ccf14a1e75d909c67b54116525ffe71ffa1bec68d69752ff"
+      },
+      "harness/skills/pour-liquid-into-cup/SKILL.md": {
+        "previous_sha256": "a08a193b2f1dcce9144b1f1c3ea511b05f0c0d8af4db7045fa5432a3be30fc76",
+        "sha256": "1b81d3c98f598f91f3cb274551909f2ee0696aa087fc3a180b345d255eb463b1"
+      },
+      "task-configs/pour_liquid_into_cup.json": {
+        "previous_sha256": null,
+        "sha256": "c9e9bb5d5c3d8e6692ca91bbd96770148f129ef94dcbd21fa3ea6f19dd7b57d1"
+      },
+      "tests/test_g_merge.py": {
+        "previous_sha256": "0d2f4e2f01bfde3ceab937bf8069fe405028d4e9cae92fb7f50cb7b682880b7a",
+        "sha256": "d622099ed4da6b85574fe5802f491446097853568b821bf49234b9b85bda5293"
+      },
+      "tests/test_g_tubes.py": {
+        "previous_sha256": "d2a6ea671c68ef230c049d3cdf5de6379e86ea2c83cbcaca0772e807afa386d5",
+        "sha256": "9fb76e5190485b062b2d93792f3bad41df18ce23a3edf65c154513fddd60297a"
+      },
+      "tests/test_pour_liquid_profile.py": {
+        "previous_sha256": null,
+        "sha256": "e2fcbad50dcfd8e031c60726075905473694b3af803d75d63f2db74e71371aea"
+      }
+    },
+    "interpolation_profile": "quintic",
+    "historical_experiments_modified": false,
+    "other_task_skills_unchanged": true,
+    "new_experiments_started": false
+  },
+  "pour_liquid_linear_restore": {
+    "updated_at": "2026-11-12T11:44:18.281268+00:00",
+    "previous_g_snapshot": "/data/lanruya/robodojo/Astra-Robodojo-new/runs/g-pour-liquid-linear-restore-20261112-194315/source-snapshot-g-before-update",
+    "previous_revision": "g-pour-liquid-contact-quintic-20261112",
+    "changed_files": {
+      "CHANGELOG.zh.md": {
+        "previous_sha256": "0903757a5578fcaf15cb307d1bffe8c5fae4c646fb6cca159c7adea42e2a798c",
+        "sha256": "c89bc2d12234d527cfe42b643aea0a8949c61fc8c78265648594c903f1b10aa3"
+      },
+      "README.md": {
+        "previous_sha256": "2063c3da784085a7ccf14a1e75d909c67b54116525ffe71ffa1bec68d69752ff",
+        "sha256": "1739dc7d6ca7e211f814ba3c3d80de5f1becb376b42529f5c6f9635bd4e6983f"
+      },
+      "harness/skills/pour-liquid-into-cup/SKILL.md": {
+        "previous_sha256": "1b81d3c98f598f91f3cb274551909f2ee0696aa087fc3a180b345d255eb463b1",
+        "sha256": "7e7dd629a6c72ee7f316efda8e56204b56c69bb9e5af7743d3d1ec10ca60f82e"
+      },
+      "task-configs/pour_liquid_into_cup.json": {
+        "previous_sha256": "c9e9bb5d5c3d8e6692ca91bbd96770148f129ef94dcbd21fa3ea6f19dd7b57d1",
+        "sha256": "ee244952d316c120edcc098c5fa4d597c085cfbd4748954d5c24120214d57aa5"
+      },
+      "tests/test_pour_liquid_profile.py": {
+        "previous_sha256": "e2fcbad50dcfd8e031c60726075905473694b3af803d75d63f2db74e71371aea",
+        "sha256": "8b15279b195205d0b9e36836548a48a5547e1bd3a2a48fab897c955c312ca7ea"
+      }
+    },
+    "interpolation_profile": "linear",
+    "reason": "User requested restoring the original interpolation before experiments.",
+    "historical_experiments_modified": false,
+    "other_task_skills_unchanged": true,
+    "new_experiments_started": false
+  },
+  "pour_liquid_grasp_axis_update": {
+    "updated_at": "2026-11-12T16:41:06.379540+00:00",
+    "previous_g_snapshot": "/data/lanruya/robodojo/Astra-Robodojo-new/runs/sol61-g-pour-liquid-grasp-axis-L20-L22-20261113-004106/source-snapshot-g-before-update",
+    "previous_revision": "g-pour-liquid-contact-linear-20261112",
+    "changed_files": {
+      "CHANGELOG.zh.md": {
+        "previous_sha256": "c89bc2d12234d527cfe42b643aea0a8949c61fc8c78265648594c903f1b10aa3",
+        "sha256": "29a3ce180835b5fd703ff1440f8d088d61c9c458ef2f0b01e3808574bdd1d7eb"
+      },
+      "README.md": {
+        "previous_sha256": "1739dc7d6ca7e211f814ba3c3d80de5f1becb376b42529f5c6f9635bd4e6983f",
+        "sha256": "1ac30245e8e41745aa327a7e71604d49217764dbe6876bdd66d349f9d79e6328"
+      },
+      "harness/skills/pour-liquid-into-cup/SKILL.md": {
+        "previous_sha256": "7e7dd629a6c72ee7f316efda8e56204b56c69bb9e5af7743d3d1ec10ca60f82e",
+        "sha256": "7b8bd6b8168c4e5bcd01c64b0796c30b62888b3dea489e170a032fa55fe935a2"
+      }
+    },
+    "experiment_batch": "/data/lanruya/robodojo/Astra-Robodojo-new/runs/sol61-g-pour-liquid-grasp-axis-L20-L22-20261113-004106",
+    "reason": "User approved grasp-dependent tilt axis and cup approach side, with L20-L22 experiments.",
+    "interpolation_profile": "linear",
+    "historical_experiments_modified": false,
+    "other_task_skills_unchanged": true
+  },
+  "align_blocks_velocity_update": {
+    "updated_at": "2026-11-15T10:52:31.376686+00:00",
+    "backup": "/data/lanruya/robodojo/Astra-Robodojo-new/runs/g-align-blocks-speed0p6-update-20261115-185231",
+    "previous_reference_velocity_limit_rad_s": 3.75,
+    "reference_velocity_limit_rad_s": 0.6,
+    "task": "align_blocks",
+    "changed_files": {
+      "harness/egg_harness/joint_goal.py": {
+        "previous_sha256": "6ec78871692e51ea75f6890c9dbe6e8c21aa45504fd6ce151c08c90d5c37b5a9",
+        "sha256": "cd39e7f2855d5dc027aa5a028876d3e48f5fa07a100047598e73665278ea26fb"
+      },
+      "README.md": {
+        "previous_sha256": "1ac30245e8e41745aa327a7e71604d49217764dbe6876bdd66d349f9d79e6328",
+        "sha256": "9476671b24350c216fb0d0e105b6565bb4eef1f72dc44b6dd25c00fd7e45a6aa"
+      },
+      "tests/test_g_merge.py": {
+        "previous_sha256": "d622099ed4da6b85574fe5802f491446097853568b821bf49234b9b85bda5293",
+        "sha256": "909054c342ea3af93145af2021b7eb4ed5b61987bae9431aaa1225a7a361135f"
+      },
+      "task-configs/align_blocks.json": {
+        "previous_sha256": null,
+        "sha256": "7b3873f1f0a7d4fb98484aa6353a8a188d99e29a8ed7542a7da7c576d858b64d"
+      },
+      "tests/test_align_blocks_velocity.py": {
+        "previous_sha256": null,
+        "sha256": "acaf6a7210cb4d27075cf851b57802b4af5f24eda035f66f1b31d571adc67c88"
+      },
+      "tests/test_push_t_motion.py": {
+        "previous_sha256": "693c3b2de74a5c6e32149df52689a3da4c6b82e1a899beace4394358689438fc",
+        "sha256": "495d95f2cf7b2c4944d6281fb46777d56d62bc1ddf0fef57658c64fb37c7514a"
+      }
+    },
+    "other_task_limits_unchanged": true
+  },
+  "align_blocks_trial_push_update": {
+    "updated_at": "2026-11-15T11:38:20.942011+00:00",
+    "backup": "/data/lanruya/robodojo/Astra-Robodojo-new/runs/g-align-blocks-trial-push-speed1p2-update-20261115-193726",
+    "task": "align_blocks",
+    "previous_reference_velocity_limit_rad_s": 0.6,
+    "reference_velocity_limit_rad_s": 1.2,
+    "changed_files": {
+      "harness/skills/align-blocks/SKILL.md": {
+        "previous_sha256": "f1bcd899d9ab39cd7c80d0599a6cf04fad5c80bd7ecb3b158bef5405fdae1dee",
+        "sha256": "ad89fa3cfff22d15aa79a81e6da1bbd4b16acc200607542210a28d8b51fad5d2"
+      },
+      "task-configs/align_blocks.json": {
+        "previous_sha256": "7b3873f1f0a7d4fb98484aa6353a8a188d99e29a8ed7542a7da7c576d858b64d",
+        "sha256": "00563b088694645fd540a10ccc16e21958223a6c77a518032217ecca6b358d63"
+      },
+      "README.md": {
+        "previous_sha256": "9476671b24350c216fb0d0e105b6565bb4eef1f72dc44b6dd25c00fd7e45a6aa",
+        "sha256": "a4c59c2bb6196fda3e557e687e3ebdfd09657dc4da12bb9eafbf036375857c04"
+      },
+      "tests/test_align_blocks_velocity.py": {
+        "previous_sha256": "acaf6a7210cb4d27075cf851b57802b4af5f24eda035f66f1b31d571adc67c88",
+        "sha256": "be594c777ba54d45fe03665f1c96be3962ca77ad940fbd28d937c8084e84da36"
+      },
+      "tests/test_g_merge.py": {
+        "previous_sha256": "909054c342ea3af93145af2021b7eb4ed5b61987bae9431aaa1225a7a361135f",
+        "sha256": "fed997ae5a326bdba9033b5d6f6844f7fe6d8c2b937b38ba25f5edb65ce01b29"
+      },
+      "tests/test_g_tubes.py": {
+        "previous_sha256": "9fb76e5190485b062b2d93792f3bad41df18ce23a3edf65c154513fddd60297a",
+        "sha256": "3d819a9f3aed4172d1afc360a0a6f4e62fc008657a36a932f51baadf2a997492"
+      }
+    },
+    "skill_update": "Short trial push, verify tool following before extending, reposition and retry on failed contact.",
+    "interpolation_profile": "linear",
+    "native_horizon_unchanged": true,
+    "other_task_limits_unchanged": true
+  },
+  "pour_liquid_drain45_update": {
+    "updated_at": "2026-11-15T12:40:52.997237+00:00",
+    "previous_g_snapshot": "/data/lanruya/robodojo/Astra-Robodojo-new/runs/g-pour-liquid-drain45-update-20261115-204052/source-snapshot-g-before-update",
+    "previous_revision": "g-pour-liquid-grasp-axis-20261113",
+    "reason": "User approved first validating a 45-degree mouth-down drainage checkpoint with a small observed trial return on L22.",
+    "changed_files": {
+      "harness/skills/pour-liquid-into-cup/SKILL.md": {
+        "previous_sha256": "7b8bd6b8168c4e5bcd01c64b0796c30b62888b3dea489e170a032fa55fe935a2",
+        "sha256": "eca9671673c08d5ba59a658fbf86a1b71cf257d4058c40184a9613dc593fd0fe"
+      },
+      "README.md": {
+        "previous_sha256": "a4c59c2bb6196fda3e557e687e3ebdfd09657dc4da12bb9eafbf036375857c04",
+        "sha256": "ad9c1420f131993beb31a01942cfe82f27a80b001bdea2824afb897e88188691"
+      }
+    },
+    "checkpoint_degrees_below_table": 45,
+    "trial_return_degrees": [
+      5,
+      10
+    ],
+    "minimum_fresh_no_flow_observations": 2,
+    "optional_further_drainage_degrees_below_table": 60,
+    "interpolation_profile": "linear",
+    "reference_velocity_limit_rad_s": 3.75,
+    "native_horizon_seconds": 16,
+    "historical_experiments_modified": false,
+    "task_config_unchanged": true,
+    "other_task_skills_unchanged": true,
+    "simulation_evaluated": false,
+    "validation": {
+      "passed": true,
+      "full_tests": {
+        "passed": 161,
+        "total": 161
+      },
+      "protected_files": 2268,
+      "release_verified": true,
+      "skill_frontmatter_validation": "passed using existing RoboDojo runtime",
+      "scope_validation": "only pouring skill, existing README and provenance changed; controller and task configuration unchanged"
+    }
+  },
+  "insert_tubes_order_update": {
+    "updated_at": "2026-11-17T11:35:23.702032+08:00",
+    "source_variant": "variants/astra_io_250hz_task_first_g_20261112",
+    "source_sha256_file": "runs/g-insert-tubes-order-update-20261117/source-sha256.json",
+    "changed_files": {
+      "README.md": {
+        "previous_sha256": "ad9c1420f131993beb31a01942cfe82f27a80b001bdea2824afb897e88188691",
+        "sha256": "ad5495a8ed3a70c4c72137d8318d8ac0a1a950af7131e2bff9504a3ce1ceca36"
+      },
+      "export_swift.py": {
+        "previous_sha256": "82bc67d930399b68e3c4be477f3b41172963204d529c32e81b701d57fbd275a8",
+        "sha256": "62ff25b131725c2cafb92c226b096036e58fa49771c456d3bd1dac47a6c35bbf"
+      },
+      "general_pickup.json": {
+        "previous_sha256": "ba040a9f95857ef5fc2d439ae7ba3972d3f170fd6e16603e9453c22257bf3294",
+        "sha256": "fdbffcf871d31c0e2f603a63d0490836a898451778deb01e279e333c229f4246"
+      },
+      "harness/skills/insert-tubes/SKILL.md": {
+        "previous_sha256": "d65c0b3d282bd3b59ac49ac986f9431b3f5c1ac61f6a29b64b33b762dd775b2f",
+        "sha256": "3d66b42318bc006628c9e1a70e3e057f94727bc438630e13db5d1ab319296383"
+      },
+      "policy.py": {
+        "previous_sha256": "2e2d6e24bdfd48599ed6ab7839288622f55338d8090dbbaee0450c0692bf0d95",
+        "sha256": "f326e64122745d98fc9c9d7b57fddd59cc476f88de1267cd5fbd0902f1149cdb"
+      },
+      "run_local.py": {
+        "previous_sha256": "8818438e2a70fac3b75be1282f1e8c735f30478aa3bf1ec7df66c1a0ae17f4b1",
+        "sha256": "a048e50e5b530990fe09da13ac9512b0a372062408bdc585685f337790548172"
+      },
+      "task-configs/align_blocks.json": {
+        "previous_sha256": "00563b088694645fd540a10ccc16e21958223a6c77a518032217ecca6b358d63",
+        "sha256": "ab0195358dfb2997132452c3dd0311cbb34af010c704d4a4fcb0a16f59233771"
+      },
+      "task-configs/insert_tubes.json": {
+        "previous_sha256": "26af449819d420c297cda8e141411ac0a596b6cf1269668ff5ff922913de7bce",
+        "sha256": "58a795fab7b79209f6f39ef1c864e3788d3102f1094071d4ff30450f31215d94"
+      },
+      "task-configs/play_tic_tac_toe.json": {
+        "previous_sha256": "59a8bd34a9f7944b45f23aacd1d9db95d5b4fb2dfebb9919c4df88574f7fd266",
+        "sha256": "9f31ead998195e79226d7e863ce93a334fc59278fdba307444fa083415e6e2f1"
+      },
+      "task-configs/pour_liquid_into_cup.json": {
+        "previous_sha256": "ee244952d316c120edcc098c5fa4d597c085cfbd4748954d5c24120214d57aa5",
+        "sha256": "b735b122379c72993a8d80fe6cab536880797d8c69baf6c2d9c5bf619d36f9af"
+      },
+      "task-configs/push_T.json": {
+        "previous_sha256": "0bc2f830dee66604631633fb7fb9969dbd6c36011360254f70864d34a5e17c39",
+        "sha256": "bc80eac8769a10037ff1abe6dd63dbe06a3f73c02408978d67ec83d1a0ebd850"
+      },
+      "task-configs/put_bottles_into_dustbin.json": {
+        "previous_sha256": "3045f999594a670083739b19fded7aadef3b93717638a1418b2951e34498bfb8",
+        "sha256": "c8eb4860ee5786a7b04c3e0290c40558df5c0cdd341bd63604bcc0c5344bf597"
+      },
+      "task-configs/stack_bowls.json": {
+        "previous_sha256": "bc89b5ae4de3b0aa54434183d71320a6b4d18cfe24cc5870198a30b53f4fdaf9",
+        "sha256": "e491be5cf38e85b48fbe01f6e281cee389277945e9c8c7929482ce3bbec0b5b8"
+      },
+      "tests/test_g_merge.py": {
+        "previous_sha256": "fed997ae5a326bdba9033b5d6f6844f7fe6d8c2b937b38ba25f5edb65ce01b29",
+        "sha256": "b4e34fb52581c57c9762727110cb073f2f81f5b4c5a642d893b255fc25638762"
+      },
+      "tests/test_g_tubes.py": {
+        "previous_sha256": "3d819a9f3aed4172d1afc360a0a6f4e62fc008657a36a932f51baadf2a997492",
+        "sha256": "aaba3d2a6ee807c00cf5a30d500987666e8e0687d42fc3358aa621a968615859"
+      },
+      "tests/test_transport.py": {
+        "previous_sha256": "920078166533372a3358ce61d74c4a0c26f48ca04a83a0ad75cdf8fbd87e664d",
+        "sha256": "5e64a93f83ff1db1d83f86d5730e97ab120f7c49d808c2fc43ec03e2becd69ff"
+      }
+    },
+    "opening_order": "Choose left-to-right or right-to-left once, then starting end, middle, far end; never both ends before the middle.",
+    "obstruction_recovery": "Inspect and substitute only farther along the chosen direction; no backfill or forcing past seated caps.",
+    "runtime_and_configuration_changes_only_adapt_identity": true,
+    "controller_settings_unchanged": true,
+    "other_task_skills_unchanged": true,
+    "historical_experiments_modified": false,
+    "simulation_evaluated": false
+  }
+}

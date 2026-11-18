@@ -1,0 +1,49 @@
+{
+  "scope": "Offline conversion of historical 25 Hz data; no new model call or 250 Hz execution",
+  "name": "control_arms",
+  "arguments": {
+    "assessment": "Alignment completed accurately. The striped white car is centered between the open fingers, with its long axis approximately perpendicular to closing direction. The raised elbow leaves descent room; the car remains table-supported, not retained.",
+    "left": null,
+    "memory": "Step36 right wrist (.130,-.162,.962), downward, joints [.535,1.840,1.370,-1.101,0,2.098], open1. White striped 53 car centered wrist image ~330,240, length vertical. Alignment tracked; no contact yet. Begin short orientation-preserving descent, inspect before closure. No reset required.",
+    "plan": "Lower approximately 3–4 cm using coordinated shoulder, elbow and wrist pitch while maintaining downward orientation and open fingers; inspect pad height afterward.",
+    "right": {
+      "control": "joint",
+      "gripper": null,
+      "joints": [
+        0.535,
+        1.872,
+        1.27,
+        -0.9688,
+        0,
+        2.1
+      ]
+    },
+    "settle": 1,
+    "steps": 3
+  },
+  "decision": {
+    "assessment": "Alignment completed accurately. The striped white car is centered between the open fingers, with its long axis approximately perpendicular to closing direction. The raised elbow leaves descent room; the car remains table-supported, not retained.",
+    "plan": "Lower approximately 3–4 cm using coordinated shoulder, elbow and wrist pitch while maintaining downward orientation and open fingers; inspect pad height afterward.",
+    "memory": "Step36 right wrist (.130,-.162,.962), downward, joints [.535,1.840,1.370,-1.101,0,2.098], open1. White striped 53 car centered wrist image ~330,240, length vertical. Alignment tracked; no contact yet. Begin short orientation-preserving descent, inspect before closure. No reset required.",
+    "action": {
+      "control_arms": {
+        "arms": {
+          "right": {
+            "control": "joint",
+            "joints": [
+              0.535,
+              1.872,
+              1.27,
+              -0.9688,
+              0.0,
+              2.1
+            ]
+          }
+        },
+        "steps": 3,
+        "settle": 1
+      }
+    }
+  },
+  "source_response": "/data/lanruya/robodojo/Astra-Robodojo-new/runs/general-pickup-control-only-20261015-155448/general_pickup/L20/policy-20/model/0005.response.json"
+}

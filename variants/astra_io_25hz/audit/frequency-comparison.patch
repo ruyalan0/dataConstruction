@@ -1,0 +1,607 @@
+--- 250hz/README.md
++++ 25hz/README.md
+@@ -1,84 +1,32 @@
+-# Astra 输入输出新版本：250 Hz、四位小数、去掉 phase、重复信息保留一份
++# Astra 新输入输出版本：25 Hz 复跑
+ 
+-本目录是独立的新版本，原 `scripts/`、`release/harness/`、RoboDojo 源码和历史运行记录均保留原文件。`harness/` 从原发布版复制，修改只发生在本目录。该副本是实验版本，不是原封存发布版。
++本目录从已运行的 astra_io_250hz 活跃源码复制，为 25 Hz 对照单独保存。原发布版、250 Hz 版本及其历史记录均不修改。
+ 
+-先核对历史重复，再实现代码。核对使用十任务 control-only 与 general_pickup L20/L21/L22 共 13 场实验、1,579 轮模型请求。结构化证据见 [audit/duplicates.json](audit/duplicates.json)。
+-
+-| 比较内容 | 检查次数 | 完全一致 |
+-|---|---:|---:|
+-| 上轮 state / 本轮 previous_observation.state | 1,566 | 1,566 |
+-| 上轮 arm_posture / 本轮 previous_arm_posture | 1,566 | 1,566 |
+-| 上轮头部、活动手腕图 / 本轮 previous_* 图 | 2,983 | 2,983 |
+-| 上轮输出 memory / 本轮输入 memory | 1,566 | 1,566 |
+-| 上轮工具执行反馈.feedback / 本轮 previous_result | 1,566 | 1,566 |
+-
+-图片同时检查记录的 SHA-256 和实际文件字节；工具调用 ID、反馈步数也与相邻请求对应。工具结果完整外壳还有 step、ended，重复的是其中的 feedback 正文。
+-
+-## 新行为
+-
+-- **实际动作间隔为 250 Hz，即 4 ms。** 原物理配置本来是 dt=0.004、250 Hz；原 collect_freq=25 使每个动作扩展为 10 个物理步。新 serve 在内存中设 collect_freq=250、相机频率=250、render_interval=1，并校验实际 collect_interval=1。RoboDojo 原 YAML 没有修改。这是仿真动作时间间隔，不是每秒请求模型 250 次，也不保证每秒墙钟时间完成 250 次渲染。
+-- **Astra 的数值动作输出最多四位小数。** 提示词要求按四位小数输出；本地先校验原始参数合法性，再按 ROUND_HALF_UP 四舍五入，执行与下一轮回放使用同一份处理后的数值。steps、settle 保持整数，null 保持 null；机器人输入测量值不作四舍五入，文字 assessment/plan/memory 不作数字替换。无需补齐本来不足四位的小数尾零。
+-- **模型输出移除 phase。** control_arms schema、模型指令和保存的 decision 均不要求 phase。旧执行接口仍使用内部分类：steps≤6 时为 fine，否则为 transit；它由程序生成，不是 Astra 输出。此版本只开放 joint 模式的 control_arms，不能用于原 TCP 工具分支。
+-- **保留上一轮完整交互，删本轮相等副本。** 状态、姿态、RGB 留在 self.previous 的用户消息；memory 留在上一轮 function_call.arguments；反馈留在 function_call_output。本轮移除相等的 previous_observation.state、previous_arm_posture、previous_* 图片、memory、previous_result。previous_observation 的 step/active_arm 元信息保留，history_references 指向保留来源。首轮/断线重连时若没有上一轮交互，全部保留；任一内容不相等时也保留并记入审计。
+-
+-steps 仍为 1..20，settle 仍为 0..2，单位现在都是 250 Hz 动作间隔。例如 steps=10 从原来的 40 ms×10=400 ms 变为 4 ms×10=40 ms。没有把旧步数自动乘十；原每步关节变化上限和原生任务步数预算继续按动作步计数。因此新版本改变了动作时长及每步速度含义，需要实际运行后才能评价抓取效果。历史任务成绩不代表新频率的成绩。
+-
+-## 看处理后的完整一局样例
+-
+-[examples/general_pickup_L20/manifest.json](examples/general_pickup_L20/manifest.json) 索引了全部 11 轮。每轮分别提供：
+-
+-- `0002.context.json`：处理后的本轮情况，便于直接阅读。
+-- `0002.input.json`：系统指令、完整工具 schema、上一轮交互和本轮消息的阅读副本。图片用 SHA-256 与原路径表示，加密推理用占位说明表示。
+-- `0002.output.json`：去掉 phase、数值四舍五入后的动作参数及执行决策。
+-
+-这些例子是对 10 月 15 日 25 Hz 日志的**离线格式转换**。它们没有请求模型或执行机器人，图片、状态、反馈仍来自原实验，不能用作新频率的成功轨迹或新训练标签。第二轮原本是上轮 3 图 + 本轮 5 图，转换后为上轮 3 图 + 本轮 3 图。
+-
+-## 运行与验证
+-
+-在项目根目录运行新的单场入口，默认 general_pickup、layout 20：
++- general_pickup，默认 group 0 / L20，仅开放 control_arms。
++- 动作频率 25 Hz，每步 40 ms；物理频率仍为 250 Hz，每动作推进 10 个物理步。
++- 原生任务预算仍为 200 步，对应 8 秒控制阶段物理时间；steps 为 1..20，settle 为 0..2。
++- 保留上一新版本的四位小数输出、移除模型 phase、文字 memory 与逐项去重，以及所有执行保护条件。
++- render_interval 保留上一新版本的 1，仅相机频率随动作频率恢复到 25 Hz。
++- 选卡使用 ISAACSIM_GPU 或 --env-gpu；原 CPU 物理后端保留，CUDA_VISIBLE_DEVICES 不设置。
+ 
+ ```bash
+-ISAACSIM_GPU=4 .venv-policy/bin/python -B variants/astra_io_250hz/run_local.py --seed 20
+-# 等价：显式指定原始设备编号
+-.venv-policy/bin/python -B variants/astra_io_250hz/run_local.py --seed 20 --env-gpu 4
++ISAACSIM_GPU=4 .venv-policy/bin/python -B variants/astra_io_25hz/run_local.py --seed 20 --env-gpu 4 --episode-timeout 0
+ ```
+ 
+-入口沿用原本的环境、资产、API 配置读取和 GPU 空闲检查，启动本目录的 serve、策略及控制代码；新结果默认写入新的 `runs/general_pickup-io-250hz-<时间>/`。可用 `--api-config`、`--api-auth`、`--output` 显式指定路径。新策略拒绝连接非 250 Hz 的服务。
++结果写入新的 runs/general_pickup-io-25hz-<时间>/，保留每次实际请求、原始及规范化响应、工具反馈、完整输入阅读副本和视频。
+ 
+-选卡使用 ISAACSIM_GPU 或 --env-gpu，AppLauncher 的 device、渲染设备及 RoboDojo device_id 使用同一个原始 GPU 编号。不会通过 CUDA_VISIBLE_DEVICES 映射设备编号；旧的 --gpu 参数只是 --env-gpu 的兼容别名。物理后端保留原 RoboDojo 配置（当前为 CPU），不因选择渲染卡而切换到 CUDA/Fabric。实际后端和选卡方式另记录在 seed-20/gpu-selection.json。
+-
+-运行时的 `NNNN.response.raw.json` 保留服务端原始响应；`NNNN.response.json` 保存实际执行和回放的规范化动作参数；`NNNN.output-normalization.json` 记录是否发生数值修正；`NNNN.api-input.readable.json` 是实际发送消息的阅读副本；`NNNN.request.json` 记录本轮删去及保留的字段。实际完整 input 仍包含原图字节，加密推理也按原协议回放。
++默认要求所选卡空闲。若明确允许共享，添加 `--allow-shared-gpu`；启动前要求该卡至少有 12 GiB 空闲显存，并将显存与利用率写入 `launch-record.json`。该选项不改变物理步长或控制频率。
+ 
+ ```bash
+-.venv-policy/bin/python -B -m unittest discover -s variants/astra_io_250hz/tests -p 'test_*.py' -v
+-.venv-policy/bin/python -B variants/astra_io_250hz/verify_originals.py
++.venv-policy/bin/python -B -m unittest discover -s variants/astra_io_25hz/tests -p 'test_*.py' -v
++.venv-policy/bin/python -B variants/astra_io_25hz/verify_originals.py
++.venv-policy/bin/python -B variants/astra_io_25hz/audit_run.py runs/general_pickup-io-25hz-<时间>
+ ```
+ 
+-离线测试验证完整三轮模型消息、仅开放 control_arms、输入不降精度、输出规范化后执行与回放一致、去掉 phase、差异内容保留，以及调用 RoboDojo 原始插值方法时每动作从 10 个物理步变为 1 个。2026-10-19 已完成一次新版本真实运行：general_pickup L20，21 次 Astra 请求、200 个原生步，环境正常结束，得分 0。详见[实跑报告](../../runs/general_pickup-io-250hz-20261019-164450/RUN_REPORT.md)。
++audit/parent-source-sha256.json 保存复跑前的 250 Hz 源码基线；audit/frequency-comparison.patch 记录两个版本的差异。
+ 
+-重新生成证据/预览时须指定一个不存在的新文件或目录，避免覆盖已有交付：
++## 本次复跑结果
+ 
+-```bash
+-.venv-policy/bin/python -B variants/astra_io_250hz/audit_duplicates.py --output /tmp/astra-duplicates-new.json
+-.venv-policy/bin/python -B variants/astra_io_250hz/preview.py --output /tmp/astra-preview-new
+-```
++2026-10-19，group 0 / L20：成功，100 分；54 个原生动作步，8 次模型调用，0 次无效动作。实际动作 25 Hz，CPU 物理；使用 ISAACSIM_GPU=4 / --env-gpu 4，并显式允许共享 GPU。
+ 
+-## 主要代码
+-
+-| 新文件 | 用途 |
+-|---|---|
+-| [run_local.py](run_local.py) | 独立启动入口，选择新的 harness 和策略 |
+-| [device_routing.py](device_routing.py) | ISAACSIM_GPU / --env-gpu 选卡，保留原物理后端 |
+-| [policy.py](policy.py) | control-only 工具过滤、模型提示词、原传输重试 |
+-| [harness/egg_harness/io_contract.py](harness/egg_harness/io_contract.py) | 四位小数处理、逐项相等检查、去重与阅读副本 |
+-| [harness/egg_harness/native_tools.py](harness/egg_harness/native_tools.py) | 无 phase 的 joint 动作 schema 与校验 |
+-| [harness/egg_harness/native_responses.py](harness/egg_harness/native_responses.py) | 实际发送前去重、原始/处理后响应分别保存 |
+-| [harness/egg_harness/skill_policy.py](harness/egg_harness/skill_policy.py) | 内部生成执行分类，检查服务端频率 |
+-| [harness/egg_harness/control_timing.py](harness/egg_harness/control_timing.py) | 动作、相机和渲染的实际 250 Hz 配置与校验 |
+-| [harness/egg_harness/client.py](harness/egg_harness/client.py) | 接受新频率观测，拒绝误连旧服务 |
+-| [harness/scripts/serve.py](harness/scripts/serve.py) | 应用新频率，不写 RoboDojo 原配置文件 |
+-| [harness/scripts/server_loop.py](harness/scripts/server_loop.py) | 将实际频率记录到观测和来源信息 |
+-
+-原文件 SHA-256 基线见 [audit/original-code-sha256.json](audit/original-code-sha256.json)，原始历史请求、响应和反馈的 SHA-256 见重复审计。可使用 verify_originals.py 再次检查原文件没有改变。
+-
+-首次离线交付的文件快照保存在 audit/new-files-sha256.json；选卡修正及实跑后的当前源码清单见 [audit/active-source-sha256.json](audit/active-source-sha256.json)。
++[完整运行报告](../../runs/general_pickup-io-25hz-20261019-181733/RUN_REPORT.md)、[输入输出索引](../../runs/general_pickup-io-25hz-20261019-181733/io-index.json)、[视频](../../runs/general_pickup-io-25hz-20261019-181733/rendered/rollout.mp4)。
+--- 250hz/audit_run.py
++++ 25hz/audit_run.py
+@@ -0,0 +1,176 @@
++"""Audit one completed 25 Hz episode and index its actual model I/O."""
++import argparse
++from collections import Counter
++from datetime import datetime, timezone
++from decimal import Decimal
++import hashlib
++import json
++from pathlib import Path
++import subprocess
++
++from verify_originals import verify
++
++HERE = Path(__file__).resolve().parent
++
++
++def read(path):
++    return json.loads(path.read_text())
++
++
++def save(path, value):
++    with path.open('x') as stream:
++        json.dump(value, stream, ensure_ascii=False, indent=2)
++        stream.write('\n')
++
++
++def require(condition, label):
++    if not condition:
++        raise ValueError(label)
++
++
++def precise(value):
++    if isinstance(value, Decimal):
++        return value.as_tuple().exponent >= -4
++    if isinstance(value, dict):
++        return all(precise(item) for item in value.values())
++    if isinstance(value, list):
++        return all(precise(item) for item in value)
++    return True
++
++
++def audit(run):
++    result = read(run / 'results.json')[0]
++    seed = result['seed_index']
++    episode, model = run / f'seed-{seed}', run / f'policy-{seed}/model'
++    native, timing = result['official_observation'], read(episode / 'control-timing.json')
++    gpu, launch = read(episode / 'gpu-selection.json'), read(run / 'launch-record.json')
++    require(result['status'] == 'native_end' and native['native_terminal'], 'native termination')
++    require(native['valid_sample'] and not native['unstable'], 'valid native sample')
++    require(result['policy_returncode'] == result['simulator_returncode'] == 0, 'process exit codes')
++    require(result['release_unchanged'], 'runtime source integrity')
++    require(timing['action_hz'] == 25 and timing['action_interval_seconds'] == .04
++            and timing['physics_hz'] == 250 and timing['physics_steps_per_action'] == 10, 'actual timing')
++    require(gpu['ISAACSIM_GPU'] == str(result['gpu']) and gpu['env_gpu'] == result['gpu']
++            and gpu['isaac_launcher_device'] == f"cuda:{result['gpu']}"
++            and gpu['robodojo_device_id'] == result['gpu'], 'native GPU selection')
++    require(not gpu['cuda_visible_devices_present'] and gpu['physics_device'] == 'cpu'
++            and gpu['use_fabric'] is False, 'original physics backend and unmasked GPUs')
++    schema = read(model / 'native-tools.json')
++    require(schema['enabled_tools'] == ['control_arms']
++            and [tool['name'] for tool in schema['tools']] == ['control_arms'], 'only control_arms')
++    parameters = schema['tools'][0]['parameters']
++    require('phase' not in parameters['properties'] and 'memory' in parameters['required'], 'output schema')
++    requests = sorted(model.glob('*.request.json'))
++    require(bool(requests) and len(requests) == result['policy']['model_calls'], 'model call count')
++    rounds, previous, normalized = [], None, 0
++    mandatory = {'previous_observation.state', 'previous_arm_posture', 'memory', 'previous_result', 'previous_head'}
++    for index, request_path in enumerate(requests, 1):
++        tag = request_path.name.removesuffix('.request.json')
++        request, response = read(request_path), read(model / f'{tag}.response.json')
++        current, readable = json.loads(request['question']), read(model / f'{tag}.api-input.readable.json')['input']
++        calls = [item for item in response['output'] if item['type'] == 'function_call']
++        require(len(calls) == 1 and calls[0]['name'] == 'control_arms', f'{tag}: single control call')
++        call = calls[0]
++        arguments = json.loads(call['arguments'])
++        require('phase' not in arguments and bool(arguments.get('memory', '').strip()), f'{tag}: phase/memory')
++        require(precise(json.loads(call['arguments'], parse_float=Decimal)), f'{tag}: output precision')
++        require(request['tools'] == ['control_arms'] and request['action_hz'] == 25
++                and current['control_timing'] == timing, f'{tag}: request tools/timing')
++        require(readable[-1]['content'][0]['text'] == request['question'], f'{tag}: actual current user message')
++        images = request['images']
++        require({image['name'] for image in images} == {'cam_head', 'cam_left_wrist', 'cam_right_wrist'},
++                f'{tag}: current camera views')
++        for image in images:
++            require(hashlib.sha256(Path(image['path']).read_bytes()).hexdigest() == image['sha256'],
++                    f'{tag}: image hash')
++        head = next(image for image in images if image['name'] == 'cam_head')
++        frame = read(Path(head['path'].replace('-cam_head.jpg', '.json')))
++        require(frame['state'] == current['state'], f'{tag}: input state remains full precision')
++        tool_result = read(model / f'{tag}.tool-result.json')
++        require(tool_result['call_id'] == call['call_id'], f'{tag}: feedback call id')
++        feedback = json.loads(tool_result['output'])
++        removed = request['deduplication']['removed']
++        if previous:
++            prior_request, prior_call, prior_feedback = previous
++            require(request['replayed_call_id'] == prior_call['call_id'], f'{tag}: previous cycle id')
++            require(readable[0]['content'][0]['text'] == prior_request['question'], f'{tag}: previous user message')
++            require([item for item in readable if item.get('type') == 'function_call'] == [prior_call],
++                    f'{tag}: previous output with memory')
++            require([item for item in readable if item.get('type') == 'function_call_output'] == [prior_feedback],
++                    f'{tag}: previous execution feedback')
++            prior_hashes = [image['sha256'] for image in prior_request['images']]
++            require([item['image_sha256'] for item in readable[0]['content'] if item['type'] == 'input_image']
++                    == prior_hashes, f'{tag}: previous camera images')
++            require(mandatory.issubset(removed) and not request['deduplication']['retained_nonidentical'],
++                    f'{tag}: duplicate groups')
++            require(set(removed) == set(current['history_references']), f'{tag}: history references')
++            require('state' not in current['previous_observation']
++                    and all(key not in current for key in ['previous_arm_posture', 'memory', 'previous_result']),
++                    f'{tag}: duplicate values omitted')
++        else:
++            require(bool(current.get('memory')), 'initial memory present')
++        normalized += bool(read(model / f'{tag}.output-normalization.json')['arguments_changed'])
++        relative = lambda suffix: str((model / f'{tag}.{suffix}.json').relative_to(run))
++        rounds.append(dict(round=index, observation_step=current['step'], end_step=feedback['step'],
++                           requested_steps=arguments['steps'], requested_settle=arguments['settle'],
++                           executed_steps=feedback['feedback']['executed_steps'], status=feedback['feedback']['status'],
++                           reason=feedback['feedback']['reason'], tool=call['name'], memory_nonempty=True,
++                           removed_duplicates=removed, input=relative('request'),
++                           full_input_readable=relative('api-input.readable'), raw_output=relative('response.raw'),
++                           effective_output=relative('response'), execution_feedback=relative('tool-result')))
++        previous = request, call, tool_result
++    require(sum(row['executed_steps'] for row in rounds) == native['steps'], 'executed step total')
++    integrity = verify()
++    require(integrity['passed'], 'original source and historical logs')
++    parent = read(HERE / 'audit/parent-source-sha256.json')['files']
++    changed = [name for name, digest in parent.items()
++               if hashlib.sha256((HERE.parent / 'astra_io_250hz' / name).read_bytes()).hexdigest() != digest]
++    require(not changed, '250 Hz parent source unchanged')
++    subprocess.run(['ffmpeg', '-v', 'error', '-xerror', '-i', str(run / 'rendered/rollout.mp4'),
++                    '-f', 'null', '-'], check=True, capture_output=True)
++    record = dict(verified_at=datetime.now(timezone.utc).isoformat(), passed=True,
++                  task=result['task'], layout=seed, native_result=native, model_calls=len(rounds),
++                  enabled_tools=['control_arms'], action_hz=25, numeric_output_decimal_places=4,
++                  output_phase_absent=True, memory_nonempty_in_all_outputs=True,
++                  followup_requests_with_complete_prior_cycle=len(rounds)-1,
++                  five_duplicate_groups_removed_when_present=True,
++                  rounds_requiring_local_precision_rounding=normalized, input_measurements_not_rounded=True,
++                  actual_gpu_selection=gpu, gpu_preflight=launch['gpu_preflight'], original_integrity=integrity,
++                  parent_250hz_source_integrity=dict(passed=True, files=len(parent)),
++                  video_full_decode='PASS', episodes_rerun_after_valid_native_result=0)
++    save(run / 'io-index.json', dict(scope='Actual new 25 Hz run; image bytes omitted only in readable audit copies', rounds=rounds))
++    save(run / 'io-audit.json', record)
++    status = '成功' if result['success'] else '未成功'
++    lines = [f'# general_pickup L{seed}：25 Hz 新版本复跑', '',
++             f"结果：**{status}，{native['score']:g}/100 分**。第 {native['steps']} 个原生动作步正常结束；"
++             f"{len(rounds)} 次模型调用，策略和仿真退出码均为 0，样本有效且未标记不稳定。", '',
++             '## 实际配置', '',
++             f"- general_pickup，group 0 / L{seed}；仅 control_arms，模型 {launch['model']} / {launch['reasoning_effort']}。",
++             '- 动作 25 Hz，每步 40 ms；物理 250 Hz，每动作 10 个物理步；原生预算 200 步。',
++             '- 保留四位小数输出、无模型 phase、文字 memory、上一轮交互回放及五组重复数据去重。',
++             '- 沿用 250 Hz 新版本的执行保护与 render_interval=1，相机采集频率恢复为 25 Hz。',
++             f"- ISAACSIM_GPU={result['gpu']} / --env-gpu {result['gpu']}；无 CUDA_VISIBLE_DEVICES，CPU 物理，Fabric 关闭。",
++             f"- 本次允许共享 GPU，启动时空闲显存 {launch['gpu_preflight']['memory_free_mib']} MiB；固定物理步长。",
++             f"- {integrity['original_source_files']} 个原源码、{integrity['historical_log_files']} 个历史日志及 {len(parent)} 个 250 Hz 父版本源码哈希均未改变。", '',
++             '## 查看结果', '',
++             '- [实际结果](results.json)', '- [逐轮输入输出索引](io-index.json)',
++             '- [输入输出核验](io-audit.json)', '- [三路视频](rendered/rollout.mp4)',
++             f'- [实际频率](seed-{seed}/control-timing.json)', f'- [选卡记录](seed-{seed}/gpu-selection.json)', '',
++             '每轮索引含实际请求、完整消息阅读副本、原始响应、执行响应和工具反馈。阅读副本替换图片字节与加密推理内容；其余信息与实际消息对应。视频封装帧率不代表动作控制频率。', '',
++             '## 逐轮执行', '',
++             '| 轮次 | 输入步 → 结束步 | 请求运动步 + 保持步 | 实际执行步 | 反馈 |',
++             '|---:|---:|---:|---:|---|']
++    for row in rounds:
++        lines.append(f"| {row['round']} | {row['observation_step']} → {row['end_step']} | "
++                     f"{row['requested_steps']} + {row['requested_settle']} | {row['executed_steps']} | {row['status']} |")
++    lines.extend(['', '反馈统计：' + ', '.join(f'{key}={count}' for key, count in Counter(row['status'] for row in rounds).items()) + '。', '',
++                  '本次在获得有效原生结束结果后没有继续重试。该单局可与上一轮 250 Hz 新版本比较，不能单独证明普遍成功率或唯一因果。', ''])
++    with (run / 'RUN_REPORT.md').open('x') as stream:
++        stream.write('\n'.join(lines))
++    print(json.dumps(record, ensure_ascii=False, indent=2))
++
++
++if __name__ == '__main__':
++    parser = argparse.ArgumentParser(description=__doc__)
++    parser.add_argument('run', type=Path)
++    audit(parser.parse_args().run.resolve())
+--- 250hz/general_pickup.json
++++ 25hz/general_pickup.json
+@@ -103,8 +103,8 @@
+     ],
+     "decision_format": "native_function"
+   },
+-  "io_variant": "astra_io_250hz",
+-  "action_hz": 250,
++  "io_variant": "astra_io_25hz",
++  "action_hz": 25,
+   "numeric_output_decimal_places": 4,
+   "model_output_phase": false,
+   "history_deduplication": true,
+--- 250hz/harness/egg_harness/control_timing.py
++++ 25hz/harness/egg_harness/control_timing.py
+@@ -1,24 +1,26 @@
+ """Select real action intervals without changing the original RoboDojo source/YAML."""
+ import math
+ 
+-CONTROL_HZ = 250
++CONTROL_HZ = 25
++PHYSICS_HZ = 250
++PHYSICS_STEPS_PER_ACTION = PHYSICS_HZ // CONTROL_HZ
+ 
+ 
+ def timing_record():
+     return dict(action_hz=CONTROL_HZ, action_interval_seconds=1 / CONTROL_HZ,
+-                physics_hz=CONTROL_HZ, physics_steps_per_action=1, render_interval=1,
+-                steps_unit='250 Hz action intervals', settle_unit='250 Hz action intervals')
++                physics_hz=PHYSICS_HZ, physics_steps_per_action=PHYSICS_STEPS_PER_ACTION, render_interval=1,
++                steps_unit='25 Hz action intervals', settle_unit='25 Hz action intervals')
+ 
+ 
+ def validate_timing_record(record):
+     if record != timing_record():
+-        raise ValueError('Expected the isolated 250 Hz action timing contract')
++        raise ValueError('Expected the isolated 25 Hz action timing contract')
+ 
+ 
+ def configure_timing(config):
+     dt = float(config.sim.dt)
+-    if not math.isclose(dt, 1 / CONTROL_HZ) or config.sim.decimation != 1:
+-        raise ValueError('250 Hz variant requires dt=0.004 and decimation=1')
++    if not math.isclose(dt, 1 / PHYSICS_HZ) or config.sim.decimation != 1:
++        raise ValueError('25 Hz action variant requires 250 Hz physics: dt=0.004 and decimation=1')
+     config.eval_cfg.observation.collect_freq = CONTROL_HZ
+     config.camera.default_frequency = CONTROL_HZ
+     config.sim.render_interval = 1
+@@ -27,6 +29,6 @@
+ 
+ def verify_environment_timing(env):
+     if (env.obs_manager.collect_freq != CONTROL_HZ
+-            or not math.isclose(float(env.obs_manager.collect_interval), 1.0)
+-            or not math.isclose(float(env.dt), 1 / CONTROL_HZ)):
+-        raise ValueError('Environment did not apply one 4 ms physics cycle per action')
++            or not math.isclose(float(env.obs_manager.collect_interval), PHYSICS_STEPS_PER_ACTION)
++            or not math.isclose(float(env.dt), 1 / PHYSICS_HZ)):
++        raise ValueError('Environment did not apply ten 4 ms physics cycles per 40 ms action')
+--- 250hz/harness/egg_harness/io_contract.py
++++ 25hz/harness/egg_harness/io_contract.py
+@@ -1,4 +1,4 @@
+-"""250 Hz variant: numeric output precision and equality-checked history deduplication."""
++"""25 Hz variant: numeric output precision and equality-checked history deduplication."""
+ import base64
+ from copy import deepcopy
+ from decimal import Decimal, ROUND_HALF_UP
+@@ -7,7 +7,7 @@
+ import math
+ from pathlib import Path
+ 
+-CONTROL_HZ = 250
++CONTROL_HZ = 25
+ IMAGE_ALIASES = {
+     'previous_head': 'cam_head',
+     'previous_left_wrist': 'cam_left_wrist',
+--- 250hz/harness/egg_harness/native_responses.py
++++ 25hz/harness/egg_harness/native_responses.py
+@@ -105,7 +105,7 @@
+             'api': 'responses', **self.provider.audit(), 'tools': list(self.registry.contracts),
+             'replayed_call_id': self.previous[-1]['call_id'] if self.previous else None,
+             'session_id': self.session_id, 'step': context['step'],
+-            'deduplication': deduplication, 'action_hz': 250,
++            'deduplication': deduplication, 'action_hz': 25,
+             'numeric_output_decimal_places': 4, 'model_output_phase': False}))
+         stem.with_suffix('.api-input.readable.json').write_text(json.dumps(
+             {'scope': 'Audit view of actual input; image bytes and encrypted reasoning replaced',
+--- 250hz/harness/egg_harness/native_tools.py
++++ 25hz/harness/egg_harness/native_tools.py
+@@ -216,7 +216,7 @@
+                 'Execute one bounded native-joint segment for one or both arms; in Both mode each arm may instead select TCP. '
+                 'Joint targets are six absolute radians per arm, not deltas. Two grippers are continuous openings0..1. '
+                 'Null fields hold; null arms hold; both null arms explicitly hold. Carrying objects is allowed. '
+-                'Steps1..20, settle0..2 at 250 Hz (4 ms per interval); no phase output. '
++                'Steps1..20, settle0..2 at 25 Hz (40 ms per interval); no phase output. '
+                 'Output numeric values with at most four decimal places. '
+                 'Joint changes<=0.15rad per action interval, including measured lag. '
+                 'The existing wrist/gripper tracking guards may stop a prefix. FK is not a collision check. No automatic recovery.')
+--- 250hz/harness/egg_harness/skill_policy.py
++++ 25hz/harness/egg_harness/skill_policy.py
+@@ -236,8 +236,8 @@
+     robot=Robot(a.episode,a.trace)
+     if robot.obs.get('action_interface') != interface:
+         raise ValueError('Policy/server action interface mismatch; start a matching server')
+-    if robot.obs.get('control_timing', {}).get('action_hz') != 250:
+-        raise ValueError('Start the isolated 250 Hz variant server before this policy')
++    if robot.obs.get('control_timing', {}).get('action_hz') != 25:
++        raise ValueError('Start the isolated 25 Hz variant server before this policy')
+     model=Vision(config,a.trace/'model')
+     memory='Fresh controller. Infer current scene; it may be a preserved failure scene.'
+     commanded_grip={'left':1.0,'right':1.0}
+--- 250hz/harness/scripts/serve.py
++++ 25hz/harness/scripts/serve.py
+@@ -19,7 +19,7 @@
+ parser.add_argument("--seed-index", type=int, default=0)
+ parser.add_argument("--run-mode", choices=["development", "frozen"], default="development")
+ parser.add_argument("--action-interface", choices=["joint", "tcp", "both"], default="joint")
+-parser.add_argument("--control-hz", type=int, choices=[250], default=250)
++parser.add_argument("--control-hz", type=int, choices=[25], default=25)
+ parser.add_argument("--env-gpu", type=int, default=int(os.environ.get('ISAACSIM_GPU', '0')))
+ parser.add_argument("--replay-episode", type=Path, help="Development-only original seed episode containing recorded native actions")
+ parser.add_argument("--replay-step", type=int, help="Replay original actions 1..N before exposing ready.json")
+--- 250hz/harness/scripts/server_loop.py
++++ 25hz/harness/scripts/server_loop.py
+@@ -72,7 +72,7 @@
+     save(output / 'initial-state.json', env.get_obs()['state'])
+     save(output / 'provenance.json', dict(seeds=seeds, task=task,
+          privileged_diagnostics=mode=='development', depth_calibration=False, object_teleportation=False,
+-         mode=mode, action_interface=action_interface, io_variant='astra_io_250hz',
++         mode=mode, action_interface=action_interface, io_variant='astra_io_25hz',
+          control_timing=json.loads((output / 'control-timing.json').read_text())))
+ 
+     def observe(tag):
+--- 250hz/policy.py
++++ 25hz/policy.py
+@@ -16,8 +16,8 @@
+ is null (hold) or has control="joint", six absolute joint targets in radians or
+ null to hold, and gripper in [0,1] or null to retain its command. Both arms and
+ grippers can change together, including while carrying an object. Do not emit
+-a phase field. steps is 1..20 and settle is 0..2, both in 250 Hz action intervals
+-(4 milliseconds each). A segment is not a 250 Hz model inference loop: the model
++a phase field. steps is 1..20 and settle is 0..2, both in 25 Hz action intervals
++(40 milliseconds each). A segment is not a 25 Hz model inference loop: the model
+ chooses a segment, and the executor issues its actions at this simulation rate.
+ Use at most four decimal places for all numeric JSON output values; round longer
+ fractional values to four places. Keep steps and settle as integers. Do not round
+@@ -66,7 +66,7 @@
+             record = json.loads(path.read_text())
+             record.update(tools=self.registry.definitions, enabled_tools=['control_arms'],
+                           history_policy='preceding complete tool cycle; equal observation copies omitted',
+-                          io_variant='astra_io_250hz', action_hz=250, numeric_output_decimal_places=4,
++                          io_variant='astra_io_25hz', action_hz=25, numeric_output_decimal_places=4,
+                           model_output_phase=False, external_transport_retry=RETRY_POLICY)
+             path.write_text(json.dumps(record, indent=2) + '\n')
+ 
+--- 250hz/run_local.py
++++ 25hz/run_local.py
+@@ -1,4 +1,4 @@
+-"""Run the isolated 250 Hz, four-decimal, history-deduplicated control-only variant."""
++"""Run the isolated 25 Hz, four-decimal, history-deduplicated control-only variant."""
+ import argparse
+ from contextlib import contextmanager
+ from datetime import datetime, timezone
+@@ -133,11 +133,15 @@
+     layout = assets / f'Eval_Layout/RoboDojo/arx_x5/0/{args.task}_{args.seed}.json'
+     if not layout.is_file():
+         raise ValueError(f'Group 0 layout L{args.seed} is unavailable')
+-    inventory = subprocess.check_output(['nvidia-smi', '--query-gpu=index,uuid,memory.used,utilization.gpu',
++    inventory = subprocess.check_output(['nvidia-smi', '--query-gpu=index,uuid,memory.used,utilization.gpu,memory.free',
+                                          '--format=csv,noheader,nounits'], text=True)
+     gpu = next((line.split(',') for line in inventory.splitlines()
+                 if line.split(',')[0].strip() == str(args.gpu)), None)
+-    if gpu is None or int(gpu[2]) > 512 or int(gpu[3]) > 5:
++    if gpu is None:
++        raise ValueError(f'Physical GPU {args.gpu} is unavailable')
++    if args.allow_shared_gpu and int(gpu[4]) < 12 * 1024:
++        raise ValueError(f'Physical GPU {args.gpu} needs at least 12 GiB free for shared execution')
++    if not args.allow_shared_gpu and (int(gpu[2]) > 512 or int(gpu[3]) > 5):
+         raise ValueError(f'Physical GPU {args.gpu} must be idle before launch')
+     gpu_uuid = gpu[1].strip()
+     output = args.output.resolve()
+@@ -169,7 +173,7 @@
+         config = read(args.task_config)
+         if config.get('task') != args.task:
+             raise ValueError('--task must match the selected task configuration')
+-        config.update(io_variant='astra_io_250hz', action_hz=250, numeric_output_decimal_places=4,
++        config.update(io_variant='astra_io_25hz', action_hz=25, numeric_output_decimal_places=4,
+                       model_output_phase=False, history_deduplication=True)
+         retry_policy = config.get('transport_retry')
+         retry_wrapper = VARIANT / 'policy.py'
+@@ -202,9 +206,12 @@
+         save(output / f'source-{args.seed}.json', {'source': str(HARNESS), 'files': source_files})
+         save(output / 'layout-provenance.json', {'seed_group': 0, 'layout_index': args.seed,
+              'path': str(layout), 'sha256': hashlib.sha256(layout.read_bytes()).hexdigest()})
+-        save(output / 'launch-record.json', {'task': args.task, 'source': str(HARNESS), 'io_variant': 'astra_io_250hz',
+-             'action_hz': 250, 'numeric_output_decimal_places': 4, 'model_output_phase': False,
++        save(output / 'launch-record.json', {'task': args.task, 'source': str(HARNESS), 'io_variant': 'astra_io_25hz',
++             'action_hz': 25, 'numeric_output_decimal_places': 4, 'model_output_phase': False,
+              'hostname': os.uname().nodename, 'gpu': args.gpu, 'gpu_uuid': gpu_uuid,
++             'gpu_preflight': {'allow_shared_gpu': args.allow_shared_gpu,
++                               'memory_used_mib': int(gpu[2]), 'utilization_percent': int(gpu[3]),
++                               'memory_free_mib': int(gpu[4])},
+              'seed_group': 0, 'layout_indices': [args.seed],
+              'model': config['model'], 'reasoning_effort': config['reasoning_effort'],
+              'rgb_memory_enabled': False, 'original_sdk_max_retries': 0,
+@@ -217,7 +224,7 @@
+              'launcher': str(Path(__file__).resolve()),
+              'launcher_sha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+              'tool_ablation': config['tool_ablation'],
+-             'scope': 'Isolated variant: actual 250 Hz action intervals; four decimal output; no model phase; deduplicated observation',
++             'scope': 'Isolated variant: actual 25 Hz action intervals; four decimal output; no model phase; deduplicated observation',
+              'device_routing': {'selection': 'ISAACSIM_GPU / --env-gpu', 'isaacsim_gpu': args.gpu,
+                                 'isaac_launcher_device': f'cuda:{args.gpu}', 'robodojo_device_id': args.gpu,
+                                 'physics_backend': 'original RoboDojo simulation configuration',
+@@ -240,14 +247,14 @@
+                        '--robodojo-root', str(robodojo), '--assets', config['assets'],
+                        '--object-assets', config['object_assets'], '--task', args.task,
+                        '--seed-index', str(args.seed), '--run-mode', 'development',
+-                       '--action-interface', 'joint', '--control-hz', '250', '--env-gpu', str(args.gpu),
++                       '--action-interface', 'joint', '--control-hz', '25', '--env-gpu', str(args.gpu),
+                        '--robodojo-revision', config['robodojo_revision'],
+                        '--required-submodule', 'XPolicyLab=' + pins['xpolicylab']['commit']]
+             sim_env = simulator_environment(environment, args.gpu)
+             with (output / f'sim-{args.seed}.log').open('w') as log:
+                 sim = subprocess.Popen(command, cwd=HARNESS, env=sim_env, stdout=log,
+                                        stderr=subprocess.STDOUT, start_new_session=True)
+-            print(f'[release] Loading 250 Hz variant simulator on GPU {args.gpu}: ' + str(output), flush=True)
++            print(f'[release] Loading 25 Hz variant simulator on GPU {args.gpu}: ' + str(output), flush=True)
+             last_report = time.monotonic()
+             while not (episode / 'ready.json').exists():
+                 storage.check()
+@@ -266,7 +273,7 @@
+                     '--config', str(output / f'config-{args.seed}.json'), '--episode', str(episode),
+                     '--trace', str(trace)], cwd=HARNESS, env=environment, stdout=log,
+                     stderr=subprocess.STDOUT, start_new_session=True)
+-            print('[release] Simulator ready; 250 Hz variant policy started with episode memory and deduplicated history', flush=True)
++            print('[release] Simulator ready; 25 Hz variant policy started with episode memory and deduplicated history', flush=True)
+             policy_started = time.monotonic()
+             while policy.poll() is None:
+                 storage.check()
+@@ -333,6 +340,8 @@
+     parser.add_argument('--env-gpu', '--gpu', dest='gpu', type=int,
+                         default=int(os.environ.get('ISAACSIM_GPU', '0')),
+                         help='Native Isaac GPU ordinal; defaults to ISAACSIM_GPU or 0; no CUDA visibility remapping')
++    parser.add_argument('--allow-shared-gpu', action='store_true',
++                        help='Allow a busy GPU with at least 12 GiB free; record its preflight occupancy')
+     parser.add_argument('--development-case-reason', help='Required outside default development layouts 20..22')
+     parser.add_argument('--episode-timeout', type=int, default=1800,
+                         help='Policy wall-clock limit in seconds; 0 disables the limit')
+@@ -362,6 +371,6 @@
+             parser.error('Unexpected positional arguments')
+         if args.output is None:
+             stamp = datetime.now(ZoneInfo('Asia/Shanghai')).strftime('%Y%m%d-%H%M%S')
+-            args.output = ROOT / 'runs' / (args.task + '-io-250hz-' + stamp)
++            args.output = ROOT / 'runs' / (args.task + '-io-25hz-' + stamp)
+         with gpu_lease(args.gpu):
+             raise SystemExit(run(args))
+--- 250hz/tests/test_io_variant.py
++++ 25hz/tests/test_io_variant.py
+@@ -175,7 +175,7 @@
+ 
+ 
+ class TimingTests(unittest.TestCase):
+-    def test_robot_ipc_accepts_verified_timing_and_rejects_original_25_hz_service(self):
++    def test_robot_ipc_accepts_25_hz_and_rejects_250_hz_service(self):
+         from egg_harness.client import Robot
+         with tempfile.TemporaryDirectory() as directory:
+             folder = Path(directory)
+@@ -186,20 +186,22 @@
+             observation = dict(step=0, state={}, cameras={}, instruction='test', ended=False,
+                                budget={}, action_interface='joint', control_timing=timing_record())
+             (folder / 'responses/policy-test-00001.json').write_text(json.dumps(observation))
+-            self.assertEqual(robot.command('observe')['control_timing']['action_hz'], 250)
+-            observation['control_timing']['action_hz'] = 25
++            self.assertEqual(robot.command('observe')['control_timing']['action_hz'], 25)
++            observation['control_timing']['action_hz'] = 250
+             (folder / 'responses/policy-test-00002.json').write_text(json.dumps(observation))
+             with self.assertRaises(ValueError):
+                 robot.command('observe')
+ 
+-    def test_upstream_interpolation_uses_one_physics_cycle_instead_of_ten(self):
++    def test_upstream_interpolation_uses_ten_physics_cycles_per_action(self):
+         cfg = SimpleNamespace(sim=SimpleNamespace(dt=0.004, decimation=1, render_interval=10),
+-                              eval_cfg=SimpleNamespace(observation=SimpleNamespace(collect_freq=25)),
+-                              camera=SimpleNamespace(default_frequency=25))
++                              eval_cfg=SimpleNamespace(observation=SimpleNamespace(collect_freq=250)),
++                              camera=SimpleNamespace(default_frequency=250))
+         timing = configure_timing(cfg)
+-        self.assertEqual(timing['action_interval_seconds'], 0.004)
+-        self.assertEqual(cfg.eval_cfg.observation.collect_freq, 250)
+-        self.assertEqual(cfg.camera.default_frequency, 250)
++        self.assertEqual(timing['action_interval_seconds'], 0.04)
++        self.assertEqual(timing['physics_hz'], 250)
++        self.assertEqual(timing['physics_steps_per_action'], 10)
++        self.assertEqual(cfg.eval_cfg.observation.collect_freq, 25)
++        self.assertEqual(cfg.camera.default_frequency, 25)
+         self.assertEqual(cfg.sim.render_interval, 1)
+         tree = ast.parse((ROOT / 'dependencies/RoboDojo/src/eval_client/eval_env.py').read_text())
+         method = next(node for node in ast.walk(tree)
+@@ -207,12 +209,12 @@
+         namespace = dict(deepcopy=deepcopy)
+         exec(compile(ast.fix_missing_locations(ast.Module(body=[method], type_ignores=[])),
+                      '<upstream process_control_info>', 'exec'), namespace)
+-        env = SimpleNamespace(dt=0.004, obs_manager=SimpleNamespace(collect_freq=250, collect_interval=1.0),
++        env = SimpleNamespace(dt=0.004, obs_manager=SimpleNamespace(collect_freq=25, collect_interval=10.0),
+                               robot_manager=SimpleNamespace(robot_list=[]))
+         verify_environment_timing(env)
++        self.assertEqual(len(namespace['process_control_info'](env, {'joint': 1}, 0)), 10)
++        env.obs_manager.collect_freq, env.obs_manager.collect_interval = 250, 1.0
+         self.assertEqual(len(namespace['process_control_info'](env, {'joint': 1}, 0)), 1)
+-        env.obs_manager.collect_freq, env.obs_manager.collect_interval = 25, 10.0
+-        self.assertEqual(len(namespace['process_control_info'](env, {'joint': 1}, 0)), 10)
+         with self.assertRaises(ValueError):
+             verify_environment_timing(env)
+ 
+@@ -281,7 +283,7 @@
+             self.assertEqual(commands[0][0], 'control_action')
+             self.assertEqual(commands[0][1]['phase'], 'transit')
+             self.assertEqual(commands[0][1]['action']['arms']['right']['joints'][0], 0.1235)
+-            self.assertEqual(model_questions[0]['control_timing']['action_hz'], 250)
++            self.assertEqual(model_questions[0]['control_timing']['action_hz'], 25)
+             result = json.loads((folder / 'trace/policy-result.json').read_text())
+             self.assertEqual(result['status'], 'native_end')
+             self.assertEqual(result['model_calls'], 1)

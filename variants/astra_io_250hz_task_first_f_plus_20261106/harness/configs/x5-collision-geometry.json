@@ -1,0 +1,427 @@
+{
+  "schema": "x5_usd_collision_geometry_v1",
+  "source_asset": "ARX.usd",
+  "source_asset_sha256": "5723a835bf5627a935a8dabb3a44447725bd1465243ce791e221b3e990121d63",
+  "geometry_sha256": "9025a2a82af30615d5c107ef75162605f9570fb1a6074c7ea2457caab81e558f",
+  "joints": [
+    {
+      "name": "joint1",
+      "parent": "base_link",
+      "child": "link1",
+      "before": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.060499999672174454
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "after": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "axis": "Z"
+    },
+    {
+      "name": "joint2",
+      "parent": "link1",
+      "child": "link2",
+      "before": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.019999999552965164
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.03999999910593033
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "after": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "axis": "Y"
+    },
+    {
+      "name": "joint3",
+      "parent": "link2",
+      "child": "link3",
+      "before": [
+        [
+          1.0000000000000002,
+          0.0,
+          0.0,
+          -0.2639999985694885
+        ],
+        [
+          0.0,
+          -0.9999999999737915,
+          7.239980277423169e-06,
+          0.0
+        ],
+        [
+          0.0,
+          -7.239980277423169e-06,
+          -0.9999999999737915,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "after": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "axis": "Y"
+    },
+    {
+      "name": "joint4",
+      "parent": "link3",
+      "child": "link4",
+      "before": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.24500000476837158
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.0560000017285347
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "after": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "axis": "Y"
+    },
+    {
+      "name": "joint5",
+      "parent": "link4",
+      "child": "link5",
+      "before": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0677499994635582
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0005000000237487257
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.08649999648332596
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "after": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "axis": "Z"
+    },
+    {
+      "name": "joint6",
+      "parent": "link5",
+      "child": "link6",
+      "before": [
+        [
+          1.0000000000000002,
+          0.0,
+          -0.0,
+          0.028950000181794167
+        ],
+        [
+          -0.0,
+          -0.9999999999737915,
+          -7.239980277423169e-06,
+          0.0
+        ],
+        [
+          0.0,
+          7.239980277423169e-06,
+          -0.9999999999737915,
+          0.08649999648332596
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "after": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "axis": "X"
+    }
+  ],
+  "ignored_self_pairs": [
+    [
+      "base_link",
+      "link1"
+    ],
+    [
+      "link1",
+      "link2"
+    ],
+    [
+      "link2",
+      "link3"
+    ],
+    [
+      "link3",
+      "link4"
+    ],
+    [
+      "link4",
+      "link5"
+    ],
+    [
+      "link5",
+      "link6"
+    ]
+  ],
+  "shapes": [
+    {
+      "key": "shape0",
+      "body": "base_link",
+      "mesh": "/X5A/base_link/collisions/base_link/node_STL_BINARY_/mesh",
+      "approximation": "convexHull"
+    },
+    {
+      "key": "shape1",
+      "body": "link1",
+      "mesh": "/X5A/link1/collisions/link1/node_STL_BINARY_/mesh",
+      "approximation": "convexHull"
+    },
+    {
+      "key": "shape2",
+      "body": "link2",
+      "mesh": "/X5A/link2/collisions/link2/node_STL_BINARY_/mesh",
+      "approximation": "convexHull"
+    },
+    {
+      "key": "shape3",
+      "body": "link3",
+      "mesh": "/X5A/link3/collisions/link3/node_STL_BINARY_/mesh",
+      "approximation": "convexDecomposition"
+    },
+    {
+      "key": "shape4",
+      "body": "link4",
+      "mesh": "/X5A/link4/collisions/link4/node_STL_BINARY_/mesh",
+      "approximation": "convexHull"
+    },
+    {
+      "key": "shape5",
+      "body": "link5",
+      "mesh": "/X5A/link5/collisions/link5/node_STL_BINARY_/mesh",
+      "approximation": "convexHull"
+    },
+    {
+      "key": "shape6",
+      "body": "link6",
+      "mesh": "/X5A/link6/collisions/link6/node_STL_BINARY_/mesh",
+      "approximation": "convexHull"
+    }
+  ],
+  "scope": "X5 base_link and link1..6; excludes gripper, cameras, carried objects and environment"
+}

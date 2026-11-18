@@ -1,0 +1,14 @@
+{
+  "at": "2026-10-19T08:41:03.823794+00:00",
+  "unit_tests_passed": 11,
+  "selection": "ISAACSIM_GPU=4 / --env-gpu 4; AppLauncher device=cuda:4, RoboDojo device_id=4",
+  "cuda_visible_devices_used": false,
+  "source_sha256": {
+    "device_routing.py": "9ee31ae698750cff247833354be981e314473139950262f8ac4320aa37018220",
+    "run_local.py": "a9f8afdbcb9794b85af8e77bd2bee5b5fac16e42c6c753d115a42bd4bed81312",
+    "harness/scripts/serve.py": "aaaa6ad91fb4730abfe905e199456e7ab7e7bb520c4a89ef78c8f65269152152",
+    "tests/test_device_routing.py": "2c0da2c447074454780fd90cc31e172d838bf57e6c32f017551341247ffd7c0e"
+  },
+  "interrupted_attempt": "runs/general_pickup-io-250hz-20261019-163432",
+  "active_attempt": "runs/general_pickup-io-250hz-20261019-164002"
+}

@@ -1,0 +1,14 @@
+---
+name: stack-blocks
+description: Stack all three textured blocks into a stable pile in RoboDojo stack_blocks, release them and return both arms to origin.
+---
+
+Identify the three blocks and their visible supporting faces in current RGB. This task permits any texture order. Choose a stable base and a stack location with room for approach, release and withdrawal; keeping an already well-placed base on the table can save a transfer. Record the chosen base, remaining blocks and observed stack state in episode memory. Infer positions and block dimensions from the current scene.
+
+Before each pickup, compare the block source with the chosen stack location and apply cross-side-handoff to assign pickup and placement arms. A central block can be picked directly by the placement-side arm. If carrying toward the stack repeatedly contracts despite a clear short approach, stage the block on separate visible table support and let the stack-side arm regrasp; keep the existing pile clear of the exchange. Plan both arms together. While one arm transports a block, the other can approach the next block or withdraw along a separated path. Reserve the stack's approach volume for the arm currently placing a block. Before fine grasp descent, apply upright-grasp-approach throughout the workspace. Use visual-contact-control for opposing finger contact and a short test lift, then transport-retention while carrying.
+
+Center each carried block over the visible supporting top face before lowering. Keep broad faces horizontal and align the projected centers closely; partial edge overlap is a poor basis for the next layer. Estimate contact height from the actual support surface, which rises after each placement. Use short observed descent, release once the block is supported, and withdraw clear of the stack before lateral motion. Confirm in RGB that the released layer stays seated without leaning or following the fingers. If it shifts, correct the supported placement before adding the next layer.
+
+The target is one stable three-block pile, with both grippers open and both arms returned to their supplied original poses. A two-block stack earns only partial credit. Reserve actions for withdrawal and return, keep the completed pile undisturbed, and use normal observations to establish native termination.
+
+Evidence provenance: skill derived from the full stack_blocks public instruction and scoring conditions in configs/public-tasks.json, cross-checked against native stacking, open-gripper and return-to-origin conditions. It contains no layout coordinates, fixed trajectories or hidden scene state. Development layouts20/21/22 reached native100 with earlier candidates. A later exposed case23 reached native100 after supported handoff and final home return. Independent evaluation of the revised candidate remains pending.

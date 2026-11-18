@@ -1,0 +1,174 @@
+{
+  "model": "gpt-6-astra",
+  "reasoning_effort": "high",
+  "request_timeout": 300,
+  "robot_runtime": "/tmp/robodojo-uv/bin/python",
+  "robodojo_root": "dependencies/RoboDojo",
+  "assets": "local/assets/Assets",
+  "object_assets": "local/assets/Assets/Object/RoboDojo",
+  "memory": "memory/skills.json",
+  "controller": "skills",
+  "max_model_calls": 400,
+  "task": "play_tic_tac_toe",
+  "skill_names": [
+    "observation-grounding",
+    "visual-contact-control",
+    "upright-grasp-approach",
+    "transport-retention",
+    "play-tic-tac-toe",
+    "idle-arm-observation",
+    "cross-side-handoff"
+  ],
+  "motion_op": "move_local",
+  "contract_local_ik": true,
+  "public_posture_feedback": true,
+  "robodojo_revision": "550059d7c883fa54280227abbb48710a6926fbb7",
+  "robodojo_required_submodules": {
+    "XPolicyLab": "7dd88aea74c92bbeb88d74324d4294aeab4836c5"
+  },
+  "provider_base_urls": {
+    "azure-astra": "https://azure-astra.example.invalid/v1",
+    "zzz-astra": "https://zzz-astra.example.invalid/v1",
+    "zzy-astra": "https://zzy-astra.example.invalid/v1"
+  },
+  "action_interface": "joint",
+  "public_task_requirements": {
+    "task": "play_tic_tac_toe",
+    "url": "https://robodojo-benchmark.com/doc/sim-tasks/play-tic-tac-toe/",
+    "fetched_at": "2026-09-14T16:06:44.542337+00:00",
+    "sha256": "11f01b08d9308dc6863f8ab92dee27d8cca307f167c8e7f5c38e9bd215804123",
+    "rows": [
+      [
+        "Instruction",
+        "Play tic-tac-toe as the first player and fill the board with the opponent."
+      ],
+      [
+        "Description",
+        "There is a 3-by-3 tic-tac-toe board. The robot plays as the first player, while the opponent follows a random strategy. The robot and the opponent take turns placing their marks until the board is filled."
+      ],
+      [
+        "Platform",
+        "Simulation"
+      ],
+      [
+        "Category",
+        "Long-Horizon"
+      ],
+      [
+        "Data Source",
+        "DateGen"
+      ],
+      [
+        "Usage",
+        "Train & Eval"
+      ],
+      [
+        "Score",
+        "Condition"
+      ],
+      [
+        "0",
+        "No player piece reaches a board cell, or the policy robot moves while the opponent robot arm is moving."
+      ],
+      [
+        "10",
+        "Any one player piece is placed on a board cell and the gripper is open."
+      ],
+      [
+        "30",
+        "Any two player pieces are placed on board cells."
+      ],
+      [
+        "50",
+        "Any three player pieces are placed on board cells."
+      ],
+      [
+        "75",
+        "Any four player pieces are placed on board cells."
+      ],
+      [
+        "100",
+        "All five player pieces are on board cells at the correct height and the gripper is open."
+      ]
+    ]
+  },
+  "transport_retry": {
+    "enabled": true,
+    "max_attempts": null,
+    "initial_delay_seconds": 60,
+    "maximum_backoff_seconds": 300,
+    "retry_http_statuses": [
+      408,
+      409,
+      429,
+      499,
+      "5xx"
+    ],
+    "connection_and_request_timeouts": true,
+    "same_request": true,
+    "failed_transport_attempts_consume_decision_budget": false
+  },
+  "tool_ablation": {
+    "mode": "control_only",
+    "enabled_tools": [
+      "control_arms"
+    ],
+    "disabled_tools": [
+      "project_pixels",
+      "review_frames",
+      "stop_episode",
+      "triangulate_point",
+      "triangulate_temporal_point",
+      "verify_completion"
+    ],
+    "decision_format": "native_function",
+    "rgb_memory_enabled": true,
+    "visual_history_window_ms": 5000,
+    "visual_history_fps": 4
+  },
+  "io_variant": "astra_io_250hz_task_first_e_merged_20261105",
+  "physics_hz": 250,
+  "controller_check_hz": 250,
+  "observation_hz": 25,
+  "task_hz": 25,
+  "timing_protocol": "interpolation_compare_clock_v1",
+  "execution_mode": "interpolation_comparison_v1",
+  "goal_submission": "once_per_model_action",
+  "model_decision_schedule": "after_execution_returns",
+  "numeric_input_decimal_places": 4,
+  "numeric_output_decimal_places": 4,
+  "numeric_rounding": "ROUND_HALF_UP",
+  "numeric_float_format": "fixed_4_decimal_places",
+  "model_output_phase": false,
+  "history_deduplication": false,
+  "explicit_episode_memory": true,
+  "model_history_replay": false,
+  "rgb_memory_enabled": true,
+  "input_protocol": "observation_pair_joint_goal_privileged_v7",
+  "memory_location": "observation.memory",
+  "model_output_duration": false,
+  "visual_history_window_ms": 5000,
+  "visual_history_fps": 4,
+  "interpolation_profile": "linear",
+  "goal_controller": {
+    "mode": "interpolation_comparison_v1",
+    "joint_tolerance_rad": 0.01,
+    "settled_joint_velocity_rad_s": 0.05,
+    "settled_finger_range_m": 0.0002,
+    "settle_window_seconds": 0.1,
+    "stall_timeout_seconds": 0.5,
+    "progress_threshold_rad": 0.001,
+    "max_motion_seconds": 0.8,
+    "gripper_tolerance_m": 0.001,
+    "held_gripper_change_guard_m": 0.003,
+    "joint_velocity_limit_rad_s": 3.75,
+    "joint_acceleration_limit_rad_s2": 3.0,
+    "gripper_close_min_seconds": 0.3,
+    "hold_observation_seconds": 0.24,
+    "interpolation_profile": "linear",
+    "reference_velocity_limit_enforced": true,
+    "reference_acceleration_limit_enforced": false
+  },
+  "privileged_scene_enabled": true,
+  "scene_feedback_enabled": true
+}

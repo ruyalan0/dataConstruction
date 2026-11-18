@@ -1,0 +1,77 @@
+# g：投瓶、推T与插管角度检查的合并版
+
+## 插管单向顺序修订（2026-11-17）
+
+当前版本为 `astra_io_250hz_task_first_g_tube_order_20261117`，从 `astra_io_250hz_task_first_g_20261112` 独立复制；原 g 及其正在运行的投瓶实验保持不变。仅修改插管操作策略，运行入口和配置使用新版本标识，其余控制器、模型、预算和任务技能不变。下面保留原 g 的历史说明。
+
+插入前，根据当前架子的实际左右方向和夹爪净空，选定三个有足够间距的空孔，固定从左向右或从右向左。按起始端、中间、另一端依次插入；禁止先占两端、最后补中间。每根确认落座、松爪并撤离后才前进，抓取哪根管及使用哪只手不改变孔位顺序。后续孔受阻时仅向同方向重选，不回头补孔，不从已插管帽之间穿夹爪。原有抓角检查、受支撑重抓、分段插入、落座确认和回零要求保留。尚未运行新版仿真实验。
+
+最新对齐方块修订：`align_blocks` 单独采用 **1.2 rad/s** 关节参考限速，使用 `task-configs/align_blocks.json`。skill 首次接触后先以很小的关节目标试推，观察尺子是否随手移动；空推时先调整接触并再次试推，确认跟随后再延伸推进。关节到位、闭爪或下降停滞不作为接触证据。策略、仿真和时序记录按任务读取相同限速；保持 linear 插值、Sol 6.1/high、400次调用及原生任务时限。
+
+最新倒水排残液修订（2026-11-15）：停流后沿已验证轴逐步达到瓶口朝下、瓶轴与桌面约 **45°**（相对直立翻转约135°）；连续至少两次新仿真停稳观测无出液，再试回正5–10°并观察。回正重新出液时暂停、接液并继续排残液，必要且有净空才向60°小幅增加。45°是实验检查点，不保证排空。瓶口始终保持杯内接液，避免第一次回正同时大幅抬升。
+
+最新倒水修订：`pour-liquid-into-cup` 根据实际抓姿选择稳定倾倒轴，优先沿手指伸出方向翻转，并通过小幅试转确认瓶子随夹爪倾斜；再按该轴和旋转方向选择入杯侧。若两指接触位置近似不变而瓶子在指间相对转动，停止延伸该旋转，调整站位或受支撑重抓。已验证的 roll 不能替代后续 pitch 的验证。倾倒时协调平移补偿瓶口轨迹，不要求某根手指固定在空间中。保留粗瓶体抓取、瓶口轻触杯沿或浅插、排空观察和回正要求。倒水继续使用原来的 **linear** 插值、3.75 rad/s、Sol 6.1/high、400次调用和原生任务时限。L20–L22 的本次实验记录单独保存。
+
+最新推T修订：按 T 块中心到目标中心的平面距离分粗推和精调。距离大于 **0.0200 m** 时，短水平推送选择 `coarse_push`，实际执行 **linear**；达到 **0.0200 m** 内后在 memory 锁定精调，后续接触推送及角度修正选择 `manipulation`，实际执行五次多项式 **quintic**。2厘米是策略切换启发值，不是成功阈值；达到边界前缩短粗推步长，边界跨越只在分段停稳后的观测间判断。没有新增按物理步自动切换插值的执行器门控。
+
+2026-11-12，在原 g 上合入当天的 e-plus 投瓶策略及 push_T 混合插值。版本标识仍为 `astra_io_250hz_task_first_g_20261112`。
+合并前的 g 已备份到 `/data/lanruya/robodojo/Astra-Robodojo-new/runs/g-merge-bottles-push-t-20261112-170409/source-snapshot-g-before-merge`；原 f、e-plus、push_T 独立副本、历史实验、源码快照、分数和视频均不改写。
+`merge-provenance.json` 记录合并来源及精确文件哈希；原有父 f、上游及 release 完整性校验继续启用。
+
+## 三项策略
+
+### 投瓶：e-plus 的抓取方法与限速
+
+- 投瓶 skill 与 `astra_io_250hz_task_first_e_plus_20261112` 逐字节一致。
+- 直立瓶保留 e 的可达瓶身或瓶颈抓取，不再强制 f 的顶部对齐后垂直下降。
+- 倒瓶先确认接近轴竖直向下、两指间通道平行瓶身、闭合方向横跨瓶身；在净空中完成姿态调整后短段下降。
+- g 的公共参考限速已为 **3.75 rad/s**，与 e-plus 相同，无需再次改动公共控制器。
+
+### 推T：限速与分阶段插值
+
+- push_T 参考限速由0.6恢复至 **3.75 rad/s**；默认全局 profile 改为 quintic。
+- 每次 control_arms 必须选择 motion_stage：initial_reach 为首次空手无接触伸出，coarse_push 为离目标大于2厘米时已建立侧接触的短水平粗推，两者使用 linear；manipulation 为近目标精调、接触获取、卸载、脱离和换边，使用 quintic；home_return 为确认完全脱离后的最终空手复位，使用 linear。
+- 线性阶段不保证平滑加减速；仅 coarse_push 允许已建立低位侧接触后的短水平推送，不能用于获取或解除接触。允许紧凑的闭合空夹爪，不能用夹爪开合判断接触。
+- 每段 **0.1 s** 实测停稳、**0.8 s** 执行上限不变；quintic 加速度上限仍为 **3 rad/s²**。
+- observation.motion_policy.home_return_budget 按当前实测关节和实际 home_joints 重算线性复位时间，计入逐段停稳、卸载/脱离余量和完成观察；额外净空点、重试与跟踪迟滞另加预算。
+- 实际阶段、profile 写入反馈与 goals.jsonl；客户端校验实际执行的阶段配置，不把所有执行都误当作 quintic。
+
+### 插管：保留原 g 角度规则
+
+- insert-tubes skill 本次逐字节不变。独立试提后，用当前管位姿和实测腕姿检查管轴相对接近轴、闭合轴的垂直偏差，初始上限各10°。
+- 超限保持夹持，再取不同 step 的稳定观测确认；确认后受支撑放下重抓，每管最多一次角度恢复。
+- 不悬空释放，不对已插入且释放的管重新应用抓取门槛。10°是开发启发值，不是判分阈值。
+- 这是模型执行的 skill 决策规则，不是执行器自动检测角度或自动重抓。分析见 `INSERT_TUBES_ANALYSIS.zh.md`。
+
+## 配置与运行
+
+- push_T 默认 quintic 基础上的混合插值；pour_liquid_into_cup、投瓶、插管和其余现有任务配置为 linear。
+- 启动时按显式 --interpolation-profile、ASTRA_INTERPOLATION_PROFILE 环境变量、任务配置的优先级选择 profile；不会把所有任务的默认插值一起改成 quintic。
+- 原模型、调用预算、公开任务要求、250 Hz物理、25 Hz任务时钟、5s/4fps历史、v7输入协议及原生任务时限保持不变。
+- 导出器按运行记录的 task/profile 校验动作，支持推T新增的 motion_stage 标签；不对其他任务放开该字段。
+
+从本目录运行本地验证：
+
+```bash
+../../.venv-policy/bin/python -B verify_originals.py
+../../.venv-policy/bin/python -B -m unittest discover -s tests -q
+```
+
+后续推T启动应使用本 g 的 `task-configs/push_T.json`，不传 profile 时会采用其 quintic 混合配置；插管继续使用 `task-configs/insert_tubes.json` 的 linear。
+倒水启动使用本 g 的 `task-configs/pour_liquid_into_cup.json`，不传 profile 时采用原来的 linear。显式参数和环境变量仍可覆盖任务默认值。接触、浅插及保持判断由模型按观测执行，未新增自动接触或插入控制器。
+合并前的 g 插管批次与正在运行的推T独立批次仍属于各自冻结版本，不将其成绩归为本合并版。旧批次启动脚本保留旧源码哈希，不能据此跳过新合并版的启动前校验。
+本次只合并及本地验证，不自动启动新的模型或仿真实验。
+
+## 合并时验证（倒水修订前）
+
+- 合并、插管保留、推T分阶段及速度专项共35项通过；全量154项全部通过。
+- 2268个受保护文件及完整release校验通过；启动器、导出器帮助检查通过。
+- 插管skill与合并前g逐字节相同；其他无关skill及任务配置保持原字节。
+- 合并前备份与历史g插管批次的源码快照一致；正在运行的推T独立副本仍与其冻结源码哈希一致。
+
+
+## Shallow seating recovery trial (2026-11-17)
+
+This independent trial derives from `astra_io_250hz_task_first_g_tube_order_20261117`. Its insertion guidance checks actual tube depth and world tilt separately, responds to contact-induced stalls/slip with a bounded local lift, upright correction and reinsertion, and verifies settled seating before advancing to the next opening. A confirmed rack-supported regrasp can avoid a full tabletop recovery. Existing pickup skew checks, monotonic opening order, controller settings, model budget and native horizon are retained.
+
+The comparison reruns exactly L30, L31, L32, L33 and L36, including the two previous successes. Historical runs and the source ordered-insertion variant are preserved. This is a prompt-guidance experiment; its physical recovery effectiveness requires the new simulation results.

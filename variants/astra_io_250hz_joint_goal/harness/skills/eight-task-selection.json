@@ -1,0 +1,13 @@
+{
+  "common": ["visual-contact-control", "upright-grasp-approach", "transport-retention"],
+  "tasks": {
+    "make_kong": "make-kong",
+    "build_tower": "build-tower",
+    "insert_tubes": "insert-tubes",
+    "play_tic_tac_toe": "play-tic-tac-toe",
+    "pour_balls_into_vase": "pour-balls-into-vase",
+    "pour_liquid_into_cup": "pour-liquid-into-cup",
+    "store_laptop_and_headphones": "store-laptop-and-headphones",
+    "fill_pen_holder": "fill-pen-holder"
+  }
+}

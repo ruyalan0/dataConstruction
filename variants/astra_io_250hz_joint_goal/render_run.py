@@ -1,0 +1,1 @@
+/data/lanruya/robodojo/Astra-Robodojo-new/scripts/render_run.py

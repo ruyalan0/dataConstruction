@@ -1,0 +1,16 @@
+---
+name: store-tools-in-toolbox
+description: Sort and seat tools in the visible toolbox while preserving usable grasps and observing insertion depth.
+---
+
+Inspect the open toolbox and each visible compartment or holder before lifting a tool. Associate tool shape with a physically compatible visible space, using the public instruction for any required assignment. Record each tool's identity, grasp region, destination opening and last confirmed placement; preserve this ledger across observations.
+
+First obtain an empty-hand view containing the full molded slot outlines, including both ends. Keep tool shape landmarks in the ledger even if its category name is uncertain: match the handle, head and long axis to the complete recess rather than trusting an initial name or a clipped half of the tray. Resolve the intended in-plane orientation while the tool still has table support, so a slipping grasp does not also need a large airborne wrist rotation.
+
+Grasp a free shaft or handle where the pads can oppose each other, leaving the insertion end and destination opening visible. Confirm a short test lift. Plan the held tool's entire sweep, including its long end, rather than only the wrist. Reorient in clear space before approaching the box. Move the empty wrist to a noncontact observation pose when the holding hand hides the opening; use that view to separate lateral alignment from depth.
+
+For a tool that pivots or slides in the pads, favor opposing a broader rigid handle or body region across its width, away from a tapered end or smooth narrow tip. Require both tool endpoints to maintain their relationship to the pads through a short lift before transfer. Stable finger spacing alone cannot establish rotational stability. If a needed orientation change repeatedly loosens the grasp, return the tool to clear support and change the pickup orientation or grasp region; another large wrist turn with the same marginal contact is not a new strategy. Approach the recess with the tool plane and long axis already aligned, keeping both ends clear of dividers. A contact-induced pivot at one end calls for unloading and realignment, not release onto the rim. Verify each released tool lies flat within its complete matching outline before moving on; a tool balanced on its narrow edge or bridging the tray is still pending.
+
+Approach along the compartment's accessible axis in short segments. If a tool bridges a rim or contacts the wrong divider, retract until free, then change its angle or grasp. Do not repeatedly press a long tool against a partition or release it above an unverified cavity. Lower until visibly supported inside its intended storage space; open incrementally and verify it remains as the hand retreats. Complete one stable placement before using nearby compartments. If the same grasp causes two observed obstructions, choose a materially different grasp/orientation or arm. Reserve space and time for remaining tools, closing only if the public instruction requires it, and both-arm home return.
+
+Evidence: task-specific development revision from the operator's 2026-09-21 review and prior failure observations. This is a strategy candidate, not a demonstrated success; resolve concrete poses from the current episode only.

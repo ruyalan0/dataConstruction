@@ -1,0 +1,50 @@
+{
+  "scope": "Offline conversion of historical 25 Hz data; no new model call or 250 Hz execution",
+  "name": "control_arms",
+  "arguments": {
+    "assessment": "The target is the small white toy car with dark windows, just right of image center and left of the folded jeans. Both hands are empty; the right arm has the nearer approach. Its compact home posture is not itself a blockage.",
+    "left": null,
+    "memory": "Task: lift white toy car >=10 cm and retain; no reset required. Target head pixels ~376,268, white body/dark windows, between small yellow round item and jeans. Home joints both approximately zero; grippers open 1. Right arm selected. No contact or retention yet.",
+    "plan": "Begin an open-hand raised-elbow approach with a bounded right-arm segment above the table; turn inward and pitch the fingers downward, then inspect before continuing toward the car.",
+    "right": {
+      "control": "joint",
+      "gripper": 1,
+      "joints": [
+        0.55,
+        0.9,
+        0.7,
+        -0.8,
+        0,
+        0
+      ]
+    },
+    "settle": 1,
+    "steps": 10
+  },
+  "decision": {
+    "assessment": "The target is the small white toy car with dark windows, just right of image center and left of the folded jeans. Both hands are empty; the right arm has the nearer approach. Its compact home posture is not itself a blockage.",
+    "plan": "Begin an open-hand raised-elbow approach with a bounded right-arm segment above the table; turn inward and pitch the fingers downward, then inspect before continuing toward the car.",
+    "memory": "Task: lift white toy car >=10 cm and retain; no reset required. Target head pixels ~376,268, white body/dark windows, between small yellow round item and jeans. Home joints both approximately zero; grippers open 1. Right arm selected. No contact or retention yet.",
+    "action": {
+      "control_arms": {
+        "arms": {
+          "right": {
+            "control": "joint",
+            "joints": [
+              0.55,
+              0.9,
+              0.7,
+              -0.8,
+              0.0,
+              0.0
+            ],
+            "gripper": 1.0
+          }
+        },
+        "steps": 10,
+        "settle": 1
+      }
+    }
+  },
+  "source_response": "/data/lanruya/robodojo/Astra-Robodojo-new/runs/general-pickup-control-only-20261015-155448/general_pickup/L20/policy-20/model/0001.response.json"
+}

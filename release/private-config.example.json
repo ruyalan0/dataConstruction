@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "locations": {
+    "31c3a984da22878c838ce36443af7d74aa624fa27219b144fe84f118d72128a3": "hdfs://storage.example.invalid/resources/31c3a984da22878c838ce36443af7d74aa624fa27219b144fe84f118d72128a3.tar.gz",
+    "b6d67ebc50907be5c73ccbbab15be948b1b7a569e745314792c2e241ff267744": "hdfs://storage.example.invalid/resources/b6d67ebc50907be5c73ccbbab15be948b1b7a569e745314792c2e241ff267744.tar.gz",
+    "2ca0937a67789a5f3b8665d37e03cc11e118fca0143505531b89b138f2863c6f": "hdfs://storage.example.invalid/resources/2ca0937a67789a5f3b8665d37e03cc11e118fca0143505531b89b138f2863c6f.tar.gz",
+    "41637dfb8a3bf728d3b410f3aae99b889a15512c7164ea24b73201af9f4c4547": "hdfs://storage.example.invalid/resources/41637dfb8a3bf728d3b410f3aae99b889a15512c7164ea24b73201af9f4c4547.tar.gz",
+    "9038f947bb515b6ff3a0ef177c83ef977838046a2d9f72006af3343529ec1ea4": "hdfs://storage.example.invalid/resources/9038f947bb515b6ff3a0ef177c83ef977838046a2d9f72006af3343529ec1ea4.tar.gz",
+    "9ec98c599648df0a19099e2750afd51ace14b019f0af2d90e0635bcf696e488c": "hdfs://storage.example.invalid/resources/9ec98c599648df0a19099e2750afd51ace14b019f0af2d90e0635bcf696e488c.tar.gz",
+    "09db0a427f43bd73d7967be84959b06d97953e9efc9de42fd272ff9f3366e0b5": "hdfs://storage.example.invalid/resources/09db0a427f43bd73d7967be84959b06d97953e9efc9de42fd272ff9f3366e0b5.tar.gz",
+    "a94b84942f0bd4c449e90a135926a6814b8050b10fb625d79aef3d2b960bcd93": "hdfs://storage.example.invalid/resources/a94b84942f0bd4c449e90a135926a6814b8050b10fb625d79aef3d2b960bcd93.tar.gz",
+    "9939e49023a0ec6e46c06dc1fbe69b15f5b2c8839ba026fd3f57eb53781105a5": "hdfs://storage.example.invalid/resources/9939e49023a0ec6e46c06dc1fbe69b15f5b2c8839ba026fd3f57eb53781105a5.tar.gz",
+    "882918b35fc65306f7da50a8d72baf6c5f9a32e388ba4405d564cdd5c362979e": "hdfs://storage.example.invalid/resources/882918b35fc65306f7da50a8d72baf6c5f9a32e388ba4405d564cdd5c362979e.tar.gz",
+    "61f0c02f2bb747e5888d645dd32e28349ed06865979ea3d67a6668ee0d3f440a": "hdfs://storage.example.invalid/resources/61f0c02f2bb747e5888d645dd32e28349ed06865979ea3d67a6668ee0d3f440a.tar.gz",
+    "d7d5af857e1433dc35adc0d1e0702f6ea0f43621a82eb87517b04f91f8318bb3": "hdfs://storage.example.invalid/resources/d7d5af857e1433dc35adc0d1e0702f6ea0f43621a82eb87517b04f91f8318bb3.tar.gz",
+    "4982ebdc116c585cf696fd5936925446911c7ad3d42b90dfebd4314e387a4f50": "hdfs://storage.example.invalid/resources/4982ebdc116c585cf696fd5936925446911c7ad3d42b90dfebd4314e387a4f50.tar.gz",
+    "42f5b33ebd5b174e8d8ea066103847f5131282478ecd2742fa2a9de041a0858d": "hdfs://storage.example.invalid/resources/42f5b33ebd5b174e8d8ea066103847f5131282478ecd2742fa2a9de041a0858d.tar.gz",
+    "8baf26a676a4789ef1f97182d73a8c7fb6f0e85141a5e31f3fa44f297723376a": "hdfs://storage.example.invalid/resources/8baf26a676a4789ef1f97182d73a8c7fb6f0e85141a5e31f3fa44f297723376a.tar.gz",
+    "82fa38c5cb996e9c86148995d961d8357cf1988787dfb68f127cf779cf8cf994": "hdfs://storage.example.invalid/resources/82fa38c5cb996e9c86148995d961d8357cf1988787dfb68f127cf779cf8cf994.tar.gz",
+    "534f0f6e71702d2f6e63939d087c0417645ff7739e43de866f1ab4e5e33122d3": "hdfs://storage.example.invalid/resources/534f0f6e71702d2f6e63939d087c0417645ff7739e43de866f1ab4e5e33122d3.tar.gz",
+    "4a322ad1d45ec53db0802d70fd9b756d5a3b0c7f25fa83fac7b08ff922de9f3f": "hdfs://storage.example.invalid/resources/4a322ad1d45ec53db0802d70fd9b756d5a3b0c7f25fa83fac7b08ff922de9f3f.tar.gz",
+    "d4911fa6984f3ca6d13699e3cde069d4eda989393300efd9904991fafe68e506": "hdfs://storage.example.invalid/resources/d4911fa6984f3ca6d13699e3cde069d4eda989393300efd9904991fafe68e506.tar.gz",
+    "ef9aab847e5db8b6c2dff897fbe248c6048eed61ee4244b755924a2a8959f0fb": "hdfs://storage.example.invalid/resources/ef9aab847e5db8b6c2dff897fbe248c6048eed61ee4244b755924a2a8959f0fb.tar.gz",
+    "73f6b2cb698096e9cfdda30a5128f872477149555e213354d5b413fc0d9a7de9": "hdfs://storage.example.invalid/resources/73f6b2cb698096e9cfdda30a5128f872477149555e213354d5b413fc0d9a7de9.tar.gz",
+    "7cd6461e903f0fbe75ac709d79c5720b0d5fb78eb1eea6a278ed78aeeb15e313": "hdfs://storage.example.invalid/resources/7cd6461e903f0fbe75ac709d79c5720b0d5fb78eb1eea6a278ed78aeeb15e313.tar.gz"
+  },
+  "provider_base_urls": {
+    "azure-astra": "https://azure-astra.example.invalid/v1",
+    "zzz-astra": "https://zzz-astra.example.invalid/v1",
+    "zzy-astra": "https://zzy-astra.example.invalid/v1"
+  }
+}

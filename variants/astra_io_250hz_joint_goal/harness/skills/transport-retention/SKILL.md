@@ -1,0 +1,12 @@
+---
+name: transport-retention
+description: Verify an object's retention across wrist motion and plan observed transport or slip recovery using paired RGB and gripper proprioception.
+---
+
+During pickup and carrying, compare the previous active-wrist image with the current image. An object fixed between finger pads while the background moves supports retention. An object moving with the background, separating from pads, or appearing on the table supports loss. Use the head view to resolve occlusion; state unknown when neither view distinguishes them. A successful test lift establishes retention only for that interval.
+
+Record the last confirmed retention step and evidence in memory. Compare history.previous_observation.state and observation.state measured finger joints, together with both observation images and observation.desired_gripper_commands. The input contains no per-tick opening trace. Sudden opening followed by closure toward zero is consistent with losing resistance; it does not identify the collision or slip cause. Reconcile with RGB before another carrying segment. If loss is confirmed, clear the empty gripper, relocalize the object, and choose a reachable regrasp rather than continuing the old placement.
+
+Plan clearance for the carried object's lowest surface and the entire wrist attachment, using current RGB and achieved pose. Finger contact-center clearance alone does not clear the object. When crossing a rim or approaching a lid, use short observed segments, keep orientation stable, and separate vertical clearance from lateral transfer. A simultaneous translation and large rotation makes a new swept volume; inspect after small rotation increments before crossing nearby geometry. Clear-space transit is appropriate only after both object retention and clearance are supported.
+
+When forward carrying repeatedly stalls at an elevated wrist pose, reassess the combination of height and reach before adding more lift. Excess height can consume the reach needed to get over a destination. From current RGB, estimate the lowest carried surface and the rim or obstacle it must clear. If a small lower waypoint still leaves visible clearance for the object and wrist attachment, test one short lowering segment with grip and orientation preserved, then one short forward segment. Continue only when tracking and retention improve. If clearance cannot be established, choose another approach or supported handoff; lowering through a rim is not a reach solution. Reach failure alone does not prove that height is its cause.

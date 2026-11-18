@@ -1,0 +1,14 @@
+---
+name: solve-equation
+description: Read and complete the visible arithmetic equation in RoboDojo solve_equation, placing the missing piece on its pad and resetting the arms.
+---
+
+Before touching pieces, transcribe the equation in its visible order, mark the missing number or operator, and list the candidate pieces with their current image locations. Solve the missing value and substitute it back into the entire equation. When a symbol is ambiguous, use another permitted RGB view before choosing. Keep the confirmed transcription, selected candidate and pad location in episode memory; infer them anew in every scene.
+
+The public task requires each digit to remain within its permitted rotational tolerance relative to its initial pose. Preserve the observed initial orientation of the selected piece during grasp, transport and placement, and leave other pieces undisturbed. Select the gripper closing direction before contact. Wrist rotation while a piece is held rotates the piece as well; reach planning must account for that constraint. The public page does not specify a numerical tolerance, so this skill does not invent one.
+
+Before picking, compare the selected piece side with the answer-pad side. Apply cross-side-handoff when they differ: source-side pickup, supported central staging, destination-side regrasp and placement. Record both arm roles and the staging area before moving. For same-side transport, choose the arm with a clear approach to both endpoints. Use the shared visual-contact-control skill for inferred contact geometry, short observed descent and retention checks. Thin pieces require opposing pad contact without pressing into the table. A small test lift must show the piece moving with the fingers before transfer. If the grasp rotates or loses the piece, open over reachable support and inspect its new pose before a revised grasp.
+
+Move the selected piece over the pad while preserving its scene orientation. Lower with short RGB checks, release onto the pad and withdraw through visible clearance. Verify that the intended piece stays on the pad as the open fingers retreat and that the resulting visible equation is correct. Reserve native steps for both open grippers and return to the supplied original arm poses, then use normal verification until native termination.
+
+Evidence status: development20/21/22 previously reached100 with the earlier skill; the cross-side handoff revision is unvalidated and follows user analysis of frozen23. Official constraints derive from the official solve_equation instruction, description, rotational-tolerance comment and scoring conditions captured in sources/official/solve_equation.json. It contains no development-layout coordinates or hidden scene state. Task-specific development and frozen evaluation remain required.

@@ -1,0 +1,49 @@
+{
+  "scope": "Offline conversion of historical 25 Hz data; no new model call or 250 Hz execution",
+  "name": "control_arms",
+  "arguments": {
+    "assessment": "The wrist rose 26.7 mm with good tracking and fingers remained near 20 mm. The car remains between pads and rose in the head view, but its wrist-view outline changed, suggesting settling or tilt; stable retention is not yet certain. Space above is clear.",
+    "left": null,
+    "memory": "Step52 test lift wrist z.9497 (+26.7mm from .9230 baseline). White striped car remains between pads and appears raised in head view, but changed wrist-view outline suggests settling/tilt; retention provisional, not yet stable. Fingers .01991/.02016m; right close command0 preserved. Next short lift checks stability. No reset required.",
+    "plan": "Continue a short approximately 27 mm upward segment with orientation and grip maintained, then inspect whether the car stabilizes relative to the pads.",
+    "right": {
+      "control": "joint",
+      "gripper": null,
+      "joints": [
+        0.5335,
+        1.7891,
+        1.3679,
+        -1.1346,
+        -0.0012,
+        2.0979
+      ]
+    },
+    "settle": 1,
+    "steps": 3
+  },
+  "decision": {
+    "assessment": "The wrist rose 26.7 mm with good tracking and fingers remained near 20 mm. The car remains between pads and rose in the head view, but its wrist-view outline changed, suggesting settling or tilt; stable retention is not yet certain. Space above is clear.",
+    "plan": "Continue a short approximately 27 mm upward segment with orientation and grip maintained, then inspect whether the car stabilizes relative to the pads.",
+    "memory": "Step52 test lift wrist z.9497 (+26.7mm from .9230 baseline). White striped car remains between pads and appears raised in head view, but changed wrist-view outline suggests settling/tilt; retention provisional, not yet stable. Fingers .01991/.02016m; right close command0 preserved. Next short lift checks stability. No reset required.",
+    "action": {
+      "control_arms": {
+        "arms": {
+          "right": {
+            "control": "joint",
+            "joints": [
+              0.5335,
+              1.7891,
+              1.3679,
+              -1.1346,
+              -0.0012,
+              2.0979
+            ]
+          }
+        },
+        "steps": 3,
+        "settle": 1
+      }
+    }
+  },
+  "source_response": "/data/lanruya/robodojo/Astra-Robodojo-new/runs/general-pickup-control-only-20261015-155448/general_pickup/L20/policy-20/model/0009.response.json"
+}

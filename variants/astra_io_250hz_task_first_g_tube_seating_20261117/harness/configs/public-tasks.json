@@ -1,0 +1,1022 @@
+{
+  "align_blocks": {
+    "task": "align_blocks",
+    "url": "https://robodojo-benchmark.com/doc/sim-tasks/align-blocks/",
+    "fetched_at": "2026-09-14T16:06:40.340865+00:00",
+    "sha256": "346eece139658231f5a1d153bf241849cbaa667f3fb1528034345df3da666656",
+    "rows": [
+      [
+        "Instruction",
+        "Use the set square to push the three blocks into a straight, aligned row, then reset the robot arm."
+      ],
+      [
+        "Description",
+        "There is a set square and three blocks. The robot needs to use the set square to push the blocks until they are aligned in parallel in a straight row."
+      ],
+      [
+        "Platform",
+        "Simulation"
+      ],
+      [
+        "Category",
+        "Open"
+      ],
+      [
+        "Data Source",
+        "null (eval-only)"
+      ],
+      [
+        "Usage",
+        "Eval"
+      ],
+      [
+        "Score",
+        "Condition"
+      ],
+      [
+        "0",
+        "The alignment, reset, or no-lift condition is not satisfied."
+      ],
+      [
+        "100",
+        "The three cubes are in one straight aligned row, the robot returns to origin, and no cube has been lifted above the allowed height during the episode."
+      ]
+    ]
+  },
+  "classify_objects_by_language": {
+    "task": "classify_objects_by_language",
+    "url": "https://robodojo-benchmark.com/doc/sim-tasks/classify-objects-by-language/",
+    "fetched_at": "2026-09-14T16:06:45.243895+00:00",
+    "sha256": "81d63238b7bc4aed3daf3cc7ed9d60ddaabfe75bf4e90c59b24750f46d6c98b9",
+    "rows": [
+      [
+        "Instruction",
+        "Put category\u2081 objects into the left basket, category\u2082 objects into the middle basket, and category\u2083 objects into the right basket, then reset the robot arm."
+      ],
+      [
+        "Description",
+        "There are three baskets and three categories of unseen objects. The robot needs to understand the language instruction, identify the category of each object, and place the objects into the specified baskets from left to right."
+      ],
+      [
+        "Platform",
+        "Simulation"
+      ],
+      [
+        "Category",
+        "Open"
+      ],
+      [
+        "Data Source",
+        "null (eval-only)"
+      ],
+      [
+        "Usage",
+        "Eval"
+      ],
+      [
+        "Score",
+        "Condition"
+      ],
+      [
+        "0",
+        "No specified category is placed into its assigned basket."
+      ],
+      [
+        "10",
+        "One specified category is placed into its assigned basket, no other objects are in that basket, and the gripper is open."
+      ],
+      [
+        "40",
+        "Two specified categories are placed into their assigned baskets, with no extra objects in those baskets."
+      ],
+      [
+        "100",
+        "All three specified categories are placed into the left, middle, and right baskets as instructed, no basket contains objects from another category, and the robot returns to origin."
+      ]
+    ]
+  },
+  "solve_equation": {
+    "task": "solve_equation",
+    "url": "https://robodojo-benchmark.com/doc/sim-tasks/solve-equation/",
+    "fetched_at": "2026-09-14T16:06:45.278908+00:00",
+    "sha256": "d2612e20d259641719c335ba939f78b6904667ed4ea71f663bfe77c319a0705f",
+    "rows": [
+      [
+        "Instruction",
+        "Complete the equation by selecting the correct missing number or operator and placing it on the pad, then reset the robot arm."
+      ],
+      [
+        "Description",
+        "There is an arithmetic equation on the table and a pad for the answer. The equation is missing either a number or an operator. The robot needs to choose the correct missing item from the randomly arranged numbers and operators on the table and place it on the pad to complete the equation."
+      ],
+      [
+        "Platform",
+        "Simulation"
+      ],
+      [
+        "Category",
+        "Open"
+      ],
+      [
+        "Data Source",
+        "null (eval-only)"
+      ],
+      [
+        "Usage",
+        "Eval"
+      ],
+      [
+        "Comment",
+        "Each digit must remain within the permitted rotational tolerance relative to its initial pose."
+      ],
+      [
+        "Score",
+        "Condition"
+      ],
+      [
+        "0",
+        "The missing equation piece is not placed correctly."
+      ],
+      [
+        "100",
+        "The correct missing number/operator piece is placed on the missing mat and the robot returns to origin."
+      ]
+    ]
+  },
+  "general_pickup": {
+    "task": "general_pickup",
+    "url": "https://robodojo-benchmark.com/doc/sim-tasks/general-pickup/",
+    "fetched_at": "2026-09-14T16:06:41.474482+00:00",
+    "sha256": "0a49e047935c066389aeb3b7ea211653da0258e0adb2ea8ba94d8bf4a6fde2cf",
+    "rows": [
+      [
+        "Instruction",
+        "Pick up the target object by 10 cm."
+      ],
+      [
+        "Description",
+        "There are multiple objects. The robot needs to understand the language instruction, identify the target object, and pick it up."
+      ],
+      [
+        "Platform",
+        "Simulation"
+      ],
+      [
+        "Category",
+        "Open"
+      ],
+      [
+        "Data Source",
+        "null (eval-only)"
+      ],
+      [
+        "Usage",
+        "Eval"
+      ],
+      [
+        "Score",
+        "Condition"
+      ],
+      [
+        "0",
+        "The target object is not lifted high enough."
+      ],
+      [
+        "100",
+        "The target object is lifted at least 10 cm."
+      ]
+    ]
+  },
+  "stack_blocks": {
+    "task": "stack_blocks",
+    "url": "https://robodojo-benchmark.com/doc/sim-tasks/stack-blocks/",
+    "fetched_at": "2026-09-14T16:06:53.040467+00:00",
+    "sha256": "af1d75305fe011e2eeff40a9c37e6d22efcdd8f284d6a1ba2490c579c2f708bc",
+    "rows": [
+      [
+        "Instruction",
+        "Stack the three blocks with different textures."
+      ],
+      [
+        "Description",
+        "There are three blocks with different textures on the table. The robot needs to pick them up and stack them into a stable pile."
+      ],
+      [
+        "Platform",
+        "Simulation"
+      ],
+      [
+        "Category",
+        "Generalization"
+      ],
+      [
+        "Data Source",
+        "DateGen / Random eval-only"
+      ],
+      [
+        "Usage",
+        "Train & Eval / Random Eval"
+      ],
+      [
+        "Score",
+        "Condition"
+      ],
+      [
+        "0",
+        "No two-block stack is completed."
+      ],
+      [
+        "15",
+        "Any two of the three blocks are stacked, and the gripper is open."
+      ],
+      [
+        "100",
+        "All three blocks are stacked together and the robot returns to origin."
+      ]
+    ]
+  },
+  "arrange_largest_number": {
+    "task": "arrange_largest_number",
+    "url": "https://robodojo-benchmark.com/doc/sim-tasks/arrange-largest-number/",
+    "fetched_at": "2026-09-14T16:06:44.365763+00:00",
+    "sha256": "f772d3e9afb30493f5c8601b97b979df8b2d3af006b2e8ad9bd42f6f7c4a48b3",
+    "rows": [
+      [
+        "Instruction",
+        "Arrange the numbers from left to right to form the largest possible number, and place them on the pad."
+      ],
+      [
+        "Description",
+        "There are several number tiles on the table and a pad for placement. The robot needs to determine the order that forms the largest possible number, then place the four numbers on the pad from left to right in that order."
+      ],
+      [
+        "Platform",
+        "Simulation"
+      ],
+      [
+        "Category",
+        "Generalization"
+      ],
+      [
+        "Data Source",
+        "DateGen / Random eval-only"
+      ],
+      [
+        "Usage",
+        "Train & Eval / Random Eval"
+      ],
+      [
+        "Comment",
+        "Each digit must remain within the permitted rotational tolerance relative to its initial pose."
+      ],
+      [
+        "Score",
+        "Condition"
+      ],
+      [
+        "0",
+        "No digit is placed correctly."
+      ],
+      [
+        "5",
+        "Any one digit is placed on its correct pad in descending-number order, with valid orientation and the gripper open."
+      ],
+      [
+        "15",
+        "Any two digits are correctly placed."
+      ],
+      [
+        "25",
+        "In a 5-digit layout, any three digits are correctly placed."
+      ],
+      [
+        "30",
+        "In a 4-digit layout, any three digits are correctly placed."
+      ],
+      [
+        "40",
+        "In a 5-digit layout, any four digits are correctly placed."
+      ],
+      [
+        "100",
+        "All digits are correctly ordered on the pads, have valid orientation, and the robot returns to origin."
+      ]
+    ]
+  },
+  "classify_objects": {
+    "task": "classify_objects",
+    "url": "https://robodojo-benchmark.com/doc/sim-tasks/classify-objects/",
+    "fetched_at": "2026-09-14T16:06:41.207052+00:00",
+    "sha256": "1579acb43cdc24a805b4168213f47a19f0e145cbbf0c8f3b76b19b7bc9a1c9e2",
+    "rows": [
+      [
+        "Instruction",
+        "Sort the objects by category into the three baskets."
+      ],
+      [
+        "Description",
+        "There are three categories of objects and three baskets. The robot needs to group the objects by category and place each category into a separate basket. Any basket can be used for any category, as long as objects of the same category are placed together."
+      ],
+      [
+        "Platform",
+        "Simulation"
+      ],
+      [
+        "Category",
+        "Long-Horizon"
+      ],
+      [
+        "Data Source",
+        "Teleop"
+      ],
+      [
+        "Usage",
+        "Train & Eval"
+      ],
+      [
+        "Score",
+        "Condition"
+      ],
+      [
+        "0",
+        "No category basket is completed."
+      ],
+      [
+        "15",
+        "One basket contains exactly one complete object category, with no objects from other categories, and the gripper is open."
+      ],
+      [
+        "40",
+        "Two baskets each contain exactly one complete category."
+      ],
+      [
+        "100",
+        "All three categories are separated into three baskets, the objects are settled inside the baskets, and the robot returns to origin."
+      ]
+    ]
+  },
+  "play_tic_tac_toe": {
+    "task": "play_tic_tac_toe",
+    "url": "https://robodojo-benchmark.com/doc/sim-tasks/play-tic-tac-toe/",
+    "fetched_at": "2026-09-14T16:06:44.542337+00:00",
+    "sha256": "11f01b08d9308dc6863f8ab92dee27d8cca307f167c8e7f5c38e9bd215804123",
+    "rows": [
+      [
+        "Instruction",
+        "Play tic-tac-toe as the first player and fill the board with the opponent."
+      ],
+      [
+        "Description",
+        "There is a 3-by-3 tic-tac-toe board. The robot plays as the first player, while the opponent follows a random strategy. The robot and the opponent take turns placing their marks until the board is filled."
+      ],
+      [
+        "Platform",
+        "Simulation"
+      ],
+      [
+        "Category",
+        "Long-Horizon"
+      ],
+      [
+        "Data Source",
+        "DateGen"
+      ],
+      [
+        "Usage",
+        "Train & Eval"
+      ],
+      [
+        "Score",
+        "Condition"
+      ],
+      [
+        "0",
+        "No player piece reaches a board cell, or the policy robot moves while the opponent robot arm is moving."
+      ],
+      [
+        "10",
+        "Any one player piece is placed on a board cell and the gripper is open."
+      ],
+      [
+        "30",
+        "Any two player pieces are placed on board cells."
+      ],
+      [
+        "50",
+        "Any three player pieces are placed on board cells."
+      ],
+      [
+        "75",
+        "Any four player pieces are placed on board cells."
+      ],
+      [
+        "100",
+        "All five player pieces are on board cells at the correct height and the gripper is open."
+      ]
+    ]
+  },
+  "insert_key": {
+    "task": "insert_key",
+    "url": "https://robodojo-benchmark.com/doc/sim-tasks/insert-key/",
+    "fetched_at": "2026-09-14T16:06:45.230752+00:00",
+    "sha256": "131b6549c825b8dc4a6709d1ee68ddd30a5bfff58d512a6d8fa78a33cf6540a5",
+    "rows": [
+      [
+        "Instruction",
+        "Pick up the key, hand it over to the other hand, insert it into the keyhole, then turn it."
+      ],
+      [
+        "Description",
+        "There is a key and a keyhole on the table. The robot needs to pick up the key, hand it over to the other hand for pose adjustment, insert it accurately into the keyhole, and then turn it."
+      ],
+      [
+        "Platform",
+        "Simulation"
+      ],
+      [
+        "Category",
+        "Precision"
+      ],
+      [
+        "Data Source",
+        "DateGen"
+      ],
+      [
+        "Usage",
+        "Train & Eval"
+      ],
+      [
+        "Score",
+        "Condition"
+      ],
+      [
+        "0",
+        "The key is not lifted."
+      ],
+      [
+        "15",
+        "The key is lifted at least 5 cm."
+      ],
+      [
+        "100",
+        "The key is inserted deep enough into the slot, aligned closely in x/y, kept upright, and successfully turned after insertion."
+      ]
+    ]
+  },
+  "deposit_coin": {
+    "task": "deposit_coin",
+    "url": "https://robodojo-benchmark.com/doc/sim-tasks/deposit-coin/",
+    "fetched_at": "2026-09-14T16:06:40.123332+00:00",
+    "sha256": "23928e91d35f23c1917243ddf2bbe492c4f76d2e056056ca6dd94b21707573e7",
+    "rows": [
+      [
+        "Instruction",
+        "Pick up the coin from the holder and insert it precisely into the coin bank."
+      ],
+      [
+        "Description",
+        "There is a coin placed on a holder and a coin bank. The robot needs to pick up the coin and accurately insert it into the slot of the coin bank."
+      ],
+      [
+        "Platform",
+        "Simulation"
+      ],
+      [
+        "Category",
+        "Precision"
+      ],
+      [
+        "Data Source",
+        "DateGen"
+      ],
+      [
+        "Usage",
+        "Train & Eval"
+      ],
+      [
+        "Score",
+        "Condition"
+      ],
+      [
+        "0",
+        "The coin is not lifted."
+      ],
+      [
+        "20",
+        "The coin is lifted at least 8 cm."
+      ],
+      [
+        "100",
+        "The coin bounding box is inside the coin bank slot region, and the robot returns to origin."
+      ]
+    ]
+  },
+  "hang_mugs": {
+    "task": "hang_mugs",
+    "url": "https://robodojo-benchmark.com/doc/sim-tasks/hang-mugs/",
+    "fetched_at": "2026-09-14T16:06:42.844714+00:00",
+    "sha256": "d6acd1e39aa3f5ccf4795e2b1d54b25dbecd5d176adad68477d3609abce81f5b",
+    "rows": [
+      [
+        "Instruction",
+        "Hang all the mugs on the mug rack."
+      ],
+      [
+        "Description",
+        "There are three mugs and one mug rack. The robot needs to pick up each mug and hang all of them on the rack."
+      ],
+      [
+        "Platform",
+        "Simulation"
+      ],
+      [
+        "Category",
+        "Generalization"
+      ],
+      [
+        "Data Source",
+        "Teleop / Random eval-only"
+      ],
+      [
+        "Usage",
+        "Train & Eval / Random Eval"
+      ],
+      [
+        "Score",
+        "Condition"
+      ],
+      [
+        "0",
+        "No mug is hung on the mug rack."
+      ],
+      [
+        "15",
+        "Any one mug is hung on the mug rack and the gripper is open."
+      ],
+      [
+        "40",
+        "Any two mugs are hung on the mug rack."
+      ],
+      [
+        "100",
+        "All three mugs are hung on the rack and the robot returns to origin."
+      ]
+    ]
+  },
+  "press_by_number": {
+    "task": "press_by_number",
+    "url": "https://robodojo-benchmark.com/doc/sim-tasks/press-by-number/",
+    "fetched_at": "2026-09-14T16:06:39.867682+00:00",
+    "sha256": "9f27d8da556c3541f80c8805b319142ee857f87f760264fcec6d2cec082eaca5",
+    "rows": [
+      [
+        "Instruction",
+        "Press the two red buttons the required number of times according to the number cards, then press the blue button to confirm."
+      ],
+      [
+        "Description",
+        "There are two number cards, two red buttons, and one blue confirmation button. The robot needs to read the numbers, press each red button the corresponding number of times, and then press the blue button to confirm. Pressing the blue button ends the task immediately."
+      ],
+      [
+        "Platform",
+        "Simulation"
+      ],
+      [
+        "Category",
+        "Memory"
+      ],
+      [
+        "Data Source",
+        "DateGen"
+      ],
+      [
+        "Usage",
+        "Train & Eval"
+      ],
+      [
+        "Score",
+        "Condition"
+      ],
+      [
+        "0",
+        "The required press counts or confirm sequence is not completed exactly."
+      ],
+      [
+        "100",
+        "Button `0` is pressed exactly the number shown by `num0`, the blue confirm button is pressed, button `1` is pressed exactly the number shown by `num1`, the blue confirm button is pressed again, and the robot returns to origin."
+      ]
+    ]
+  },
+  "stack_blocks_by_language": {
+    "task": "stack_blocks_by_language",
+    "url": "https://robodojo-benchmark.com/doc/sim-tasks/stack-blocks-by-language/",
+    "fetched_at": "2026-09-14T16:06:42.423610+00:00",
+    "sha256": "e165c874aa552a5d43f849777b5def7e51202293945af2936d063603d8cf8625",
+    "rows": [
+      [
+        "Instruction",
+        "Stack the three blocks on top of each other in the order of color\u2081, color\u2082, and color\u2083, then reset the robot arm."
+      ],
+      [
+        "Description",
+        "There are several colored blocks. The robot needs to understand the language instruction and stack the blocks in the specified color order."
+      ],
+      [
+        "Platform",
+        "Simulation"
+      ],
+      [
+        "Category",
+        "Open"
+      ],
+      [
+        "Data Source",
+        "null (eval-only)"
+      ],
+      [
+        "Usage",
+        "Eval"
+      ],
+      [
+        "Score",
+        "Condition"
+      ],
+      [
+        "0",
+        "The first ordered stack is not completed."
+      ],
+      [
+        "20",
+        "The first two specified blocks are stacked in the instructed order, the bottom block remains on the table, and the gripper is open."
+      ],
+      [
+        "100",
+        "All three specified blocks are stacked in order and the robot returns to origin."
+      ]
+    ]
+  },
+  "swap_blocks": {
+    "task": "swap_blocks",
+    "url": "https://robodojo-benchmark.com/doc/sim-tasks/swap-blocks/",
+    "fetched_at": "2026-09-14T16:06:45.674233+00:00",
+    "sha256": "977c3821deec32ebfaa47c890e87abfffb0dfceeabb71747784cac12343bbe7a",
+    "rows": [
+      [
+        "Instruction",
+        "Swap the two blocks using the empty mat, pressing the button after each move."
+      ],
+      [
+        "Description",
+        "There are three mats, two blocks placed on two of the mats, and one button. The robot needs to swap the positions of the two blocks by using the empty mat as a temporary place. After each move, the robot must press the button."
+      ],
+      [
+        "Platform",
+        "Simulation"
+      ],
+      [
+        "Category",
+        "Memory"
+      ],
+      [
+        "Data Source",
+        "DateGen"
+      ],
+      [
+        "Usage",
+        "Train & Eval"
+      ],
+      [
+        "Score",
+        "Condition"
+      ],
+      [
+        "0",
+        "The swap sequence is not completed, or the button is not pressed after each move."
+      ],
+      [
+        "100",
+        "The two target blocks are swapped using the empty mat, the button is pressed once after each of the three moves, the blocks finish on each other's original mats, and the robot returns to origin."
+      ]
+    ]
+  },
+  "cover_blocks": {
+    "task": "cover_blocks",
+    "url": "https://robodojo-benchmark.com/doc/sim-tasks/cover-blocks/",
+    "fetched_at": "2026-09-14T16:06:47.035538+00:00",
+    "sha256": "ca869895306aef68ce3c5c11c725b85af29b667697ba167f1f31c9cb354b9b9b",
+    "rows": [
+      [
+        "Instruction",
+        "Cover the blocks from left to right, remember their colors, then uncover them in the order: red, green, and blue."
+      ],
+      [
+        "Description",
+        "There are three covers and three blocks arranged in a random order. The blocks are red, green, and blue. The robot needs to cover the blocks from left to right, remember the color under each cover, and then uncover the blocks in the order of red, green, and blue."
+      ],
+      [
+        "Platform",
+        "Simulation"
+      ],
+      [
+        "Category",
+        "Memory"
+      ],
+      [
+        "Data Source",
+        "DateGen"
+      ],
+      [
+        "Usage",
+        "Train & Eval"
+      ],
+      [
+        "Score",
+        "Condition"
+      ],
+      [
+        "0",
+        "No block-covering step is completed."
+      ],
+      [
+        "5",
+        "All three blocks are covered by cups from left to right."
+      ],
+      [
+        "15",
+        "After all blocks are covered, the red block is uncovered first while the green and blue blocks remain covered."
+      ],
+      [
+        "30",
+        "The red and green blocks are uncovered in order while the blue block remains covered."
+      ],
+      [
+        "100",
+        "All three blocks are first covered from left to right, then uncovered in red, green, and blue order; cup orientation remains valid and the robot returns to origin."
+      ]
+    ]
+  },
+  "sort_nesting_dolls_by_size": {
+    "task": "sort_nesting_dolls_by_size",
+    "url": "https://robodojo-benchmark.com/doc/sim-tasks/sort-nesting-dolls-by-size/",
+    "fetched_at": "2026-09-14T16:06:45.213590+00:00",
+    "sha256": "5b39ff8c3df29998f3806f1306de8b29171a14a81c136fd60be9e0531639f366",
+    "rows": [
+      [
+        "Instruction",
+        "Arrange the five nesting dolls in a row from left to right, from smallest to largest."
+      ],
+      [
+        "Description",
+        "There are five nesting dolls of different sizes on the table. The robot needs to sort them by size and arrange them in a straight row from left to right, from smallest to largest."
+      ],
+      [
+        "Platform",
+        "Simulation"
+      ],
+      [
+        "Category",
+        "Generalization"
+      ],
+      [
+        "Data Source",
+        "DateGen / Random eval-only"
+      ],
+      [
+        "Usage",
+        "Train & Eval / Random Eval"
+      ],
+      [
+        "Score",
+        "Condition"
+      ],
+      [
+        "0",
+        "The dolls are not arranged in the required size order."
+      ],
+      [
+        "100",
+        "All five nesting dolls stand in a one horizontal straight row, are ordered from left to right from smallest to largest, and the robot returns to origin."
+      ]
+    ]
+  },
+  "imitate_sorting_sequence": {
+    "task": "imitate_sorting_sequence",
+    "url": "https://robodojo-benchmark.com/doc/sim-tasks/imitate-sorting-sequence/",
+    "fetched_at": "2026-09-14T16:06:38.888157+00:00",
+    "sha256": "36e8d4d90f20f969214f4370d8fb652ddb7d1865e6c809a15bc47db9e78ed061",
+    "rows": [
+      [
+        "Instruction",
+        "Observe the object placement order, remember it, then place the corresponding objects into the basket in the same order."
+      ],
+      [
+        "Description",
+        "There are five categories of objects, with five objects on each side. The opposite robot places its objects into the basket on the right side in a certain order. The robot needs to observe and remember this sequence, then place its corresponding objects into the basket in the same order. This is a memory-based imitation task."
+      ],
+      [
+        "Platform",
+        "Simulation"
+      ],
+      [
+        "Category",
+        "Memory"
+      ],
+      [
+        "Data Source",
+        "DateGen"
+      ],
+      [
+        "Usage",
+        "Train & Eval"
+      ],
+      [
+        "Score",
+        "Condition"
+      ],
+      [
+        "0",
+        "The first sequence step is not completed, or the policy robot moves before the opposite robot arm finishes."
+      ],
+      [
+        "5",
+        "The first target object is placed into the policy basket, later target objects are still outside it, all demonstration objects remain in the demo basket, and the gripper is open."
+      ],
+      [
+        "15",
+        "The first two target objects are placed in the correct sequence."
+      ],
+      [
+        "30",
+        "The first three target objects are placed in the correct sequence."
+      ],
+      [
+        "50",
+        "The first four target objects are placed in the correct sequence."
+      ],
+      [
+        "100",
+        "All five target objects are placed in sequence, all demonstration objects remain in the demo basket, the gripper is open, and the robot returns to origin."
+      ]
+    ]
+  },
+  "match_and_pick_from_conveyor": {
+    "task": "match_and_pick_from_conveyor",
+    "url": "https://robodojo-benchmark.com/doc/sim-tasks/match-and-pick-from-conveyor/",
+    "fetched_at": "2026-09-14T16:06:44.103179+00:00",
+    "sha256": "7004575ed5822f3450fcfed01db5c992c3ce7cb95337d32a90e0c1094727a2aa",
+    "rows": [
+      [
+        "Instruction",
+        "Remember the first object on the conveyor, then pick the matching object when it appears again."
+      ],
+      [
+        "Description",
+        "An object first appears on the conveyor and is carried away. The robot needs to remember this object, observe the following objects on the conveyor, and pick the one that matches the first object."
+      ],
+      [
+        "Platform",
+        "Simulation"
+      ],
+      [
+        "Category",
+        "Memory"
+      ],
+      [
+        "Data Source",
+        "Teleop"
+      ],
+      [
+        "Usage",
+        "Train & Eval"
+      ],
+      [
+        "Score",
+        "Condition"
+      ],
+      [
+        "0",
+        "The matching target object is not lifted high enough."
+      ],
+      [
+        "100",
+        "The matching target object is lifted at least 10 cm."
+      ]
+    ]
+  },
+  "put_bottles_into_dustbin": {
+    "task": "put_bottles_into_dustbin",
+    "url": "https://robodojo-benchmark.com/doc/sim-tasks/put-bottles-into-dustbin/",
+    "fetched_at": "2026-09-14T16:06:43.547339+00:00",
+    "sha256": "a218f2ef5fff6711fb3e2c1597a30a9984702eaeb74282636fbb7636b45dc17b",
+    "rows": [
+      [
+        "Instruction",
+        "Pick up the bottles and throw them into the dustbin, using handover when needed."
+      ],
+      [
+        "Description",
+        "There are four bottles on the table, and they may be either standing or lying down. A dustbin is placed beside the table. The robot needs to pick up the bottles and throw them into the dustbin. Because of the shifted table layout, bottles on the right side require a handover between the two hands before being discarded."
+      ],
+      [
+        "Platform",
+        "Simulation"
+      ],
+      [
+        "Category",
+        "Long-Horizon"
+      ],
+      [
+        "Data Source",
+        "Teleop"
+      ],
+      [
+        "Usage",
+        "Train & Eval"
+      ],
+      [
+        "Score",
+        "Condition"
+      ],
+      [
+        "0",
+        "No bottle is placed into the dustbin."
+      ],
+      [
+        "10",
+        "Any one bottle is inside the dustbin, and the gripper is open."
+      ],
+      [
+        "25",
+        "Any two bottles are inside the dustbin."
+      ],
+      [
+        "40",
+        "Any three bottles are inside the dustbin."
+      ],
+      [
+        "100",
+        "All four bottles are inside the dustbin and the robot returns to origin."
+      ]
+    ]
+  },
+  "fill_egg_holder": {
+    "task": "fill_egg_holder",
+    "url": "https://robodojo-benchmark.com/doc/sim-tasks/fill-egg-holder/",
+    "fetched_at": "2026-09-14T16:06:44.957228+00:00",
+    "sha256": "2368dbb508dcbb0224ff515dcc815a4c265d043d3afe74dd3172725669b6e609",
+    "rows": [
+      [
+        "Instruction",
+        "Place the four eggs from the basket into the egg holder, then close the lid."
+      ],
+      [
+        "Description",
+        "There is a woven basket containing four eggs and an egg holder. The robot needs to pick up the eggs one by one, place all four into the egg holder, and then close the lid."
+      ],
+      [
+        "Platform",
+        "Simulation"
+      ],
+      [
+        "Category",
+        "Long-Horizon"
+      ],
+      [
+        "Data Source",
+        "Teleop"
+      ],
+      [
+        "Usage",
+        "Train & Eval"
+      ],
+      [
+        "Score",
+        "Condition"
+      ],
+      [
+        "0",
+        "No egg is placed into the egg holder."
+      ],
+      [
+        "10",
+        "Any one egg is inside the egg holder and close to the holder bottom, with the gripper open."
+      ],
+      [
+        "25",
+        "Any two eggs are placed correctly into the egg holder."
+      ],
+      [
+        "40",
+        "Any three eggs are placed correctly into the egg holder."
+      ],
+      [
+        "90",
+        "All four eggs are placed in the holder, but the lid is not fully closed yet."
+      ],
+      [
+        "100",
+        "All four eggs are in the holder, the holder lid is correctly and fully closed, and the robot returns to origin."
+      ]
+    ]
+  }
+}

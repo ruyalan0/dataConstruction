@@ -1,0 +1,22 @@
+---
+name: visual-contact-control
+description: Control X5 from RGB and measured robot state, with rapid clear-space reaches and observed contact corrections.
+---
+
+The wrist target is link6 in world metres with wxyz quaternion. Approximate finger contact lies 0.138 m along wrist local +X; for contact c and orientation R, command wrist c - R*[0.138,0,0]. This is a geometric prior, not measured object contact. Rz(yaw)*Ry(90 degrees) points local +X down. Infer each target anew from current RGB; head ray-plane projection requires an explicit estimated height.
+
+Use a clear-space transit to a pre-contact waypoint. At contact use short fine segments and inspect current head/wrist RGB against the previous images. Separate descent, closure, test lift, transfer, release and withdrawal where their outcomes need checking. Use the shortest sufficient observation cadence rather than spending the task budget on empty-space fine moves.
+
+ee_joint_state is a command echo, not measured opening. gripper_measured_joints are physical finger positions in metres. Keep intentional gripper commands in memory; omit the gripper field to maintain the last command. Object/background relative motion across two views is evidence of retention; a closed command alone is not.
+
+Every native action is monitored. A tracking residual above 35 mm or measured finger change above 3 mm while maintaining a closed command returns early for visual inspection. wrist_error_m compares the achieved pose to the last executed interpolation target; unexecuted_target_distance_m is unfinished motion, not tracking error. After two low-progress contact attempts retreat and change approach or arm instead of repeating the same blockage.
+
+With move_local, each native step permits at most 0.15 radians of joint change. A zero-step local IK rejection can mean the requested interpolation increment is too large, even when a smaller increment along that direction is reachable. In visibly clear space, test a shorter pose prefix or increase the duration within the current phase limit, then inspect fresh RGB and measured motion. For simultaneous arms the shared duration must suit both arms. A solved first increment establishes neither reachability of the final goal nor clearance of the whole path; if small increments still fail, change the approach or orientation. Contact/tracking stalls require visual diagnosis, not merely a longer duration.
+
+Simultaneous commands stop both arms when either arm's next local IK increment is rejected. For independent empty-hand withdrawals or resets, repeated short execution of a bilateral segment can therefore conceal which arm is limiting progress. After a shorter shared prefix still rejects, use one observed single-arm segment while the other maintains its pose; infer that arm's progress from fresh RGB and measured state. Then choose a separate clear waypoint for the limiting arm. Resume simultaneous motion when both individual directions track and their swept spaces remain separated. This is a deliberate model decision, not automatic execution of the other arm after a rejection; coupled grasps require preserving object support before separating actions.
+
+For a held object, a high lateral transfer can stall even when the visible path is clear. Preserve the commanded grip and verify retention. If there is free space below the whole object, lower a short observed segment, then test a short diagonal approach at the lower height. Continue transit only after the achieved motion tracks and clearance remains visible. Height is a tradeoff between fixture clearance and reachability; raising farther is not always helpful.
+
+Reserve actions for all public completion conditions, including reset only when required. Home is the observed initial robot pose. Holding advances simulation; API waiting does not.
+
+For empty-hand reset after release, use the supplied original orientation as the eventual target. If short translation-only withdrawals repeatedly stall or move in the wrong direction, inspect clearance around the whole gripper and try a small rotation toward that orientation, optionally paired with a short clear lift. Rotation sweeps the fingers through space: verify that sweep is clear and return to fine inspection after each segment. Once short motion tracks and the hand visibly clears the fixture, use a clear-space transit for the remaining reset. A fixed downward grasp orientation need not remain feasible throughout withdrawal.

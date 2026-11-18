@@ -1,0 +1,1182 @@
+--- /dev/null
++++ astra_io_250hz_obspair/EVALUATION.md
+@@ -0,0 +1,43 @@
++# 两个决策点观测替代整轮消息历史：可行性评估
++
++方案在现有控制架构中可实现，已形成独立版本 `astra_io_250hz_obspair`。两时刻观测用于判断实际运动与接触变化，文字 memory 保留跨多个决策点的任务进度。它是输入策略变更，最终抓取表现仍需新的真实回合验证。
++
++## 参考数据核对
++
++`val.jsonl` 共 4,163 条、6 种任务。20 条首轮记录只有当前三图；4,143 条后续记录包含前后三路图，共 24,918 次图片引用。每条都是 system/user/assistant 三条消息，图像占位符与 images 数量相符。History 提供 available、duration_ms、previous_state，决策间隔为 60..500 ms；State 提供当前关节和夹爪信号，以及 last_gripper_command。参考数据本身没有文字 memory，输出为 arms + steps。
++
++这些图片路径位于另一台机器的 `/share/workspace/...`，本机未找到原图，因此只核对了用户提供文件的结构和文本。图像内容与来源数据的物理正确性没有据此声称已验证。结构审计见 [audit/val-reference.json](audit/val-reference.json)。
++
++## 与现有控制的对应
++
++| 方面 | 新版本处理 |
++|---|---|
++| 历史输入 | 不再用 `self.previous` 回放旧 user、function_call、function_call_output 或推理 |
++| 前一时刻 | 上一次已完成决策的**动作开始前观测**，不是前一个 4 ms 物理步 |
++| 三路图 | head、left wrist、right wrist 都保存；不因只有单臂移动而省略另一个腕部图 |
++| 当前输入 | 当前测得关节、腕部位姿、手指位置、当前命令、任务与剩余预算 |
++| memory | 在 `observation.memory` 显式输入；模型仍输出 memory，执行后供下一轮使用 |
++| 夹爪 | 保留真实手指测量（米）、命令回显和 desired_gripper_commands，分别标注，避免把命令当开度测量 |
++| 时间 | `history.duration_ms = 实际控制步差 × 4`；保护截断按实际步数计算，零步拒绝时可为 0 |
++| 控制输出 | 保留 control_arms 的 assessment、plan、memory、left、right、steps、settle 及 null hold 语义 |
++| 执行器 | 延续 250 Hz 关节目标、25 Hz 任务时钟、8 秒 general_pickup 预算、插值和既有保护 |
++
++没有直接套用参考数据的输出 schema。若还要以该 `val.jsonl` 原样训练并直接接入，需要额外统一 arms 包装、memory、settle、null 和夹爪目标语义；本次实现仅借鉴两个观测点的输入方式。输入测量保持原精度，没有跟随参考训练集将状态统一截断到四位小数。
++
++## 保留与丢失的信息
++
++两次关节测量、三视图和实际间隔能够描述动作后的实际状态，并支持比较物体相对手指和背景的变化。更早的阶段完成情况、失败原因假设、对象身份等信息需要通过 memory 压缩保留。
++
++两时刻并不是整个过程的充分观测：短暂碰撞、夹爪中间滑动又恢复、保护触发原因和原计划目标都可能在两帧之间不可辨别。新输入按方案不提供上个调用及其完整反馈，因此模型不得把 memory 中的意图当成已完成事实。所有原始响应、执行反馈和逐周期跟踪仍保存在本地日志中用于审计，但不进入下一次模型输入。
++
++本版本以全新策略会话启动。原来的 continuation_request 依赖旧问题结构，显式拒绝复用；同一请求的传输失败仍沿用原重试逻辑。新会话不会暗中拼入其他回合的历史。
++
++## 验证与文本体积
++
++离线测试覆盖实际请求组装、真实 policy 主循环、两帧状态和三路图片的顺序、memory 转移、提前中断、零步拒绝、禁止旧推理与调用回放、会话重置、原数值边界和四位小数规范化；同时复用原生控制队列、计时、回合边界和选卡测试。Swift 导出测试确认一条样本只含一个 user 输入并拒绝被改写的标签。
++
++用已经完成的 250 Hz L20/L21/L22 的 39 次决策做离线格式预览：两个版本均引用 225 张次图片。旧 API 输入中的 user 文本及上次调用/反馈文本共 12,250,711 字节，新 user 文本约 663,354 字节，减少约 94.6%。统计排除 system、tools、图片字节和加密推理，不能换算为 API token、延时或费用降幅。明细见 [预览清单](examples/historical-input-preview/manifest.json)。
++
++这些是旧轨迹的格式转换；没有用新输入重新请求模型或执行机器人，不能当成新版本成功轨迹或直接据此声称新版本仍然 3/3 成功。该结论需要以新版本入口另行实跑。
++
++现有代码、原有 25 Hz/250 Hz 版本、脚本、发布代码和 `val.jsonl` 共 1,328 个文件做了 SHA-256 保护，另复核 4,711 个历史日志；校验由 [verify_originals.py](verify_originals.py) 执行。
+--- astra_io_250hz_timed/README.md
++++ astra_io_250hz_obspair/README.md
+@@ -1,62 +1,72 @@
+-# 250 Hz 定时关节控制
++# 250 Hz 两时刻观测输入版
+ 
+-参考 nvidia11 `/data/chenxinlong/RoboDojo` 的 QwenSwift 适配，分开执行时钟和任务时钟。独立入口为 `variants/astra_io_250hz_timed/run_local.py`。
++基于 `astra_io_250hz_timed` 的独立副本。输入采用上一决策点 + 当前决策点观测，memory 位于当前 `observation`。原有代码和用户提供的 `val.jsonl` 均保留。方案评估见 [EVALUATION.md](EVALUATION.md)。
+ 
+-| 内容 | 本版本 |
+-|---|---|
+-| 关节目标执行 | 250 Hz，每个控制周期 4 ms |
+-| 原生观测/任务时钟 | 25 Hz，每个任务步 40 ms |
+-| general_pickup 回合预算 | 原生 200 步 = 2,000 控制周期 = 8 秒 |
+-| `steps` | 1..2500 个控制周期，最长 10 秒；超出回合剩余时间只执行原轨迹前缀 |
+-| 轨迹 | 从动作开始时测得的关节状态线性插值到目标 |
+-| 夹爪 | 第一控制周期即下发目标，沿用原生开度映射、mimic 和底层限速 |
+-| 奖励推进 | 每 10 个控制周期一次，保持原任务时钟；提前成功仍可结束回合 |
+-| 观测证据 | 每个控制周期记录目标和测得跟踪误差；每个任务步及动作返回时保存 RGB |
++每次 API 请求只包含一条 user 消息，结构为：
+ 
+-模型沿用 Astra 的 `control_arms` 工具格式、memory、上一轮交互回放、相等内容去重、最多四位小数和无 phase 输出。`settle` 保留 0..2，单位也是 4 ms；需要等待时可输出相同关节目标和更长的 `steps`。保留原有测得状态关节增量上限及腕部/夹爪跟踪中断检查，因此与远端无此检查的执行器并非完全相同。
++```json
++{
++  "input_protocol": "observation_pair_v1",
++  "instruction": "当前任务要求",
++  "history": {
++    "available": true,
++    "duration_ms": 332.0,
++    "previous_observation": {
++      "step": 0,
++      "state": {"left_arm_joint_state": [0, 0, 0, 0, 0, 0], "right_arm_joint_state": [0, 0, 0, 0, 0, 0]}
++    }
++  },
++  "observation": {
++    "step": 83,
++    "state": {"left_arm_joint_state": [0, 0, 0, 0, 0, 0], "right_arm_joint_state": [0.1, 0, 0, 0, 0, 0]},
++    "memory": "上一决策返回的文字记忆"
++  }
++}
++```
+ 
+-`step`、动作日志和工具反馈的 `executed_steps` 计控制周期；`budget.total_native_steps` 等字段计原生任务步，并提供 `native_step_unit`、`total_control_ticks`、`elapsed_simulation_seconds` 和 `task_horizon_seconds`。`control-timing.json` 的 `protocol=timed_joint_v1` 用于阻止误连另一种计时方式的服务。模型请求墙钟等待时间不计入仿真时间。
++上面是简化结构；实际 state 还包含两臂腕部位姿、夹爪命令回显和实测手指位置，当前 observation 带有原有公共关节语义、姿态和当前命令。完整输入另含控制协议、任务预算及公共任务要求。图像依次为 previous_cam_head、previous_cam_left_wrist、previous_cam_right_wrist、current_cam_head、current_cam_left_wrist、current_cam_right_wrist。首轮 history.available=false、previous_observation=null，只带后三图。
+ 
+-## 远端核对
++`history` 中只有一个观测快照，不携带旧工具调用、反馈或推理；`recent_executed_segments`、逐周期 tracking、history_references 也不进入输入。原始动作和保护事件继续记入本地日志。memory 仍由模型输出，每轮显式放进新的 observation；同一 memory 不再通过旧调用回放。
+ 
+-读取的远端提交为 `726e9aa`，工作区包含未提交的适配修改，不能只用提交号复现。文件原文已保存到 [参考归档](../../runs/nvidia11-250hz-reference-20261019-192705/)，逐文件 SHA-256 见 [remote-reference.json](audit/remote-reference.json)。
+-
+-用户指定的 `qwen_actions.jsonl` 共 266 行：133 个计划和 133 个执行反馈，`steps` 范围 15..120。计划时长合计 44.444 秒，实际合计 44 秒，最后一段计划 0.48 秒只执行 0.036 秒，符合原生 44 秒任务时间截断。该局 `_result.json` 为未成功、过程分 30；用于核对协议和计时。
+-
+-原本本地 `astra_io_250hz` 的失败记录保留：它将 `collect_freq` 改为 250，同时仍按 200 次动作结束，使 general_pickup 仅有 0.8 秒，单次动作最多 20 周期即 80 ms。本版本修正这两个时间约束。它们是已确认的协议差异；尚未通过新仿真证明抓取失败的全部原因。
+-
+-## 运行
+-
+-在项目根目录，选择空闲 GPU 后执行：
++## 入口
+ 
+ ```bash
+-ISAACSIM_GPU=4 .venv-policy/bin/python -B variants/astra_io_250hz_timed/run_local.py --seed 20
++ISAACSIM_GPU=3 .venv-policy/bin/python -B variants/astra_io_250hz_obspair/run_local.py --seed 20 --env-gpu 3
++# 所有卡都在使用时，可显式添加 --allow-shared-gpu（要求至少 12 GiB 空余显存）
+ ```
+ 
+-也可通过 `--env-gpu N` 指定原始设备编号。如果所有卡都有任务，可显式添加 `--allow-shared-gpu`；此时要求所选卡至少有 12 GiB 空余显存，并在 `launch-record.json` 中记录共享选项与启动前显存、利用率。默认仍要求空闲卡。
++输出目录为新建的 `runs/general_pickup-io-250hz-obspair-<时间>/`。250 Hz 关节控制、25 Hz 任务计时、原 CPU 物理后端、插值、夹爪映射和保护保持原实现；控制输出仍是原 control_arms 工具。旧接口的 continuation_request 不支持直接接入。
+ 
+-结果默认写入 `runs/general_pickup-io-250hz-timed-<时间>/`。设备选择、CPU 物理后端和资产配置沿用原入口。独立环境适配器仅支持单环境 joint 控制；不接受旧回合重放。底层 RoboDojo 源码和 YAML 无需修改。
++## 检查与样例
+ 
+ ```bash
+-.venv-policy/bin/python -B -m unittest discover -s variants/astra_io_250hz_timed/tests -p 'test_*.py' -v
+-.venv-policy/bin/python -B variants/astra_io_250hz_timed/verify_originals.py
++.venv-policy/bin/python -B -m unittest discover -s variants/astra_io_250hz_obspair/tests -p 'test_*.py' -v
++.venv-policy/bin/python -B variants/astra_io_250hz_obspair/verify_originals.py
+ ```
+ 
+-22 项离线测试通过：真实原生动作校验、控制队列、默认插值和文件通信服务代码参与验证；物理演化使用替身。覆盖 200 步对应 8 秒、25 Hz 奖励推进、125 周期线性插值和夹爪首周期目标、回合边界截断不加速、跟踪中断、非任务步边界的预算回传，以及全部 133 个远端动作的格式和时间。四位小数、memory、历史去重、选卡和工具回放检查同时通过。前版 333 个文件、原封存源码 546 个文件和历史日志 4,711 个文件哈希校验通过。
++可先阅读[第二轮完整输入预览](examples/historical-input-preview/L20/0002.input.json)及其[结构化 observation](examples/historical-input-preview/L20/0002.context.json)。39 次历史决策全部转换用于格式预览，未调用 API 或 Isaac；这些预览不是本版本新采集的训练数据。
+ 
+-截至 2026-10-19，尚未运行本版本的真实 Isaac 回合：检查时本机 8 张 GPU 均处于高利用率，入口要求空闲 GPU。因此此处不提供新任务成绩。
++## Swift 导出
+ 
+-2026-10-20，在 GPU 7 以共享模式完成 general_pickup L20：成功，100 分，24 次模型调用，1,680 个控制周期（168 任务步，6.72 秒仿真时间），0 次无效动作。修正了首次 `env.reset()` 前检查尚未创建的仿真对象的问题。详情见 [实跑报告](../../runs/general_pickup-io-250hz-timed-20261020-084923/RUN_REPORT.md)。
++真实回合结束后使用本目录的独立导出器，支持重复 `--run` 合并不同 layout：
+ 
+-本局已按之前的 `messages + images` JSONL 格式导出 24 条 Swift 训练样本，包含原始输入、上一轮完整交互、memory 和实际执行参数标签；72 张原图、141 次图片引用，`steps` 与 `settle` 保持 250 Hz 控制周期。数据和校验见 [Swift 数据说明](../../runs/general_pickup-io-250hz-timed-20261020-084923/swift-dataset/README.md)。可使用 `scripts/export_timed_io_ms_swift.py --run <运行目录> --output <新的数据目录>` 导出其他本版本完整回合；`--validate-only --output <数据目录>` 可重新核验。
++```bash
++.venv-policy/bin/python -B variants/astra_io_250hz_obspair/export_swift.py \
++  --run /absolute/path/to/new-obspair-run \
++  --output /absolute/path/to/new-swift-dataset
++```
+ 
+-同日补跑 L21、L22，各一场：均成功、100 分，分别为 8/7 次模型决策、870/740 控制周期、3.48/2.96 秒仿真时间，0 次无效动作。两场在 GPU 3 串行执行，与 L20 的 276 个 Harness 文件快照完全一致，视频和 Swift 数据校验通过。[三回合汇总](../../runs/general_pickup-io-250hz-timed-3layouts-20261020-090459/SUMMARY.md)包含原始结果和视频链接。
++`train.jsonl` / `all.jsonl` 每行包含 system/user/assistant 和 images，user 原样保留一次请求的两个观测点和 observation.memory；没有上一轮调用/反馈块。assistant 标签保留实际执行响应的参数 JSON。验证命令为 `export_swift.py --validate-only --output <数据目录>`。旧版本导出器不应用到本版本日志。
+ 
+-三个 layout 的 Swift 合并集共 39 条（L20=24、L21=8、L22=7），117 张原图、225 次图片引用，历史在回合边界重置。入口为 [train.jsonl](../../runs/general_pickup-io-250hz-timed-3layouts-20261020-090459/swift-dataset/train.jsonl)，[数据说明与校验](../../runs/general_pickup-io-250hz-timed-3layouts-20261020-090459/swift-dataset/README.md)。导出器支持重复传入 `--run` 合并不同 layout；串行运行和自动导出入口为 `scripts/run_timed_pickup_layouts.py`。
++## 主要新实现
+ 
+-## 核心实现
++| 文件 | 用途 |
++|---|---|
++| [observation_pair.py](harness/egg_harness/observation_pair.py) | 两时刻输入、真实间隔、三路图及 memory 组织 |
++| [native_responses.py](harness/egg_harness/native_responses.py) | 单 user 请求、观测快照生命周期、不回放 self.previous |
++| [policy.py](policy.py) | 新输入说明及原有重试/工具过滤 |
++| [run_local.py](run_local.py) | 独立运行、选卡与运行来源标记 |
++| [export_swift.py](export_swift.py) | 新日志的训练数据导出及校验 |
++| [test_observation_pair.py](tests/test_observation_pair.py) | 请求、执行主循环与导出验证 |
+ 
+-- [control_timing.py](harness/egg_harness/control_timing.py)：两个时钟的配置及协议校验。
+-- [timed_joint.py](harness/egg_harness/timed_joint.py)：原生控制队列、4 ms 物理步与 40 ms 任务计数桥接。
+-- [action_control.py](harness/egg_harness/action_control.py)：定时目标插值、跟踪反馈和按观测周期采图。
+-- [test_timed_joint.py](tests/test_timed_joint.py)：原生代码与远端样例验证。
++当前完成离线验证，尚未进行本版本真实 API/Isaac 回合。
+--- /dev/null
++++ astra_io_250hz_obspair/export_swift.py
+@@ -0,0 +1,155 @@
++"""Export actual observation-pair runs; each Swift row has the same one-user input."""
++import argparse
++from copy import deepcopy
++from datetime import datetime, timezone
++import hashlib
++import json
++from pathlib import Path
++import shutil
++import sys
++
++from PIL import Image
++
++HERE = Path(__file__).resolve().parent
++ROOT = HERE.parents[1]
++sys.path[:0] = [str(HERE / 'harness'), str(ROOT / 'scripts')]
++from egg_harness.control_timing import validate_timing_record
++from egg_harness.observation_pair import CAMERAS, PROTOCOL
++from export_io_variant_ms_swift import NATIVE_PREFIX, TEXT_PREFIX, compact, call_from, digest, require
++from export_timed_io_ms_swift import validate_arguments
++
++
++def read(path):
++    return json.loads(path.read_text())
++
++
++def save(path, value):
++    path.write_text(json.dumps(value, ensure_ascii=False, indent=2) + '\n')
++
++
++def records_for(run):
++    result=read(run/'results.json')[0]
++    launch=read(run/'launch-record.json')
++    native=result['official_observation']
++    require(result['status']=='native_end' and native['native_terminal'] and native['valid_sample']
++            and not native['unstable'], 'Only valid native terminal episodes can be exported')
++    require(result['policy_returncode']==result['simulator_returncode']==0 and result['release_unchanged'],
++            'Runtime failed or source changed')
++    require(launch['io_variant']=='astra_io_250hz_obspair' and launch['input_protocol']==PROTOCOL
++            and launch['model_history_replay'] is False, 'Use an actual observation-pair run')
++    layout=result['seed_index'];model=run/f'policy-{layout}/model'
++    timing=read(run/f'seed-{layout}/control-timing.json');validate_timing_record(timing)
++    paths=sorted(model.glob('*.request.json'))
++    require(len(paths)==result['policy']['model_calls'] and bool(paths), 'Decision count mismatch')
++    tools=read(model/'native-tools.json')['tools']
++    require([tool['name'] for tool in tools]==['control_arms'], 'Unexpected tools')
++    output=[];previous=None;end=0
++    for path in paths:
++        stem=path.name.removesuffix('.request.json');request=read(path)
++        value=json.loads(request['question']);observation=value['observation'];history=value['history']
++        require(request['input_protocol']==value['input_protocol']==PROTOCOL and not request['model_history_replay']
++                and request['replayed_call_id'] is None and request['step']==observation['step']==end,
++                'Unexpected replay or observation boundary')
++        call=call_from(model/f'{stem}.response.json');validate_arguments(call['arguments'])
++        feedback=read(model/f'{stem}.tool-result.json');actual=json.loads(feedback['output'])
++        require(feedback['call_id']==call['call_id'], 'Feedback call mismatch')
++        args=json.loads(call['arguments']);executed=actual['feedback']['executed_steps']
++        require(actual['step']==end+executed and 0<=executed<=args['steps']+args['settle'], 'Execution boundary mismatch')
++        expected_names=(['previous_'+name for name in CAMERAS] if previous else [])+['current_'+name for name in CAMERAS]
++        require([image['name'] for image in request['images']]==expected_names, 'Image order mismatch')
++        if previous:
++            prior=json.loads(previous['request']['question'])['observation']
++            snapshot={key:deepcopy(prior[key]) for key in ('step','state','arm_posture') if key in prior}
++            require(history['available'] and history['previous_observation']==snapshot
++                    and history['duration_ms']==(observation['step']-prior['step'])*4, 'Previous decision observation mismatch')
++            require(observation['memory']==json.loads(previous['call']['arguments'])['memory'], 'Memory was not propagated')
++            require([image['sha256'] for image in request['images'][:3]]==[
++                image['sha256'] for image in previous['request']['images'][-3:]], 'Previous images mismatch')
++        else:
++            require(history==dict(available=False,duration_ms=None,previous_observation=None), 'First request has history')
++        content=[dict(type='input_text',text=request['question'])]
++        for image in request['images']:
++            require(digest(Path(image['path']))==image['sha256'], 'Source image changed')
++            content.extend([dict(type='input_text',text=image['name']),
++                            dict(type='input_image',detail='high',image_sha256=image['sha256'])])
++        require(read(model/f'{stem}.api-input.readable.json')['input']==[dict(role='user',content=content)],
++                'Actual API input differs from observation pair')
++        row=dict(run=run,layout=layout,stem=stem,request=request,call=call,feedback=feedback,
++                 end_step=actual['step'],tool=tools[0])
++        output.append(row);previous=row;end=actual['step']
++    require(end==result['action_count']==native['steps'] and actual['ended'], 'Final native result mismatch')
++    return output
++
++
++def sample_for(output,record,copy_images=False):
++    request=record['request'];system=request['system']
++    require(system.count(NATIVE_PREFIX)==1,'Unknown system prompt')
++    system=system.replace(NATIVE_PREFIX,TEXT_PREFIX,1)+'\nOutput only the control_arms argument JSON; no Markdown. '
++    system+='Keep observation.memory and compare the previous/current observations. No tool history is serialized.\n'
++    system+='Output schema:\n'+compact(record['tool'])
++    text=request['question'];images=[]
++    for index,image in enumerate(request['images']):
++        target=output/'images'/f"L{record['layout']}"/f"{record['stem']}-{image['name']}.jpg"
++        if copy_images:
++            target.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(image['path'],target)
++        text+='\n'+image['name']+': <image>'
++        images.append(str(target))
++    return dict(messages=[dict(role='system',content=system),dict(role='user',content=text),
++                          dict(role='assistant',content=record['call']['arguments'])],images=images)
++
++
++def export(runs,output):
++    records=[record for run in runs for record in records_for(run)]
++    require(len({record['layout'] for record in records})==len(runs),'Use distinct layouts')
++    output.mkdir(parents=True,exist_ok=False)
++    samples=[sample_for(output,record,True) for record in records]
++    content=''.join(compact(row)+'\n' for row in samples)
++    (output/'train.jsonl').write_text(content);(output/'all.jsonl').write_text(content)
++    index=[dict(line=i,layout=record['layout'],decision=int(record['stem']),source_run=str(record['run']),
++                observation_step=record['request']['step'],end_step=record['end_step']) for i,record in enumerate(records,1)]
++    (output/'index.jsonl').write_text(''.join(compact(row)+'\n' for row in index))
++    save(output/'example-first.json',samples[0])
++    if len(samples)>1:save(output/'example-followup.json',samples[1])
++    save(output/'manifest.json',dict(source_runs=list(map(str,runs)),samples=len(samples),input_protocol=PROTOCOL,
++         memory_location='observation.memory',action_hz=250,observation_hz=25,model_history_replay=False,
++         format='ms-swift messages + images JSONL',labels='exact effective function_call.arguments',
++         source_sha256={str(path):digest(path) for run in runs for path in sorted(run.rglob('*.json'))
++                        if path.is_file() and 'runtime-assets' not in path.parts
++                        and not path.is_relative_to(output) and 'swift-dataset' not in path.parts}))
++    (output/'README.md').write_text('# Observation-pair Swift data\n\n'
++        f'{len(samples)} samples from actual completed observation-pair runs. Each row has system/user/assistant '
++        'messages and ordered images. The user message contains two measured observations and observation.memory; '
++        'no previous tool cycle. Labels preserve exact effective arguments. steps/settle use 4 ms control ticks.\n\n'
++        'Image paths are absolute; update them when moving the dataset. train.jsonl and all.jsonl are identical.\n\n'
++        f'Use --dataset {output/"train.jsonl"} --split_dataset_ratio 0.\n')
++    return validate(output)
++
++
++def validate(output):
++    manifest=read(output/'manifest.json');records=[record for run in manifest['source_runs'] for record in records_for(Path(run))]
++    require(all(Path(path).is_file() and digest(Path(path))==sha for path,sha in manifest['source_sha256'].items()),
++            'Source files changed since export')
++    samples=[json.loads(line) for line in (output/'train.jsonl').read_text().splitlines()]
++    require(len(samples)==len(records)==manifest['samples'], 'Sample count mismatch')
++    require((output/'train.jsonl').read_bytes()==(output/'all.jsonl').read_bytes(),'train/all mismatch')
++    for sample,record in zip(samples,records):
++        require(sample==sample_for(output,record),'Source input or label mismatch')
++        require(sample['messages'][1]['content'].count('<image>')==len(sample['images']),'Placeholder mismatch')
++        for image,source in zip(sample['images'],record['request']['images']):
++            require(digest(Path(image))==source['sha256'],'Exported image changed')
++            with Image.open(image) as picture:picture.load()
++    report=dict(passed=True,validated_at=datetime.now(timezone.utc).isoformat(),samples=len(samples),
++                exact_source_inputs_and_labels=True,memory_in_observation=True,tool_history_replayed=False,
++                dataset_sha256=digest(output/'train.jsonl'),model_template_tested=False)
++    save(output/'validation.json',report);return report
++
++
++if __name__=='__main__':
++    parser=argparse.ArgumentParser(description=__doc__)
++    parser.add_argument('--run',type=Path,action='append')
++    parser.add_argument('--output',type=Path,required=True)
++    parser.add_argument('--validate-only',action='store_true')
++    args=parser.parse_args()
++    if not args.validate_only and not args.run:parser.error('--run is required')
++    result=validate(args.output.resolve()) if args.validate_only else export([run.resolve() for run in args.run],args.output.resolve())
++    print(json.dumps(result,indent=2))
+--- astra_io_250hz_timed/general_pickup.json
++++ astra_io_250hz_obspair/general_pickup.json
+@@ -103,15 +103,17 @@
+     ],
+     "decision_format": "native_function"
+   },
+-  "io_variant": "astra_io_250hz_timed",
++  "io_variant": "astra_io_250hz_obspair",
+   "action_hz": 250,
+   "observation_hz": 25,
+   "timing_protocol": "timed_joint_v1",
+   "max_action_steps": 2500,
+   "numeric_output_decimal_places": 4,
+   "model_output_phase": false,
+-  "history_deduplication": true,
++  "history_deduplication": false,
+   "explicit_episode_memory": true,
+-  "model_history_replay": true,
+-  "rgb_memory_enabled": false
++  "model_history_replay": false,
++  "rgb_memory_enabled": false,
++  "input_protocol": "observation_pair_v1",
++  "memory_location": "observation.memory"
+ }
+--- astra_io_250hz_timed/harness/egg_harness/native_responses.py
++++ astra_io_250hz_obspair/harness/egg_harness/native_responses.py
+@@ -1,4 +1,4 @@
+-"""Astra Responses transport; one allowlisted tool and one actual result per cycle."""
++"""One self-contained observation-pair request; responses never become API history."""
+ import base64
+ import hashlib
+ import io
+@@ -14,18 +14,20 @@
+ from .native_tools import ToolRegistry
+ from .storage import check_configured_storage
+ from .vision import failure_record
+-from .io_contract import deduplicate_observation, readable_input, round_output
++from .io_contract import readable_input, round_output
++from .observation_pair import PROTOCOL, build_pair
+ 
+ TOOL_INSTRUCTIONS = '''Use exactly one of the supplied native function tools for your next operation.
+ The action:{...} notation in the skills describes the existing operation semantics;
+ express that operation through the matching function's parameters, not a JSON text answer.
+ Include your brief assessment, plan and updated episode memory in the call.
+ Do not emit phase. Numeric action outputs have at most four decimal places.
+-Null optional fields mean hold/omit, never a guessed value. Inspect actual tool feedback
+-before the next operation. Analysis/preview tools execute zero native steps. Only enabled
++Null optional fields mean hold/omit, never a guessed value. Inspect the actual measured
++observation pair before the next operation. Only enabled
+ tools are callable; there is no shell, arbitrary file access or hidden-state query.
+-Each request includes current public context and the preceding completed tool cycle;
+-older details survive only in the explicit memory, selected history or frame review.
++Each request is one self-contained user observation. history contains only the
++preceding decision-point observation; observation contains current measurements
++and the latest explicit memory. Previous calls, results and reasoning are not replayed.
+ '''
+ 
+ 
+@@ -35,12 +37,20 @@
+         if effort not in ('low', 'medium', 'high', 'xhigh'):
+             raise ValueError('Astra reasoning effort must be low, medium, high or xhigh')
+         self.registry = ToolRegistry(config)
++        if config.get('action_interface') != 'joint' or config.get('tool_ablation', {}).get('mode') != 'control_only':
++            raise ValueError('Observation-pair input supports joint control_arms only')
++        self.registry.contracts = {'control_arms': self.registry.contracts['control_arms']}
++        self.registry.definitions = [tool for tool in self.registry.definitions if tool['name'] == 'control_arms']
+         self.config = config
+         self.trace = Path(trace)
+         self.trace.mkdir(parents=True, exist_ok=False)
+         self.calls = 0
+         self.pending = None
+-        self.previous = []
++        if (config.get('model_history_replay') is not False
++                or config.get('input_protocol') != PROTOCOL):
++            raise ValueError('Use observation_pair_v1 with model_history_replay=false')
++        self.last_observation = None
++        self.last_memory = None
+         self.last_images = {}
+         self.seen_call_ids = set()
+         self.session_id = uuid.uuid4().hex
+@@ -50,7 +60,8 @@
+         (self.trace / 'native-tools.json').write_text(json.dumps({
+             'api': 'responses', **self.provider.audit(), 'tools': self.registry.definitions,
+             'session_id': self.session_id, 'reasoning_effort': effort,
+-            'history_policy': 'preceding complete tool cycle plus current explicit public context',
++            'history_policy': 'previous/current decision observations; memory in observation',
++            'input_protocol': PROTOCOL, 'model_history_replay': False,
+             'parallel_tool_calls': False, 'max_retries': 0}, indent=2))
+ 
+     def observe(self, feedback, step, ended):
+@@ -61,7 +72,9 @@
+         item = {'type': 'function_call_output', 'call_id': self.pending['call_id'],
+                 'output': json.dumps(result, allow_nan=False)}
+         self.pending['stem'].with_suffix('.tool-result.json').write_text(json.dumps(item, indent=2))
+-        self.previous = [self.pending['observation'], *self.pending['output'], item]
++        # Commit only the measured pre-action snapshot, never a response/tool cycle.
++        self.last_observation = self.pending['snapshot']
++        self.last_memory = self.pending['memory']
+         self.pending = None
+ 
+     def fail_pending(self, error, step):
+@@ -80,7 +93,9 @@
+         if self.calls >= self.config['max_model_calls']:
+             raise TimeoutError('Model call budget exhausted')
+         context = json.loads(question)
+-        context, images, deduplication = deduplicate_observation(context, images, self.previous)
++        if self.last_memory is not None and context.get('memory') != self.last_memory:
++            raise ValueError('observation.memory must equal the latest executed decision memory')
++        context, images, current_snapshot = build_pair(context, images, self.last_observation)
+         question = json.dumps(context, allow_nan=False)
+         content = [{'type': 'input_text', 'text': question}]
+         manifest = []
+@@ -98,25 +113,24 @@
+         instructions = TOOL_INSTRUCTIONS + '\n' + (system or '')
+         self.calls += 1
+         stem = self.trace / f'{self.calls:04d}'
+-        # Keep the existing trace contract for continuation and cost accounting.
++        # Preserve request/response artifacts for auditing and cost accounting.
+         stem.with_suffix('.request.json').write_text(json.dumps({
+             'system': instructions, 'question': question, 'images': manifest,
+             'model': self.config['model'], 'reasoning_effort': self.config['reasoning_effort'],
+             'api': 'responses', **self.provider.audit(), 'tools': list(self.registry.contracts),
+-            'replayed_call_id': self.previous[-1]['call_id'] if self.previous else None,
+-            'session_id': self.session_id, 'step': context['step'],
+-            'deduplication': deduplication, 'action_hz': 250,
++            'replayed_call_id': None, 'model_history_replay': False, 'input_protocol': PROTOCOL,
++            'session_id': self.session_id, 'step': context['observation']['step'],
++            'memory_location': 'observation.memory', 'action_hz': 250,
+             'numeric_output_decimal_places': 4, 'model_output_phase': False}))
+         stem.with_suffix('.api-input.readable.json').write_text(json.dumps(
+             {'scope': 'Audit view of actual input; image bytes and encrypted reasoning replaced',
+-             'input': readable_input([*self.previous, observation])}, indent=2))
++             'input': readable_input([observation])}, indent=2))
+         start = time.monotonic()
+         try:
+             response = self.client.responses.create(
+                 model=self.config['model'], instructions=instructions,
+-                input=[*self.previous, observation], tools=self.registry.definitions,
++                input=[observation], tools=self.registry.definitions,
+                 tool_choice='required', parallel_tool_calls=False, store=False,
+-                include=['reasoning.encrypted_content'],
+                 reasoning={'effort': self.config['reasoning_effort']},
+                 extra_headers=self.provider.headers(self.session_id))
+             raw = response.model_dump(exclude_none=True)
+@@ -141,7 +155,7 @@
+                 raise ValueError('Missing or repeated function call ID')
+             decision = self.registry.decision(call['name'], call['arguments'])
+             # Validate original bounds before rounding. Keep the provider response
+-            # separately; replay and execute the same normalized action values.
++            # separately; execute and log the same normalized action values.
+             original_arguments = json.loads(call['arguments'])
+             normalized_arguments = round_output(original_arguments)
+             call['arguments'] = json.dumps(normalized_arguments, allow_nan=False)
+@@ -153,7 +167,7 @@
+                  'effective_response': stem.with_suffix('.response.json').name}, indent=2))
+             self.seen_call_ids.add(call_id)
+             self.pending = {'call_id': call_id, 'stem': stem,
+-                            'observation': observation, 'output': raw['output']}
++                            'snapshot': current_snapshot, 'memory': normalized_arguments['memory']}
+             return decision
+         except BaseException as error:
+             stem.with_suffix('.failure.json').write_text(json.dumps({
+--- /dev/null
++++ astra_io_250hz_obspair/harness/egg_harness/observation_pair.py
+@@ -0,0 +1,69 @@
++"""Build a self-contained two-observation request without a replayed tool cycle."""
++from copy import deepcopy
++import math
++
++PROTOCOL = 'observation_pair_v1'
++CAMERAS = ('cam_head', 'cam_left_wrist', 'cam_right_wrist')
++CURRENT_FIELDS = ('home', 'home_joints', 'joint_semantics', 'arm_posture',
++                  'desired_gripper_commands', 'contact_estimates')
++REQUIRED_STATE = tuple(arm + suffix for arm in ('left', 'right') for suffix in
++                       ('_arm_joint_state', '_ee_pose', '_ee_joint_state', '_gripper_measured_joints'))
++
++
++def _state(state):
++    if not isinstance(state, dict) or not all(key in state for key in REQUIRED_STATE):
++        raise ValueError('Observation must contain both measured arms, poses, finger joints and command echoes')
++    for key in REQUIRED_STATE:
++        value = state[key]
++        expected = 6 if key.endswith('_arm_joint_state') else 7 if key.endswith('_ee_pose') else None
++        if (not isinstance(value, list) or not value or (expected is not None and len(value) != expected)
++                or any(isinstance(v, bool) or not isinstance(v, (int, float)) or not math.isfinite(v) for v in value)):
++            raise ValueError('Invalid public state field: ' + key)
++    return deepcopy(state)
++
++
++def snapshot(context, images):
++    step = context.get('step')
++    if type(step) is not int or step < 0:
++        raise ValueError('Decision step must be a nonnegative control-tick count')
++    if not all(name in images for name in CAMERAS):
++        raise ValueError('Each observation needs all three camera views')
++    result = dict(step=step, state=_state(context['state']),
++                  cameras={name: str(images[name]) for name in CAMERAS})
++    if 'arm_posture' in context:
++        result['arm_posture'] = deepcopy(context['arm_posture'])
++    return result
++
++
++def build_pair(context, images, previous=None):
++    """Use the preceding decision's pre-action measurements, not the prior physics tick.
++
++    Only public current fields and one observation snapshot cross this boundary.
++    In particular no prior function arguments, results or tracking arrays survive.
++    """
++    current = snapshot(context, images)
++    if not isinstance(context.get('memory'), str):
++        raise ValueError('Current observation requires explicit episode memory')
++    timing = context['control_timing']
++    if (timing.get('protocol') != 'timed_joint_v1' or timing.get('action_hz') != 250
++            or timing.get('observation_hz') != 25):
++        raise ValueError('Observation pairs require timed 250 Hz control and a 25 Hz task clock')
++    observation = dict(step=current['step'], state=current['state'], memory=context['memory'])
++    observation.update({key: deepcopy(context[key]) for key in CURRENT_FIELDS if key in context})
++    history = dict(available=False, duration_ms=None, previous_observation=None)
++    ordered_images = {}
++    if previous is not None:
++        prior = snapshot(previous, previous['cameras'])
++        if prior['step'] > current['step']:
++            raise ValueError('Previous decision observation cannot come from the future')
++        history = dict(available=True, duration_ms=(current['step']-prior['step'])*1000/250,
++                       previous_observation={key: value for key, value in prior.items() if key != 'cameras'})
++        ordered_images.update({'previous_' + name: prior['cameras'][name] for name in CAMERAS})
++    ordered_images.update({'current_' + name: current['cameras'][name] for name in CAMERAS})
++    payload = dict(input_protocol=PROTOCOL, instruction=context['instruction'],
++                   history=history, observation=observation,
++                   control_timing=deepcopy(timing), budget=deepcopy(context['budget']),
++                   action_interface=context.get('action_interface', 'joint'))
++    if 'public_task_requirements' in context:
++        payload['public_task_requirements'] = deepcopy(context['public_task_requirements'])
++    return payload, ordered_images, current
+--- astra_io_250hz_timed/harness/egg_harness/skill_policy.py
++++ astra_io_250hz_obspair/harness/egg_harness/skill_policy.py
+@@ -156,13 +156,8 @@
+ 
+ 
+ def temporal_inputs(obs, previous):
+-    images=dict(obs['cameras'])
+-    if previous is None:return images,None
+-    images['previous_head']=previous['cameras']['cam_head']
+-    arm=previous['arm']
+-    arms=arm if isinstance(arm,list) else ([] if arm is None else [arm])
+-    for name in arms:images['previous_'+name+'_wrist']=previous['cameras']['cam_'+name+'_wrist']
+-    return images,{'step':previous['step'],'state':previous['state'],'active_arm':arm}
++    # The transport retains one completed decision snapshot, including all views.
++    return dict(obs['cameras']), None
+ 
+ 
+ def gripper_trace(episode, start, end, arm):
+@@ -250,12 +245,7 @@
+     pending_joint_preview=None
+     review_images={};review_records=[]
+     if config.get('continuation_request'):
+-        from .continuation_context import load_context
+-        restored=load_context(config['continuation_request'],a.episode,robot.obs['step'])
+-        memory=restored['memory']+' Reconnected after model interruption. Verify this prior memory against current RGB before acting.'
+-        feedback=restored['feedback'];recent=restored['recent'];stalls=restored['stalls']
+-        previous=restored['previous']
+-        (a.trace/'restored-context.json').write_text(json.dumps(restored,indent=2))
++        raise ValueError('Start a fresh observation-pair policy; legacy continuation requests are incompatible')
+     try:
+         while True:
+             model.observe(feedback, robot.obs['step'], robot.obs['ended'])
+@@ -263,7 +253,7 @@
+             if model.calls>=config['max_model_calls']:raise TimeoutError('Model call budget exhausted')
+             images,previous_state=temporal_inputs(robot.obs,previous)
+             images.update(review_images)
+-            context={'step':robot.obs['step'],'state':robot.obs['state'],'home':robot.home,'instruction':robot.obs['instruction'],'memory':memory,'previous_result':feedback,'recent_executed_segments':recent[-8:],'stalled_segments_this_controller':stalls[-12:],'desired_gripper_commands':commanded_grip,'contact_estimates':{arm:(np.asarray(robot.obs['state'][arm+'_ee_pose'][:3])+Rotation.from_quat(np.asarray(robot.obs['state'][arm+'_ee_pose'])[ [4,5,6,3] ]).apply([.138,0,0])).tolist() for arm in ('left','right')}}
++            context={'step':robot.obs['step'],'state':robot.obs['state'],'home':robot.home,'instruction':robot.obs['instruction'],'memory':memory,'desired_gripper_commands':commanded_grip,'contact_estimates':{arm:(np.asarray(robot.obs['state'][arm+'_ee_pose'][:3])+Rotation.from_quat(np.asarray(robot.obs['state'][arm+'_ee_pose'])[ [4,5,6,3] ]).apply([.138,0,0])).tolist() for arm in ('left','right')}}
+             context['control_timing']=robot.obs['control_timing']
+             context['previous_observation']=previous_state
+             context['review_capability']='Zero-motion action:{review:[{step:recorded_native_step,camera:cam_head|cam_left_wrist|cam_right_wrist}]};1..6 frames. Historical RGB and original public poses appear on your next decision alongside current views. No future, other-episode or hidden state. Use before declaring past contact unknowable.'
+@@ -345,7 +335,7 @@
+                         if 'gripper' in spec:commanded_grip[arm]=spec['gripper']
+                 errors+=int(feedback['status']=='rejected_before_motion')
+                 event={'start_step':previous['step'],'end_step':robot.obs['step'],'action':action,'feedback':feedback}
+-                recent.append(event)
++                # Complete feedback stays in local audit files, not model history.
+                 with (a.trace/'motion-feedback.jsonl').open('a') as f:f.write(json.dumps(event)+chr(10))
+                 continue
+             if action.get('verify'):
+--- astra_io_250hz_timed/harness/scripts/server_loop.py
++++ astra_io_250hz_obspair/harness/scripts/server_loop.py
+@@ -68,7 +68,7 @@
+     save(output / 'initial-state.json', env.get_obs()['state'])
+     save(output / 'provenance.json', dict(seeds=seeds, task=task,
+          privileged_diagnostics=mode=='development', depth_calibration=False, object_teleportation=False,
+-         mode=mode, action_interface=action_interface, io_variant='astra_io_250hz_timed',
++         mode=mode, action_interface=action_interface, io_variant='astra_io_250hz_obspair',
+          control_timing=json.loads((output / 'control-timing.json').read_text())))
+ 
+     def observe(tag):
+--- astra_io_250hz_timed/harness/skills/transport-retention/SKILL.md
++++ astra_io_250hz_obspair/harness/skills/transport-retention/SKILL.md
+@@ -5,7 +5,7 @@
+ 
+ During pickup and carrying, compare the previous active-wrist image with the current image. An object fixed between finger pads while the background moves supports retention. An object moving with the background, separating from pads, or appearing on the table supports loss. Use the head view to resolve occlusion; state unknown when neither view distinguishes them. A successful test lift establishes retention only for that interval.
+ 
+-Record the last confirmed retention step and evidence in memory. Compare gripper_opening_by_step against the opening at that step, while preserving the desired close command. Sudden opening followed by closure toward zero is consistent with losing resistance; it does not identify the collision or slip cause. Reconcile with RGB before another carrying segment. If loss is confirmed, clear the empty gripper, relocalize the object, and choose a reachable regrasp rather than continuing the old placement.
++Record the last confirmed retention step and evidence in memory. Compare history.previous_observation.state and observation.state measured finger joints, together with both observation images and observation.desired_gripper_commands. The input contains no per-tick opening trace. Sudden opening followed by closure toward zero is consistent with losing resistance; it does not identify the collision or slip cause. Reconcile with RGB before another carrying segment. If loss is confirmed, clear the empty gripper, relocalize the object, and choose a reachable regrasp rather than continuing the old placement.
+ 
+ Plan clearance for the carried object's lowest surface and the entire wrist attachment, using current RGB and achieved pose. Finger contact-center clearance alone does not clear the object. When crossing a rim or approaching a lid, use short observed segments, keep orientation stable, and separate vertical clearance from lateral transfer. A simultaneous translation and large rotation makes a new swept volume; inspect after small rotation increments before crossing nearby geometry. Clear-space transit is appropriate only after both object retention and clearance are supported.
+ 
+--- astra_io_250hz_timed/harness/skills/upright-grasp-approach/SKILL.md
++++ astra_io_250hz_obspair/harness/skills/upright-grasp-approach/SKILL.md
+@@ -9,7 +9,7 @@
+ - Constrained folding: the wrist is near the target or table while link2/link3 leave insufficient room to approach, descend or withdraw. Holding the same wrist pose can trap local IK; create space before repeating the blocked motion.
+ - Raised-elbow approach: link2 is more upright and link3 extends toward the target, leaving room for descent, grasp and lift. Choose this when it helps the next motion.
+ 
+-Before adjusting, identify the obstructed next motion and evidence: visible lack of clearance, a restricted approach path, or measured failure to advance. Use arm_posture and previous_arm_posture as geometric context. link2_tilt_from_vertical_deg describes joint2-to-joint3 geometry; it is not a trigger, optimization objective or success criterion.
++Before adjusting, identify the obstructed next motion and evidence: visible lack of clearance, a restricted approach path, or measured failure to advance. Use observation.arm_posture and history.previous_observation.arm_posture as geometric context when available. link2_tilt_from_vertical_deg describes joint2-to-joint3 geometry; it is not a trigger, optimization objective or success criterion.
+ 
+ Select a short empty-hand retreat, reorientation, or available posture action with a visibly clear swept path. Move the other arm only when it obstructs that path. Inspect actual motion and fresh views, then re-estimate the next wrist target. Judge adjustment by whether approach, descent or withdrawal resumes with adequate clearance. If blocked, change the approach, wrist orientation or arm instead of repeating angle reduction. Preserve a working grasp even with comparatively horizontal link2.
+ 
+--- astra_io_250hz_timed/policy.py
++++ astra_io_250hz_obspair/policy.py
+@@ -32,19 +32,27 @@
+ also checked against measured state at <=0.15 rad/joint/step. Respect the supplied
+ joint limits with a 0.02 rad planning margin. No implicit IK or automatic recovery
+ is available. Tracking errors >35 mm or measured finger change >3 mm during an
+-established closed grip can stop the whole segment early; inspect actual feedback.
++established closed grip can stop the whole segment early; inspect measured changes.
+ ee_joint_state is a command echo, not measured opening. gripper_measured_joints
+ are finger positions in metres, not contact sensors. Verify retention by object
+ motion relative to the fingers and background in more than one view. Explain
+ uncertainty. Return home only when the public task requires it.
+-The preceding complete tool cycle is replayed. Its user message contains the
+-previous state, arm_posture and RGB; its function call contains the latest memory;
+-its function_call_output contains the latest actual execution feedback. The new
+-observation omits only equal copies of these data and records history_references.
+-Read references from the preceding messages. Compare camera names together with
+-their user message's step; cam_head in two messages denotes two observation times.
+-Use current robot state and joint_semantics to plan motion; the prior message's
+-state and cameras are historical evidence, not the current robot pose.
++Each request has one user observation with two measured decision points.
++observation.state is the current robot state; observation.memory is the latest
++explicit episode memory. history.previous_observation contains the PRECEDING
++DECISION POINT'S measured state, not the previous physics tick. Previous and
++current images are named previous_cam_head, previous_cam_left_wrist,
++previous_cam_right_wrist and current_cam_head, current_cam_left_wrist,
++current_cam_right_wrist. history.duration_ms gives actual elapsed
++simulation time between these decisions; the first decision has no prior view.
++Compare both measured joint states and all three views to infer movement and
++retention. State gripper command echoes and observation.desired_gripper_commands
++are commands, not measured apertures; use gripper_measured_joints for fingers.
++No previous function call, result, reasoning or action sequence is supplied.
++Requested goals may have been cut short by tracking or gripper guards. Infer the
++actual outcome from the current measurements; do not assume memory describes a
++completed movement. Current observation fields contain joint_semantics and home
++when needed. Return an updated memory for the next observation.memory.
+ Preserve compact episode memory. There is no frame-review, projection,
+ triangulation, completion-check, stop tool, arbitrary file access or hidden state.
+ Completion is determined by the simulator; bounded holds can inspect completion.
+@@ -71,8 +79,9 @@
+             path = self.trace / 'native-tools.json'
+             record = json.loads(path.read_text())
+             record.update(tools=self.registry.definitions, enabled_tools=['control_arms'],
+-                          history_policy='preceding complete tool cycle; equal observation copies omitted',
+-                          io_variant='astra_io_250hz_timed', action_hz=250, observation_hz=25,
++                          history_policy='previous/current observations only; memory in observation',
++                          io_variant='astra_io_250hz_obspair', input_protocol='observation_pair_v1',
++                          model_history_replay=False, memory_location='observation.memory', action_hz=250, observation_hz=25,
+                           timing_protocol='timed_joint_v1', max_action_steps=2500,
+                           numeric_output_decimal_places=4,
+                           model_output_phase=False, external_transport_retry=RETRY_POLICY)
+--- /dev/null
++++ astra_io_250hz_obspair/preview.py
+@@ -0,0 +1,127 @@
++"""Preview new inputs from saved measurements without requesting a model or a simulator."""
++import argparse
++from collections import Counter
++from datetime import datetime, timezone
++import hashlib
++import json
++from pathlib import Path
++import re
++import sys
++
++HERE = Path(__file__).resolve().parent
++ROOT = HERE.parents[1]
++sys.path[:0] = [str(HERE), str(HERE / 'harness')]
++from egg_harness.native_responses import TOOL_INSTRUCTIONS
++from egg_harness.observation_pair import CAMERAS, build_pair
++from policy import JOINT_SYSTEM
++
++
++def read(path):
++    return json.loads(path.read_text())
++
++
++def save(path, value):
++    path.write_text(json.dumps(value, ensure_ascii=False, indent=2) + '\n')
++
++
++def audit_reference(path):
++    counts, cameras, tasks, durations = Counter(), Counter(), Counter(), []
++    for line in path.open():
++        if not line.strip():
++            continue
++        row = json.loads(line)
++        assert set(row) == {'messages', 'images'}
++        assert [item['role'] for item in row['messages']] == ['system', 'user', 'assistant']
++        user = row['messages'][1]['content']
++        history = json.loads(re.search(r'^History: (.*)$', user, re.M).group(1))
++        assert user.count('<image>') == len(row['images']) == (6 if history['available'] else 3)
++        assert set(json.loads(row['messages'][-1]['content'])) == {'arms', 'steps'}
++        assert (history['previous_state'] is not None) == history['available']
++        if history['available']:
++            assert history['duration_ms'] >= 0
++            durations.append(history['duration_ms'])
++        counts['rows'] += 1
++        counts['history_available' if history['available'] else 'first_decision'] += 1
++        cameras[len(row['images'])] += 1
++        tasks[user.splitlines()[0]] += 1
++        counts['memory_present'] += 'memory' in user
++    return dict(passed=True, source=str(path), sha256=hashlib.sha256(path.read_bytes()).hexdigest(),
++                counts=dict(counts), image_count_distribution=dict(cameras), tasks=dict(tasks),
++                duration_ms_min=min(durations), duration_ms_max=max(durations),
++                image_bytes_verified=False,
++                scope='JSON structure and placeholder order checked; referenced remote image paths are not local')
++
++
++def preview(runs, output):
++    output.mkdir(parents=True, exist_ok=False)
++    skills='\n'.join((HERE / 'harness/skills' / name / 'SKILL.md').read_text() for name in
++                     read(HERE / 'general_pickup.json')['skill_names'])
++    instructions=TOOL_INSTRUCTIONS+'\n'+JOINT_SYSTEM+'\n'+skills
++    rows, sources = [], set()
++    old_bytes=new_bytes=0
++    for run in runs:
++        result=read(run/'results.json')[0]
++        layout=result['seed_index']
++        previous=None
++        last_memory=None
++        folder=output/f'L{layout}'
++        folder.mkdir()
++        paths=sorted((run/f'policy-{layout}/model').glob('*.request.json'))
++        for path in paths:
++            stem=path.name.removesuffix('.request.json')
++            request=read(path)
++            source=json.loads(request['question'])
++            source['memory']=source['memory'] if last_memory is None else last_memory
++            images={item['name']:item['path'] for item in request['images']}
++            pair,ordered,current=build_pair(source,images,previous)
++            content=[dict(type='input_text',text=json.dumps(pair,ensure_ascii=False,allow_nan=False))]
++            manifest=[]
++            for name,image in ordered.items():
++                image=Path(image)
++                digest=hashlib.sha256(image.read_bytes()).hexdigest()
++                sources.add(image)
++                content.extend([dict(type='input_text',text=name),dict(type='input_image',image_sha256=digest,detail='high')])
++                manifest.append(dict(name=name,path=str(image),sha256=digest))
++            response_path=path.with_name(stem+'.response.json')
++            response=read(response_path)
++            call=next(item for item in response['output'] if item['type']=='function_call')
++            actual_input=read(path.with_name(stem+'.api-input.readable.json'))['input']
++            old_text=sum(len(part['text'].encode()) for item in actual_input for part in item.get('content',[])
++                         if part['type']=='input_text')
++            old_text+=sum(len(item.get('arguments','').encode())+len(item.get('output','').encode()) for item in actual_input)
++            new_text=sum(len(part['text'].encode()) for part in content if part['type']=='input_text')
++            old_bytes+=old_text;new_bytes+=new_text
++            assert pair['observation']['state']==source['state']
++            assert pair['observation']['memory']==source['memory']
++            assert pair['history']['previous_observation'] is None or pair['history']['previous_observation']['step']==previous['step']
++            assert len(ordered)==(6 if previous else 3)
++            preview_record=dict(scope='Offline input-format conversion only; no new model or robot execution',
++                instructions=instructions,input=[dict(role='user',content=content)],images=manifest,
++                reference_response=str(response_path),reference_action_arguments=call['arguments'])
++            save(folder/f'{stem}.context.json',pair)
++            save(folder/f'{stem}.input.json',preview_record)
++            rows.append(dict(layout=layout,decision=int(stem),source_request=str(path),source_response=str(response_path),
++                             context=str(folder/f'{stem}.context.json'),input=str(folder/f'{stem}.input.json'),
++                             images=len(ordered),old_nonimage_user_call_feedback_bytes=old_text,new_user_text_bytes=new_text))
++            sources.update((path,response_path,path.with_name(stem+'.api-input.readable.json')))
++            previous=current
++            last_memory=json.loads(call['arguments'])['memory']
++    report=dict(passed=True,created_at=datetime.now(timezone.utc).isoformat(),samples=len(rows),
++                per_layout=dict(Counter(row['layout'] for row in rows)),image_references=sum(row['images'] for row in rows),
++                memory_location='observation.memory',complete_tool_cycles_replayed=0,
++                exact_current_states=True,exact_previous_decision_states=True,all_three_previous_cameras=True,
++                nonimage_input_bytes=dict(old_user_plus_call_feedback=old_bytes,new_user_only=new_bytes,
++                    reduction_fraction=1-new_bytes/old_bytes,
++                    scope='Excludes system/tools, image bytes and encrypted reasoning; not a token or performance measurement'),
++                scope='Offline preview of historical measurements and labels, not new-policy success evidence or new training trajectories')
++    save(output/'manifest.json',dict(report,records=rows))
++    save(output/'source-sha256.json',{str(path):hashlib.sha256(path.read_bytes()).hexdigest() for path in sorted(sources)})
++    return report
++
++
++if __name__=='__main__':
++    parser=argparse.ArgumentParser(description=__doc__)
++    parser.add_argument('--run',type=Path,action='append',required=True)
++    parser.add_argument('--output',type=Path,required=True)
++    args=parser.parse_args()
++    print(json.dumps(preview([path.resolve() for path in args.run],args.output.resolve()),ensure_ascii=False,indent=2))
+--- astra_io_250hz_timed/run_local.py
++++ astra_io_250hz_obspair/run_local.py
+@@ -1,4 +1,4 @@
+-"""Run the isolated 250 Hz, four-decimal, history-deduplicated control-only variant."""
++"""Run the isolated 250 Hz, four-decimal, observation-pair control-only variant."""
+ import argparse
+ from contextlib import contextmanager
+ from datetime import datetime, timezone
+@@ -173,10 +173,11 @@
+         config = read(args.task_config)
+         if config.get('task') != args.task:
+             raise ValueError('--task must match the selected task configuration')
+-        config.update(io_variant='astra_io_250hz_timed', action_hz=250, observation_hz=25,
++        config.update(io_variant='astra_io_250hz_obspair', action_hz=250, observation_hz=25,
+                       timing_protocol='timed_joint_v1', max_action_steps=2500,
+                       numeric_output_decimal_places=4,
+-                      model_output_phase=False, history_deduplication=True)
++                      model_output_phase=False, history_deduplication=False,
++                      input_protocol='observation_pair_v1', memory_location='observation.memory')
+         retry_policy = config.get('transport_retry')
+         retry_wrapper = VARIANT / 'policy.py'
+         MODES = {'control_only': {'control_arms'}}
+@@ -184,7 +185,7 @@
+         if ablation_mode not in MODES:
+             raise ValueError('Unknown tool ablation mode')
+         if ablation_mode == 'control_only':
+-            memory_policy = dict(explicit_episode_memory=True, model_history_replay=True,
++            memory_policy = dict(explicit_episode_memory=True, model_history_replay=False,
+                                  rgb_memory_enabled=False)
+             config.update(memory_policy)
+             config['tool_ablation'].update(memory_policy)
+@@ -208,7 +209,7 @@
+         save(output / f'source-{args.seed}.json', {'source': str(HARNESS), 'files': source_files})
+         save(output / 'layout-provenance.json', {'seed_group': 0, 'layout_index': args.seed,
+              'path': str(layout), 'sha256': hashlib.sha256(layout.read_bytes()).hexdigest()})
+-        save(output / 'launch-record.json', {'task': args.task, 'source': str(HARNESS), 'io_variant': 'astra_io_250hz_timed',
++        save(output / 'launch-record.json', {'task': args.task, 'source': str(HARNESS), 'io_variant': 'astra_io_250hz_obspair',
+              'action_hz': 250, 'observation_hz': 25, 'timing_protocol': 'timed_joint_v1',
+              'max_action_steps': 2500, 'numeric_output_decimal_places': 4, 'model_output_phase': False,
+              'hostname': os.uname().nodename, 'gpu': args.gpu, 'gpu_uuid': gpu_uuid,
+@@ -218,8 +219,9 @@
+              'seed_group': 0, 'layout_indices': [args.seed],
+              'model': config['model'], 'reasoning_effort': config['reasoning_effort'],
+              'rgb_memory_enabled': False, 'original_sdk_max_retries': 0,
++             'input_protocol': 'observation_pair_v1', 'memory_location': 'observation.memory',
+              'explicit_episode_memory': config.get('explicit_episode_memory', True),
+-             'model_history_replay': config.get('model_history_replay', True),
++             'model_history_replay': config.get('model_history_replay', False),
+              'episode_timeout_seconds': args.episode_timeout or None,
+              'external_transport_retry': retry_policy,
+              'retry_wrapper_sha256': hashlib.sha256(retry_wrapper.read_bytes()).hexdigest() if retry_policy else None,
+@@ -227,7 +229,7 @@
+              'launcher': str(Path(__file__).resolve()),
+              'launcher_sha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+              'tool_ablation': config['tool_ablation'],
+-             'scope': '250 Hz timed joint goals, original 25 Hz task horizon, four decimal output and deduplicated history',
++             'scope': '250 Hz timed joint goals, original 25 Hz task horizon, four decimal output, observation pairs and explicit observation memory',
+              'device_routing': {'selection': 'ISAACSIM_GPU / --env-gpu', 'isaacsim_gpu': args.gpu,
+                                 'isaac_launcher_device': f'cuda:{args.gpu}', 'robodojo_device_id': args.gpu,
+                                 'physics_backend': 'original RoboDojo simulation configuration',
+@@ -276,7 +278,7 @@
+                     '--config', str(output / f'config-{args.seed}.json'), '--episode', str(episode),
+                     '--trace', str(trace)], cwd=HARNESS, env=environment, stdout=log,
+                     stderr=subprocess.STDOUT, start_new_session=True)
+-            print('[release] Simulator ready; 250 Hz variant policy started with episode memory and deduplicated history', flush=True)
++            print('[release] Simulator ready; 250 Hz variant policy started with previous/current observations and explicit observation memory', flush=True)
+             policy_started = time.monotonic()
+             while policy.poll() is None:
+                 storage.check()
+@@ -374,6 +376,6 @@
+             parser.error('Unexpected positional arguments')
+         if args.output is None:
+             stamp = datetime.now(ZoneInfo('Asia/Shanghai')).strftime('%Y%m%d-%H%M%S')
+-            args.output = ROOT / 'runs' / (args.task + '-io-250hz-timed-' + stamp)
++            args.output = ROOT / 'runs' / (args.task + '-io-250hz-obspair-' + stamp)
+         with gpu_lease(args.gpu):
+             raise SystemExit(run(args))
+--- /dev/null
++++ astra_io_250hz_obspair/tests/test_observation_pair.py
+@@ -0,0 +1,256 @@
++"""Exercise actual three-cycle requests, policy execution and observation-only memory."""
++from copy import deepcopy
++import json
++from pathlib import Path
++import shutil
++import sys
++import tempfile
++from types import SimpleNamespace
++import unittest
++from unittest.mock import patch
++
++from PIL import Image
++
++HERE = Path(__file__).resolve().parents[1]
++ROOT = HERE.parents[1]
++sys.path[:0] = [str(HERE), str(HERE / 'harness'), str(ROOT / 'scripts')]
++import policy
++from egg_harness import native_responses
++from egg_harness.control_timing import timing_record
++from egg_harness.observation_pair import CAMERAS, PROTOCOL, build_pair, snapshot
++
++
++def state(value):
++    result = {}
++    for arm in ('left', 'right'):
++        result[arm+'_arm_joint_state'] = [value, .123456789, 0., 0., 0., 0.]
++        result[arm+'_ee_pose'] = [value, 0., 1., 1., 0., 0., 0.]
++        result[arm+'_ee_joint_state'] = [.4]
++        result[arm+'_gripper_measured_joints'] = [.0123456789, .0123]
++    return result
++
++
++def context(step=0, value=0., memory='fresh memory'):
++    return dict(step=step, state=state(value), instruction='Pick up the target.', memory=memory,
++                action_interface='joint', control_timing=timing_record(),
++                budget=dict(total_control_ticks=2000, executed_control_ticks=step),
++                desired_gripper_commands=dict(left=.4, right=.4),
++                joint_semantics=dict(arms='public'), home_joints=dict(left=[0.]*6,right=[0.]*6),
++                arm_posture=dict(source_step=step))
++
++
++def arguments(number):
++    return dict(assessment='observed', plan='next goal', memory=f'memory from decision {number}',
++                left=None, right=dict(control='joint', joints=[.123456, 0., 0., 0., 0., 0.], gripper=.4),
++                steps=125, settle=2)
++
++
++class PairBuilderTests(unittest.TestCase):
++    def test_first_and_previous_frames_keep_full_precision_and_source_objects(self):
++        images={name: name+'.jpg' for name in CAMERAS}
++        original=context(); before=deepcopy(original)
++        first, first_images, prior=build_pair(original,images)
++        self.assertEqual(first['observation']['memory'],'fresh memory')
++        self.assertFalse(first['history']['available'])
++        self.assertEqual(list(first_images),['current_'+name for name in CAMERAS])
++        current=context(83,.012345678901,'updated memory')
++        pair, views, _=build_pair(current,images,prior)
++        self.assertEqual(pair['history']['duration_ms'],332.)
++        self.assertEqual(pair['history']['previous_observation']['state'],original['state'])
++        self.assertEqual(pair['observation']['state'],current['state'])
++        self.assertNotIn('memory',pair['history']['previous_observation'])
++        self.assertEqual(list(views),['previous_'+name for name in CAMERAS]+['current_'+name for name in CAMERAS])
++        self.assertEqual(original,before)
++        pair['history']['previous_observation']['state']['left_arm_joint_state'][0]=999
++        self.assertEqual(prior['state']['left_arm_joint_state'][0],0.)
++
++    def test_action_history_feedback_and_future_labels_do_not_enter_request(self):
++        source=context()
++        for key in ('previous_result','recent_executed_segments','stalled_segments_this_controller',
++                    'history_references','previous_observation','success','score','future_action'):
++            source[key]={'secret_marker':key}
++        result,_,_=build_pair(source,{name:name for name in CAMERAS})
++        self.assertNotIn('secret_marker',json.dumps(result))
++        self.assertNotIn('memory',result)
++        self.assertIn('memory',result['observation'])
++
++    def test_zero_motion_rejection_still_has_previous_decision_at_the_same_step(self):
++        current=context(20)
++        previous=snapshot(current,{name:name for name in CAMERAS})
++        result,_,_=build_pair(current,{name:name for name in CAMERAS},previous)
++        self.assertTrue(result['history']['available'])
++        self.assertEqual(result['history']['duration_ms'],0.)
++
++    def test_future_incomplete_nonfinite_and_wrong_timing_inputs_are_rejected(self):
++        images={name:name for name in CAMERAS}
++        previous=snapshot(context(20),images)
++        with self.assertRaisesRegex(ValueError,'future'):build_pair(context(10),images,previous)
++        with self.assertRaisesRegex(ValueError,'three camera'):build_pair(context(),{'cam_head':'head'})
++        source=context();source['state']['left_arm_joint_state'][0]=float('nan')
++        with self.assertRaisesRegex(ValueError,'Invalid public state'):build_pair(source,images)
++        source=context();source['control_timing']['action_hz']=25
++        with self.assertRaisesRegex(ValueError,'250 Hz'):build_pair(source,images)
++
++
++class TransportTests(unittest.TestCase):
++    def setUp(self):
++        self.temporary=tempfile.TemporaryDirectory()
++        self.folder=Path(self.temporary.name)
++        self.images={}
++        for number,name in enumerate(CAMERAS):
++            path=self.folder/(name+'.jpg');Image.new('RGB',(12,8),(30+number,50,70)).save(path)
++            self.images[name]=path
++        self.config=json.loads((HERE/'general_pickup.json').read_text())
++        self.provider=SimpleNamespace(base_url='https://example.invalid',api_key='unused',
++            audit=lambda:dict(provider='mock'),headers=lambda session:{})
++        self.payloads=[]
++        def create(**kwargs):
++            self.payloads.append(deepcopy(kwargs));n=len(self.payloads)
++            raw=dict(id=f'response{n}',status='completed',output=[
++                dict(type='reasoning',id=f'reason{n}',encrypted_content='NEVER_REPLAY_THIS',summary=[]),
++                dict(type='function_call',name='control_arms',status='completed',call_id=f'call{n}',
++                     arguments=json.dumps(arguments(n)))])
++            return SimpleNamespace(id=raw['id'],usage=None,status='completed',model_dump=lambda **options:deepcopy(raw))
++        self.patches=[patch.object(native_responses,'OpenAI',return_value=SimpleNamespace(responses=SimpleNamespace(create=create))),
++                      patch.object(native_responses,'select_provider',return_value=self.provider)]
++        for item in self.patches:item.start()
++        self.model=native_responses.NativeToolVision(self.config,self.folder/'model')
++
++    def tearDown(self):
++        for item in reversed(self.patches):item.stop()
++        self.temporary.cleanup()
++
++    def test_three_real_calls_use_only_observation_pairs_and_latest_memory(self):
++        memory='fresh memory'
++        for number,step in enumerate((0,83,83),1):
++            decision=self.model.ask(json.dumps(context(step,step/1000,memory)),self.images)
++            self.assertEqual(decision['action']['control_arms']['arms']['right']['joints'][0],.1235)
++            self.model.observe(dict(status='completed' if number==1 else 'rejected_before_motion',
++                                    executed_steps=83 if number==1 else 0),83,False)
++            request=self.payloads[-1]
++            self.assertEqual(len(request['input']),1)
++            self.assertEqual(request['input'][0]['role'],'user')
++            self.assertNotIn('include',request)
++            self.assertNotIn('NEVER_REPLAY_THIS',json.dumps(request))
++            text=json.loads(request['input'][0]['content'][0]['text'])
++            self.assertEqual(text['observation']['memory'],memory)
++            self.assertEqual(text['observation']['state'],state(step/1000))
++            self.assertNotIn('memory',text)
++            if number>1:
++                self.assertEqual(text['history']['previous_observation']['step'],0 if number==2 else 83)
++                self.assertEqual(text['history']['duration_ms'],332 if number==2 else 0)
++                self.assertEqual(len([p for p in request['input'][0]['content'] if p['type']=='input_image']),6)
++            memory=decision['memory']
++        self.assertFalse(hasattr(self.model,'previous'))
++        self.assertNotIn('output',self.model.pending or {})
++        self.assertEqual(self.model.last_memory,'memory from decision 3')
++        self.assertEqual(json.loads((self.folder/'model/0002.request.json').read_text())['memory_location'],'observation.memory')
++        effective=json.loads((self.folder/'model/0001.response.json').read_text())
++        raw=json.loads((self.folder/'model/0001.response.raw.json').read_text())
++        self.assertNotEqual(raw['output'][-1]['arguments'],effective['output'][-1]['arguments'])
++
++    def test_pending_result_is_required_and_stale_memory_is_rejected(self):
++        self.model.ask(json.dumps(context()),self.images)
++        with self.assertRaisesRegex(RuntimeError,'execution result'):self.model.ask(json.dumps(context()),self.images)
++        self.model.observe(dict(status='completed',executed_steps=1),1,False)
++        with self.assertRaisesRegex(ValueError,'latest executed decision memory'):
++            self.model.ask(json.dumps(context(1)),self.images)
++
++    def test_failed_pending_action_does_not_commit_a_new_previous_observation(self):
++        self.model.ask(json.dumps(context()),self.images)
++        self.model.fail_pending(RuntimeError('partial failure'),10)
++        self.assertIsNone(self.model.last_observation)
++        self.assertIsNone(self.model.pending)
++        self.assertEqual(json.loads((self.folder/'model/0001.tool-result.json').read_text())['status'],'aborted')
++
++    def test_invalid_raw_gripper_cannot_round_into_bounds(self):
++        def bad(**kwargs):
++            raw=dict(status='completed',output=[dict(type='function_call',status='completed',
++                name='control_arms',call_id='bad',arguments=json.dumps(dict(arguments(1),
++                    right=dict(control='joint',joints=[0.]*6,gripper=1.00001))))])
++            return SimpleNamespace(status='completed',usage=None,model_dump=lambda **options:raw)
++        self.model.client.responses.create=bad
++        with self.assertRaises(ValueError):self.model.ask(json.dumps(context()),self.images)
++
++    def test_new_instance_has_no_observations_from_another_episode(self):
++        self.model.ask(json.dumps(context()),self.images)
++        self.model.observe(dict(status='completed',executed_steps=1),1,False)
++        other=native_responses.NativeToolVision(self.config,self.folder/'other-model')
++        other.ask(json.dumps(context(memory='another episode')),self.images)
++        text=json.loads(self.payloads[-1]['input'][0]['content'][0]['text'])
++        self.assertFalse(text['history']['available'])
++        self.assertEqual(text['observation']['memory'],'another episode')
++
++    def test_swift_export_keeps_exact_observation_pair_and_rejects_corrupt_labels(self):
++        import export_swift
++        memory='fresh memory'
++        for number,step in enumerate((0,83),1):
++            decision=self.model.ask(json.dumps(context(step,memory=memory)),self.images)
++            self.model.observe(dict(status='completed' if number==1 else 'episode_ended',
++                                    executed_steps=83 if number==1 else 7),83 if number==1 else 90,number==2)
++            memory=decision['memory']
++        run=self.folder/'completed-run';(run/'policy-20').mkdir(parents=True);(run/'seed-20').mkdir()
++        shutil.copytree(self.folder/'model',run/'policy-20/model')
++        export_swift.save(run/'seed-20/control-timing.json',timing_record())
++        export_swift.save(run/'launch-record.json',dict(io_variant='astra_io_250hz_obspair',input_protocol=PROTOCOL,
++                                                        model_history_replay=False))
++        export_swift.save(run/'results.json',[dict(seed_index=20,status='native_end',action_count=90,
++            official_observation=dict(native_terminal=True,valid_sample=True,unstable=False,steps=90),
++            policy=dict(model_calls=2),policy_returncode=0,simulator_returncode=0,release_unchanged=True)])
++        output=self.folder/'swift'
++        result=export_swift.export([run],output)
++        self.assertTrue(result['passed'])
++        samples=[json.loads(line) for line in (output/'train.jsonl').read_text().splitlines()]
++        self.assertEqual(len(samples[0]['images']),3)
++        self.assertEqual(len(samples[1]['images']),6)
++        source=json.loads((run/'policy-20/model/0002.request.json').read_text())
++        self.assertTrue(samples[1]['messages'][1]['content'].startswith(source['question']))
++        self.assertNotIn('preceding_function_call',samples[1]['messages'][1]['content'])
++        samples[1]['messages'][-1]['content']=json.dumps(arguments(999))
++        contents=''.join(json.dumps(row)+'\n' for row in samples)
++        for name in ('train.jsonl','all.jsonl'):(output/name).write_text(contents)
++        with self.assertRaisesRegex(ValueError,'Source input or label mismatch'):export_swift.validate(output)
++
++    def test_real_policy_loop_moves_memory_and_actual_prefix_into_second_request(self):
++        from egg_harness import skill_policy
++        original=skill_policy.Vision
++        observations=[]
++        source=json.loads((ROOT/'runs/general_pickup-io-250hz-timed-20261020-084923/policy-20/model/0001.request.json').read_text())
++        initial=json.loads(source['question'])
++        images=self.images
++        class Robot:
++            def __init__(robot,episode,trace):
++                robot.home,robot.home_joints=initial['home'],initial['home_joints']
++                robot.obs=dict(step=0,state=initial['state'],instruction=initial['instruction'],
++                    budget=initial['budget'],control_timing=timing_record(),action_interface='joint',ended=False,cameras=images)
++                robot.episode=episode
++            def command(robot,operation,**kwargs):
++                observations.append(deepcopy(robot.obs));step=83 if len(observations)==1 else 90
++                robot.obs={**robot.obs,'step':step,'ended':len(observations)==2,
++                    'action_feedback':dict(status='tracking_or_gripper_change' if step==83 else 'episode_ended',
++                                          executed_steps=83 if step==83 else 7)}
++        config=dict(self.config,memory=str(HERE/'harness/memory/skills.json'),skills_root=str(HERE/'harness/skills'))
++        path=self.folder/'config.json';path.write_text(json.dumps(config))
++        episode=self.folder/'episode';episode.mkdir()
++        try:
++            installed=policy.install()
++            with patch.object(skill_policy,'Robot',Robot),patch.object(skill_policy,'Vision',installed),\
++                 patch.object(sys,'argv',['policy','--config',str(path),'--episode',str(episode),'--trace',str(self.folder/'loop')]),\
++                 patch('builtins.print'):
++                skill_policy.main()
++        finally:
++            native_responses.NativeToolVision=installed.__bases__[0]
++            skill_policy.Vision=original
++        second=json.loads(self.payloads[1]['input'][0]['content'][0]['text'])
++        self.assertEqual(second['observation']['memory'],'memory from decision 1')
++        self.assertEqual(second['history']['previous_observation']['step'],0)
++        self.assertEqual(second['observation']['step'],83)
++        self.assertEqual(second['history']['duration_ms'],332)
++        self.assertNotIn('tracking',json.dumps(second))
++        result=json.loads((self.folder/'loop/policy-result.json').read_text())
++        self.assertEqual(result['status'],'native_end')
++        self.assertEqual(result['model_calls'],2)
++
++
++if __name__=='__main__':
++    unittest.main()
+--- astra_io_250hz_timed/verify_originals.py
++++ astra_io_250hz_obspair/verify_originals.py
+@@ -1,4 +1,4 @@
+-"""Check the preceding 250 Hz variant and its protected original sources/logs."""
++"""Verify all protected code and the supplied val.jsonl remain unchanged."""
+ import hashlib
+ import json
+ from pathlib import Path
+@@ -9,14 +9,12 @@
+ 
+ 
+ def verify():
+-    original = runpy.run_path(str(HERE.parent / 'astra_io_250hz/verify_originals.py'))['verify']()
+-    hashes = json.loads((HERE / 'audit/previous-250hz-sha256.json').read_text())
+-    differences = [name for name, expected in hashes.items()
+-                   if not (ROOT / name).is_file()
+-                   or hashlib.sha256((ROOT / name).read_bytes()).hexdigest() != expected]
+-    return dict(passed=original['passed'] and not differences,
+-                previous_variant_files=len(hashes), previous_variant_differences=differences,
+-                original_sources_and_logs=original)
++    hashes = json.loads((HERE / 'audit/protected-originals-sha256.json').read_text())
++    changed = [name for name, digest in hashes.items() if not (ROOT / name).is_file()
++               or hashlib.sha256((ROOT / name).read_bytes()).hexdigest() != digest]
++    parent = runpy.run_path(str(HERE.parent / 'astra_io_250hz_timed/verify_originals.py'))['verify']()
++    return dict(passed=not changed and parent['passed'], protected_files=len(hashes),
++                differences=changed, parent_integrity=parent)
+ 
+ 
+ if __name__ == '__main__':

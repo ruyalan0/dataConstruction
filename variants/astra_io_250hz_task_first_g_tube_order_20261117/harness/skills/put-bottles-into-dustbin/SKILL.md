@@ -1,0 +1,24 @@
+---
+name: put-bottles-into-dustbin
+description: Grasp four standing or lying bottles, hand them to the bin-side arm when required and deposit all four into the dustbin in RoboDojo put_bottles_into_dustbin.
+---
+
+Read the full instruction and locate all four bottles, their standing or lying orientations, the table edge and dustbin opening from current RGB. Assign visual identities and track each as on-table, held, staged or deposited. Determine which arm has a clear approach above the bin; the shifted table makes cross-body carrying unsuitable for some sources. Plan pickup and bin-side placement roles before each grasp.
+
+For a bottle on the opposite side from the bin, use cross-side-handoff: source-side pickup, supported release in a visible shared table region, withdrawal, then bin-side regrasp and disposal. Choose support away from the table edge with room for the full bottle and both finger approaches. If a lying bottle can roll, inspect its settled position after release before receiving. A central bottle may be picked directly by the bin-side arm.
+
+Choose opposing contact for the actual bottle pose. For a standing bottle, select an accessible body or neck region that gives stable contact without hitting the cap or neighboring bottle.
+
+For a LYING bottle, re-localize its settled long body axis, then set and VERIFY the empty gripper's orientation above the bottle before descending. The measured approach axis must be perpendicular to the tabletop and point down. In the table plane, align the grasp channel between the two fingers parallel to the bottle's long axis, so the pad-to-pad CLOSING direction crosses the body perpendicular to that axis. Parallel channel alignment does not mean closing along the bottle's length or pinching its two ends. Choose opposing side contacts on a suitable body region, centered between the pads, with finger tips and wrist attachments clear of the table. Complete yaw and tilt adjustment in clear space, check achieved attitude with robot state and current views, then descend vertically in short waypoints without rolling or sweeping sideways against the bottle. If it rolls, tips or shifts, invalidate the old alignment, withdraw clear and re-localize before another attempt.
+
+For a lying-bottle approach, use achieved wrist orientation, joint/FK direction references and contact_estimates to check the alignment; a wrist position above the bottle alone does not place the fingers correctly. Close only after the lying-bottle alignment and opposing-pad clearance have been observed. If a standing bottle is accidentally knocked over, stop the old descent and switch to the lying-bottle alignment checks.
+
+Use visual-contact-control to close separately from the test lift. Verify the bottle moves with the fingers before transport; a closed command and lifted empty wrist are not retention evidence.
+
+Use transport-retention while carrying and account for the complete bottle length below or beside the fingers. Preserve the intended gripper command. If a high carry stalls and lower space is visibly clear around the entire bottle, test a short lower route before continuing. If the distant bin approach still stalls, return toward reachable table support and hand over rather than repeating cross-body targets. Preserve support before any empty-hand posture adjustment.
+
+Carry above the bin with the full bottle footprint inside the visible opening and clear of the rim. A controlled release into the opening satisfies disposal without an unobserved ballistic throw. Lower only as far as needed for a clear drop while keeping fingers outside collision with the rim, then open and withdraw. Inspect that the bottle enters and remains inside; a rim catch, bounce outside or bottle still in the fingers remains unresolved. Recover a reachable misplaced bottle with a revised approach before counting it deposited.
+
+After each confirmed deposit, update the four-object ledger and verify with both grippers open. Keep completed contents undisturbed and use fresh RGB to find the remaining bottles. Independent empty-hand preparation may run alongside a clear transfer only when the swept spaces stay separate; reserve the shared handoff and bin approach volumes for one arm at a time.
+
+When all four bottles are visibly deposited, open both grippers, withdraw through clearance and return both arms to their recorded original poses. Check native completion; if it remains absent after settling, follow the common observation-grounding procedure. Reserve simulation time for the final withdrawal and home return; intermediate handoff or release alone does not prove disposal.

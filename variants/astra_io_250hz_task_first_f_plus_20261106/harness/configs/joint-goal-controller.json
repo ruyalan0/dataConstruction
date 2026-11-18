@@ -1,0 +1,16 @@
+{
+  "mode": "interpolation_comparison_v1",
+  "joint_tolerance_rad": 0.01,
+  "settled_joint_velocity_rad_s": 0.05,
+  "settled_finger_range_m": 0.0002,
+  "settle_window_seconds": 0.1,
+  "stall_timeout_seconds": 0.5,
+  "progress_threshold_rad": 0.001,
+  "max_motion_seconds": 0.8,
+  "gripper_tolerance_m": 0.001,
+  "held_gripper_change_guard_m": 0.003,
+  "joint_velocity_limit_rad_s": 3.75,
+  "joint_acceleration_limit_rad_s2": 3.0,
+  "gripper_close_min_seconds": 0.3,
+  "hold_observation_seconds": 0.24
+}

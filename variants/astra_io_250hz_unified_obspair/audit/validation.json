@@ -1,0 +1,57 @@
+{
+  "passed": true,
+  "verified_at": "2026-10-20T03:07:48.366788+00:00",
+  "unit_tests": 23,
+  "actual_policy_loop_mock_transport": true,
+  "actual_wire_payload_has_one_user": true,
+  "model_history_replay": false,
+  "memory_location": "observation.memory",
+  "all_three_previous_and_current_cameras": true,
+  "zero_motion_and_actual_prefix_cases_tested": true,
+  "swift_export_roundtrip_and_modified_label_rejection": true,
+  "protected_originals": {
+    "passed": true,
+    "protected_files": 1328,
+    "differences": [],
+    "parent_integrity": {
+      "passed": true,
+      "previous_variant_files": 333,
+      "previous_variant_differences": [],
+      "original_sources_and_logs": {
+        "passed": true,
+        "original_source_files": 546,
+        "historical_log_files": 4711,
+        "differences": []
+      }
+    }
+  },
+  "reference_rows": 4163,
+  "reference_images_available_locally": false,
+  "offline_preview_samples": 39,
+  "offline_preview_image_references": 225,
+  "nonimage_input_bytes": {
+    "old_user_plus_call_feedback": 12250711,
+    "new_user_only": 663354,
+    "reduction_fraction": 0.9458517958671949,
+    "scope": "Excludes system/tools, image bytes and encrypted reasoning; not a token or performance measurement"
+  },
+  "changed_or_added_files": [
+    "EVALUATION.md",
+    "README.md",
+    "export_swift.py",
+    "general_pickup.json",
+    "harness/egg_harness/native_responses.py",
+    "harness/egg_harness/observation_pair.py",
+    "harness/egg_harness/skill_policy.py",
+    "harness/scripts/server_loop.py",
+    "harness/skills/transport-retention/SKILL.md",
+    "harness/skills/upright-grasp-approach/SKILL.md",
+    "policy.py",
+    "preview.py",
+    "run_local.py",
+    "tests/test_observation_pair.py",
+    "verify_originals.py"
+  ],
+  "real_new_policy_episode_executed": false,
+  "scope": "All mutations confined to variants/astra_io_250hz_obspair; tests use actual new message/policy code with a mock model and robot."
+}

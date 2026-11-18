@@ -1,0 +1,49 @@
+{
+  "scope": "Offline conversion of historical 25 Hz data; no new model call or 250 Hz execution",
+  "name": "control_arms",
+  "arguments": {
+    "assessment": "The car continues upward with the fingers in the head view while tabletop features shift in the wrist view. Its width and pad engagement remain stable, although some tilt persists. Measured fingers remain near 20 mm and tracking is good, supporting retention over this interval. The lift is not yet 10 cm.",
+    "left": null,
+    "memory": "Step56: white red/blue-striped toy car held by right pads, head center-right. Retention supported through step56: car accompanies raised hand, background shifts, fingers .01989/.02021m stable; some car tilt/settling remains. Wrist z.97697, +54mm over grasp baseline .9230; object lift not yet 10cm. Right close0 maintained; no reset required.",
+    "plan": "Raise another approximately 4 cm through clear space using the proven shoulder/elbow direction and compensating wrist pitch; preserve grip and inspect retention again.",
+    "right": {
+      "control": "joint",
+      "gripper": null,
+      "joints": [
+        0.5335,
+        1.7291,
+        1.4609,
+        -1.2876,
+        -0.0012,
+        2.0979
+      ]
+    },
+    "settle": 1,
+    "steps": 4
+  },
+  "decision": {
+    "assessment": "The car continues upward with the fingers in the head view while tabletop features shift in the wrist view. Its width and pad engagement remain stable, although some tilt persists. Measured fingers remain near 20 mm and tracking is good, supporting retention over this interval. The lift is not yet 10 cm.",
+    "plan": "Raise another approximately 4 cm through clear space using the proven shoulder/elbow direction and compensating wrist pitch; preserve grip and inspect retention again.",
+    "memory": "Step56: white red/blue-striped toy car held by right pads, head center-right. Retention supported through step56: car accompanies raised hand, background shifts, fingers .01989/.02021m stable; some car tilt/settling remains. Wrist z.97697, +54mm over grasp baseline .9230; object lift not yet 10cm. Right close0 maintained; no reset required.",
+    "action": {
+      "control_arms": {
+        "arms": {
+          "right": {
+            "control": "joint",
+            "joints": [
+              0.5335,
+              1.7291,
+              1.4609,
+              -1.2876,
+              -0.0012,
+              2.0979
+            ]
+          }
+        },
+        "steps": 4,
+        "settle": 1
+      }
+    }
+  },
+  "source_response": "/data/lanruya/robodojo/Astra-Robodojo-new/runs/general-pickup-control-only-20261015-155448/general_pickup/L20/policy-20/model/0010.response.json"
+}

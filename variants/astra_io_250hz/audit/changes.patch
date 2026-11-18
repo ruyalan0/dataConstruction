@@ -1,0 +1,420 @@
+--- release/harness/egg_harness/client.py
++++ variants/astra_io_250hz/harness/egg_harness/client.py
+@@ -141,7 +141,9 @@
+                 raise TimeoutError(command['id'])
+             time.sleep(.2)
+         obs = json.loads(response.read_text())
+-        expected_fields = {'step', 'state', 'cameras', 'instruction', 'ended', 'budget'}
++        expected_fields = {'step', 'state', 'cameras', 'instruction', 'ended', 'budget', 'control_timing'}
++        from .control_timing import validate_timing_record
++        validate_timing_record(obs.get('control_timing'))
+         if 'action_interface' in obs:
+             from .action_control import action_interface
+             action_interface(obs)
+--- release/harness/egg_harness/native_responses.py
++++ variants/astra_io_250hz/harness/egg_harness/native_responses.py
+@@ -14,11 +14,13 @@
+ from .native_tools import ToolRegistry
+ from .storage import check_configured_storage
+ from .vision import failure_record
++from .io_contract import deduplicate_observation, readable_input, round_output
+ 
+ TOOL_INSTRUCTIONS = '''Use exactly one of the supplied native function tools for your next operation.
+ The action:{...} notation in the skills describes the existing operation semantics;
+ express that operation through the matching function's parameters, not a JSON text answer.
+-Include your brief assessment, plan, phase and updated episode memory in the call.
++Include your brief assessment, plan and updated episode memory in the call.
++Do not emit phase. Numeric action outputs have at most four decimal places.
+ Null optional fields mean hold/omit, never a guessed value. Inspect actual tool feedback
+ before the next operation. Analysis/preview tools execute zero native steps. Only enabled
+ tools are callable; there is no shell, arbitrary file access or hidden-state query.
+@@ -78,6 +80,8 @@
+         if self.calls >= self.config['max_model_calls']:
+             raise TimeoutError('Model call budget exhausted')
+         context = json.loads(question)
++        context, images, deduplication = deduplicate_observation(context, images, self.previous)
++        question = json.dumps(context, allow_nan=False)
+         content = [{'type': 'input_text', 'text': question}]
+         manifest = []
+         for name, path in images.items():
+@@ -100,7 +104,12 @@
+             'model': self.config['model'], 'reasoning_effort': self.config['reasoning_effort'],
+             'api': 'responses', **self.provider.audit(), 'tools': list(self.registry.contracts),
+             'replayed_call_id': self.previous[-1]['call_id'] if self.previous else None,
+-            'session_id': self.session_id, 'step': context['step']}))
++            'session_id': self.session_id, 'step': context['step'],
++            'deduplication': deduplication, 'action_hz': 250,
++            'numeric_output_decimal_places': 4, 'model_output_phase': False}))
++        stem.with_suffix('.api-input.readable.json').write_text(json.dumps(
++            {'scope': 'Audit view of actual input; image bytes and encrypted reasoning replaced',
++             'input': readable_input([*self.previous, observation])}, indent=2))
+         start = time.monotonic()
+         try:
+             response = self.client.responses.create(
+@@ -111,7 +120,7 @@
+                 reasoning={'effort': self.config['reasoning_effort']},
+                 extra_headers=self.provider.headers(self.session_id))
+             raw = response.model_dump(exclude_none=True)
+-            stem.with_suffix('.response.json').write_text(json.dumps(raw, indent=2))
++            stem.with_suffix('.response.raw.json').write_text(json.dumps(raw, indent=2))
+             if response.usage is not None:
+                 stem.with_suffix('.cost.json').write_text(json.dumps({
+                     'seconds': time.monotonic() - start, 'usage': response.usage.model_dump(),
+@@ -131,6 +140,17 @@
+             if not isinstance(call_id, str) or not call_id or call_id in self.seen_call_ids:
+                 raise ValueError('Missing or repeated function call ID')
+             decision = self.registry.decision(call['name'], call['arguments'])
++            # Validate original bounds before rounding. Keep the provider response
++            # separately; replay and execute the same normalized action values.
++            original_arguments = json.loads(call['arguments'])
++            normalized_arguments = round_output(original_arguments)
++            call['arguments'] = json.dumps(normalized_arguments, allow_nan=False)
++            stem.with_suffix('.response.json').write_text(json.dumps(raw, indent=2))
++            stem.with_suffix('.output-normalization.json').write_text(json.dumps(
++                {'decimal_places': 4, 'rounding': 'ROUND_HALF_UP',
++                 'arguments_changed': original_arguments != normalized_arguments,
++                 'raw_response': stem.with_suffix('.response.raw.json').name,
++                 'effective_response': stem.with_suffix('.response.json').name}, indent=2))
+             self.seen_call_ids.add(call_id)
+             self.pending = {'call_id': call_id, 'stem': stem,
+                             'observation': observation, 'output': raw['output']}
+--- release/harness/egg_harness/native_tools.py
++++ variants/astra_io_250hz/harness/egg_harness/native_tools.py
+@@ -3,6 +3,7 @@
+ 
+ from pydantic import BaseModel, ConfigDict, Field
+ from .action_control import action_interface
++from .io_contract import round_output
+ 
+ Arm = Literal['left', 'right']
+ Phase = Literal['fine', 'transit']
+@@ -111,7 +112,13 @@
+     gripper: Annotated[float, Field(ge=0, le=1)] | None
+ 
+ 
+-class JointArms(Decision):
++class JointDecision(Contract):
++    assessment: str
++    plan: str
++    memory: str
++
++
++class JointArms(JointDecision):
+     left: JointArm | None
+     right: JointArm | None
+     steps: Steps
+@@ -209,7 +216,9 @@
+                 'Execute one bounded native-joint segment for one or both arms; in Both mode each arm may instead select TCP. '
+                 'Joint targets are six absolute radians per arm, not deltas. Two grippers are continuous openings0..1. '
+                 'Null fields hold; null arms hold; both null arms explicitly hold. Carrying objects is allowed. '
+-                'Fine1..6 or transit1..20 steps, settle0..2; joint changes<=0.15rad per native step, including measured lag. '
++                'Steps1..20, settle0..2 at 250 Hz (4 ms per interval); no phase output. '
++                'Output numeric values with at most four decimal places. '
++                'Joint changes<=0.15rad per action interval, including measured lag. '
+                 'The existing wrist/gripper tracking guards may stop a prefix. FK is not a collision check. No automatic recovery.')
+         model, description = self.contracts['triangulate_temporal_point']
+         self.contracts['triangulate_temporal_point'] = (model, description.replace(
+@@ -229,7 +238,12 @@
+             raise ValueError(f'Tool is not enabled: {name}')
+         # Validate locally even when the upstream advertises strict generation.
+         data = self.contracts[name][0].model_validate_json(arguments).model_dump(exclude_none=True)
+-        decision = {key: data.pop(key) for key in ('assessment', 'plan', 'phase', 'memory')}
++        if name == 'control_arms':
++            data = round_output(data)
++            keys = ('assessment', 'plan', 'memory')
++        else:
++            keys = ('assessment', 'plan', 'phase', 'memory')
++        decision = {key: data.pop(key) for key in keys}
+         if name == 'review_frames':
+             action = {'review': data['frames']}
+         elif name == 'project_pixels':
+--- release/harness/egg_harness/skill_policy.py
++++ variants/astra_io_250hz/harness/egg_harness/skill_policy.py
+@@ -14,6 +14,7 @@
+ from .native_responses import NativeToolVision as Vision
+ from .segments import compile_segment
+ from .action_control import action_interface
++from .io_contract import execution_phase
+ from .bilateral import compile_motion
+ from .motion_evidence import executed_motion, target_for_arm
+ from .kinematics import Kinematics
+@@ -235,6 +236,8 @@
+     robot=Robot(a.episode,a.trace)
+     if robot.obs.get('action_interface') != interface:
+         raise ValueError('Policy/server action interface mismatch; start a matching server')
++    if robot.obs.get('control_timing', {}).get('action_hz') != 250:
++        raise ValueError('Start the isolated 250 Hz variant server before this policy')
+     model=Vision(config,a.trace/'model')
+     memory='Fresh controller. Infer current scene; it may be a preserved failure scene.'
+     commanded_grip={'left':1.0,'right':1.0}
+@@ -261,6 +264,7 @@
+             images,previous_state=temporal_inputs(robot.obs,previous)
+             images.update(review_images)
+             context={'step':robot.obs['step'],'state':robot.obs['state'],'home':robot.home,'instruction':robot.obs['instruction'],'memory':memory,'previous_result':feedback,'recent_executed_segments':recent[-8:],'stalled_segments_this_controller':stalls[-12:],'desired_gripper_commands':commanded_grip,'contact_estimates':{arm:(np.asarray(robot.obs['state'][arm+'_ee_pose'][:3])+Rotation.from_quat(np.asarray(robot.obs['state'][arm+'_ee_pose'])[ [4,5,6,3] ]).apply([.138,0,0])).tolist() for arm in ('left','right')}}
++            context['control_timing']=robot.obs['control_timing']
+             context['previous_observation']=previous_state
+             context['review_capability']='Zero-motion action:{review:[{step:recorded_native_step,camera:cam_head|cam_left_wrist|cam_right_wrist}]};1..6 frames. Historical RGB and original public poses appear on your next decision alongside current views. No future, other-episode or hidden state. Use before declaring past contact unknowable.'
+             context['reviewed_observations']=review_records
+@@ -334,7 +338,7 @@
+                 if interface not in ('joint','both') or set(action)!={'control_arms'}:
+                     raise ValueError('Native joint tool is not enabled or has mixed action fields')
+                 previous={**robot.obs,'arm':list(action['control_arms']['arms'])}
+-                robot.command('control_action',action=action['control_arms'],phase=decision['phase'])
++                robot.command('control_action',action=action['control_arms'],phase=execution_phase(decision))
+                 feedback=robot.obs['action_feedback']
+                 if feedback['executed_steps']:
+                     for arm,spec in action['control_arms']['arms'].items():
+@@ -367,12 +371,12 @@
+                         else:
+                             if set(action)!={'joint_delta','steps','preview_id'}:raise ValueError('Joint execution requires matching preview_id')
+                             body={k:action[k] for k in ('joint_delta','steps')}
+-                        deltas,steps=validate_joint_action(body,decision['phase']);arms=list(deltas)
++                        deltas,steps=validate_joint_action(body,execution_phase(decision));arms=list(deltas)
+                         options=dict(body)
+                         if preview:joint_preview(posture_model,robot.obs['state'],deltas,steps)
+                     else:
+                         if set(action)!=({kind} if preview else {'unfold_arm','preview_id'}):raise ValueError('Unexpected unfold fields')
+-                        spec=validate_unfold({'unfold_arm':action[kind]},decision['phase']);arms=[spec['arm']]
++                        spec=validate_unfold({'unfold_arm':action[kind]},execution_phase(decision));arms=[spec['arm']]
+                         options={'unfold_arm':spec}
+                         if preview:plan_unfold(posture_model,robot.obs['state'],spec)
+                     for arm in arms:
+@@ -399,7 +403,7 @@
+             if 'recover_posture' in action:
+                 try:
+                     if not recovery_enabled:raise ValueError('Recovery program not enabled')
+-                    spec=validate_recovery(action,decision['phase'])
++                    spec=validate_recovery(action,execution_phase(decision))
+                     arm=spec['arm']
+                     if commanded_grip[arm]<.8 or min(robot.obs['state'][arm+'_gripper_measured_joints'])<.035:raise ValueError('Recovery requires empty open hand')
+                     plan_recovery(posture_model,robot.obs['state'],spec)
+@@ -417,7 +421,7 @@
+             if 'posture' in action:
+                 try:
+                     if not direct_posture:raise ValueError('Direct posture is not enabled')
+-                    arms,steps=validate_posture_action(action,decision['phase'])
++                    arms,steps=validate_posture_action(action,execution_phase(decision))
+                     for arm in arms:
+                         if commanded_grip[arm]<.8 or min(robot.obs['state'][arm+'_gripper_measured_joints'])<.035:
+                             raise ValueError('Open selected hand after supporting/releasing objects before posture motion')
+@@ -457,8 +461,8 @@
+                 if any(v["wrist_error_m"]>.10 for v in feedback["arms"].values()):raise RuntimeError("Wrist deviation exceeds 10cm")
+                 continue
+             try:
+-                action, compilation = compile_segment(action, decision['phase'], robot.obs)
+-                arm,pos,q,steps,settle=validate(action,decision['phase'],robot.obs)
++                action, compilation = compile_segment(action, execution_phase(decision), robot.obs)
++                arm,pos,q,steps,settle=validate(action,execution_phase(decision),robot.obs)
+             except (ValueError,KeyError,TypeError) as e:
+                 errors+=1;feedback={'rejected_before_motion':str(e)}
+                 with (a.trace/'rejections.jsonl').open('a') as f:f.write(json.dumps(feedback)+chr(10))
+@@ -469,7 +473,7 @@
+             grip=action.get('gripper',commanded_grip[arm])
+             watch_grip=grip==0 and commanded_grip[arm]==0
+             options={'contract_local_ik':True} if contract else {}
+-            robot.command(motion_op,arms={arm:{k:v for k,v in action.items() if k in ('position','quaternion','gripper')}},steps=steps,settle=settle,label='astra_'+decision['phase'],guard={'arm':arm,'tracking_error_m':.035,'watch_grip':watch_grip,'opening_change':.003},**options)
++            robot.command(motion_op,arms={arm:{k:v for k,v in action.items() if k in ('position','quaternion','gripper')}},steps=steps,settle=settle,label='astra_'+execution_phase(decision),guard={'arm':arm,'tracking_error_m':.035,'watch_grip':watch_grip,'opening_change':.003},**options)
+             actual=np.asarray(robot.obs['state'][arm+'_ee_pose'])
+             elapsed=robot.obs['step']-before
+             if contract:evidence=executed_motion(robot.episode,robot.last_command_id,before,robot.obs['step'])
+--- release/harness/scripts/serve.py
++++ variants/astra_io_250hz/harness/scripts/serve.py
+@@ -19,6 +19,7 @@
+ parser.add_argument("--seed-index", type=int, default=0)
+ parser.add_argument("--run-mode", choices=["development", "frozen"], default="development")
+ parser.add_argument("--action-interface", choices=["joint", "tcp", "both"], default="joint")
++parser.add_argument("--control-hz", type=int, choices=[250], default=250)
+ parser.add_argument("--replay-episode", type=Path, help="Development-only original seed episode containing recorded native actions")
+ parser.add_argument("--replay-step", type=int, help="Replay original actions 1..N before exposing ready.json")
+ parser.add_argument("--calibrate-cameras", action="store_true", help="Development-only isolated camera/marker qualification, then exit")
+@@ -86,6 +87,7 @@
+     eval_env.WsModelClient = ResetOnlyClient
+     config_dir = args.robodojo_root / "env_cfg"
+     evaluation = load_yaml(str(config_dir / "arx_x5.yml"))
++    evaluation['observation']['collect_freq'] = args.control_hz
+     evaluation.update(
+         task_name=args.task,
+         num_envs=1,
+@@ -111,8 +113,12 @@
+     cfg, _ = process_config(cfg, task_name=args.task)
+     cfg.eval_cfg.eval_num = 1
+     cfg.camera.default_frequency = cfg.eval_cfg.observation.collect_freq
++    from egg_harness.control_timing import configure_timing, verify_environment_timing
++    timing = configure_timing(cfg)
++    (args.output / 'control-timing.json').write_text(json.dumps(timing, indent=2) + '\n')
+     cfg.sim.seed = [0]
+     env = eval_env.create_eval_env(cfg, app)
++    verify_environment_timing(env)
+     from env.scene_manager import layout_manager
+     from utils.load_file import require_object_metadata
+ 
+--- release/harness/scripts/server_loop.py
++++ variants/astra_io_250hz/harness/scripts/server_loop.py
+@@ -72,7 +72,8 @@
+     save(output / 'initial-state.json', env.get_obs()['state'])
+     save(output / 'provenance.json', dict(seeds=seeds, task=task,
+          privileged_diagnostics=mode=='development', depth_calibration=False, object_teleportation=False,
+-         mode=mode, action_interface=action_interface))
++         mode=mode, action_interface=action_interface, io_variant='astra_io_250hz',
++         control_timing=json.loads((output / 'control-timing.json').read_text())))
+ 
+     def observe(tag):
+         raw = capture_public_observation(env)
+@@ -84,6 +85,7 @@
+             cameras[name] = str(stem) + '.jpg'
+         ended = env.is_episode_end()
+         result = dict(step=int(env.take_action_cnt[0]), state=robot_state(), cameras=cameras,
++                      control_timing=json.loads((output / 'control-timing.json').read_text()),
+                       camera_calibration_id=camera_calibration_id, action_interface=action_interface,
+                       instruction=raw['instruction'], ended=ended,
+                       budget=dict(total_native_steps=total_steps, executed_native_steps=int(env.take_action_cnt[0]),
+--- scripts/run_task_tool_ablation_local.py
++++ variants/astra_io_250hz/run_local.py
+@@ -1,4 +1,4 @@
+-"""Run a separately recorded API-tool ablation with the sealed joint executor."""
++"""Run the isolated 250 Hz, four-decimal, history-deduplicated control-only variant."""
+ import argparse
+ from contextlib import contextmanager
+ from datetime import datetime, timezone
+@@ -19,8 +19,10 @@
+ import traceback
+ from zoneinfo import ZoneInfo
+ 
+-ROOT = Path(__file__).resolve().parents[1]
+-HARNESS = ROOT / 'release/harness'
++VARIANT = Path(__file__).resolve().parent
++ROOT = VARIANT.parents[1]
++HARNESS = VARIANT / 'harness'
++sys.path.append(str(ROOT / 'scripts'))
+ 
+ 
+ def read(path, default=None):
+@@ -43,7 +45,7 @@
+ 
+ 
+ def serve_on_device(gpu, arguments):
+-    """Route Isaac rendering at launch; execute the original serve.py bytes."""
++    """Route Isaac rendering at launch and execute this variant's serve.py."""
+     import torch
+     torch.cuda.init()
+     import isaaclab.app
+@@ -161,9 +163,13 @@
+             stream.write(key + '\n')
+         del key
+         config = read(args.task_config)
++        if config.get('task') != args.task:
++            raise ValueError('--task must match the selected task configuration')
++        config.update(io_variant='astra_io_250hz', action_hz=250, numeric_output_decimal_places=4,
++                      model_output_phase=False, history_deduplication=True)
+         retry_policy = config.get('transport_retry')
+-        retry_wrapper = ROOT / 'scripts/tool_ablation_policy.py'
+-        from tool_ablation_policy import MODES
++        retry_wrapper = VARIANT / 'policy.py'
++        MODES = {'control_only': {'control_arms'}}
+         ablation_mode = config['tool_ablation']['mode']
+         if ablation_mode not in MODES:
+             raise ValueError('Unknown tool ablation mode')
+@@ -172,10 +178,9 @@
+                                  rgb_memory_enabled=False)
+             config.update(memory_policy)
+             config['tool_ablation'].update(memory_policy)
+-        if retry_policy:
+-            from full_tool_retry_policy import RETRY_POLICY
+-            if retry_policy != RETRY_POLICY:
+-                raise ValueError('Unexpected transport retry settings')
++        from full_tool_retry_policy import RETRY_POLICY
++        if retry_policy != RETRY_POLICY:
++            raise ValueError('This variant requires its recorded transport retry policy')
+         config.pop('credentials', None)
+         config.update(robot_runtime=str(runtime), robodojo_root=str(robodojo),
+                       assets=str(output / 'runtime-assets'),
+@@ -193,7 +198,8 @@
+         save(output / f'source-{args.seed}.json', {'source': str(HARNESS), 'files': source_files})
+         save(output / 'layout-provenance.json', {'seed_group': 0, 'layout_index': args.seed,
+              'path': str(layout), 'sha256': hashlib.sha256(layout.read_bytes()).hexdigest()})
+-        save(output / 'launch-record.json', {'task': args.task, 'source': str(HARNESS),
++        save(output / 'launch-record.json', {'task': args.task, 'source': str(HARNESS), 'io_variant': 'astra_io_250hz',
++             'action_hz': 250, 'numeric_output_decimal_places': 4, 'model_output_phase': False,
+              'hostname': os.uname().nodename, 'gpu': args.gpu, 'gpu_uuid': gpu_uuid,
+              'seed_group': 0, 'layout_indices': [args.seed],
+              'model': config['model'], 'reasoning_effort': config['reasoning_effort'],
+@@ -207,7 +213,7 @@
+              'launcher': str(Path(__file__).resolve()),
+              'launcher_sha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+              'tool_ablation': config['tool_ablation'],
+-             'scope': 'Sealed serve and joint executor; external API-tool ablation and transport retry wrapper',
++             'scope': 'Isolated variant: actual 250 Hz action intervals; four decimal output; no model phase; deduplicated observation',
+              'device_routing': {'cuda_visible_devices': gpu_uuid, 'renderer_active_gpu': args.gpu,
+                                 'renderer_multi_gpu': False},
+              'runtime_temp': str(runtime_temp),
+@@ -226,14 +232,14 @@
+                        '--robodojo-root', str(robodojo), '--assets', config['assets'],
+                        '--object-assets', config['object_assets'], '--task', args.task,
+                        '--seed-index', str(args.seed), '--run-mode', 'development',
+-                       '--action-interface', 'joint', '--robodojo-revision', config['robodojo_revision'],
++                       '--action-interface', 'joint', '--control-hz', '250', '--robodojo-revision', config['robodojo_revision'],
+                        '--required-submodule', 'XPolicyLab=' + pins['xpolicylab']['commit']]
+             sim_env = dict(environment, CUDA_VISIBLE_DEVICES=gpu_uuid, LIVESTREAM='0',
+                            OMNI_KIT_ACCEPT_EULA='YES', OMP_NUM_THREADS='1', OPENBLAS_NUM_THREADS='1')
+             with (output / f'sim-{args.seed}.log').open('w') as log:
+                 sim = subprocess.Popen(command, cwd=HARNESS, env=sim_env, stdout=log,
+                                        stderr=subprocess.STDOUT, start_new_session=True)
+-            print(f'[release] Loading original simulator on GPU {args.gpu}: ' + str(output), flush=True)
++            print(f'[release] Loading 250 Hz variant simulator on GPU {args.gpu}: ' + str(output), flush=True)
+             last_report = time.monotonic()
+             while not (episode / 'ready.json').exists():
+                 storage.check()
+@@ -246,13 +252,13 @@
+                     last_report = time.monotonic()
+                 time.sleep(1)
+             with (output / f'policy-{args.seed}.log').open('w') as log:
+-                policy_command = ([sys.executable, '-B', str(retry_wrapper), '--harness', str(HARNESS), '--mode', ablation_mode]
+-                                  if retry_policy else [sys.executable, '-B', '-m', 'egg_harness.skill_policy'])
++                policy_command = [sys.executable, '-B', str(retry_wrapper),
++                                  '--harness', str(HARNESS), '--mode', ablation_mode]
+                 policy = subprocess.Popen([*policy_command,
+                     '--config', str(output / f'config-{args.seed}.json'), '--episode', str(episode),
+                     '--trace', str(trace)], cwd=HARNESS, env=environment, stdout=log,
+                     stderr=subprocess.STDOUT, start_new_session=True)
+-            print('[release] Simulator ready; original policy started, no experience memory', flush=True)
++            print('[release] Simulator ready; 250 Hz variant policy started with episode memory and deduplicated history', flush=True)
+             policy_started = time.monotonic()
+             while policy.poll() is None:
+                 storage.check()
+@@ -268,7 +274,7 @@
+                 time.sleep(1)
+             result['policy_returncode'] = policy.returncode
+             if policy.returncode:
+-                raise RuntimeError('Original policy failed; see policy log')
++                raise RuntimeError('Variant policy failed; see policy log')
+             result['status'] = 'policy_finished'
+         except BaseException:
+             result.update(status='error_or_timeout', error=traceback.format_exc())
+@@ -299,7 +305,7 @@
+             try:
+                 verify()
+                 if digest(HARNESS) != source_files:
+-                    raise ValueError('Original Harness changed during execution')
++                    raise ValueError('Variant Harness changed during execution')
+                 result['release_unchanged'] = True
+             except Exception as error:
+                 result.update(release_unchanged=False, integrity_error=str(error), success=False)
+@@ -313,8 +319,8 @@
+ 
+ if __name__ == '__main__':
+     parser = argparse.ArgumentParser(description=__doc__)
+-    parser.add_argument('--task')
+-    parser.add_argument('--task-config', type=Path)
++    parser.add_argument('--task', default='general_pickup')
++    parser.add_argument('--task-config', type=Path, default=VARIANT / 'general_pickup.json')
+     parser.add_argument('--seed', type=int, default=20, help='Layout index in group 0 (0..54)')
+     parser.add_argument('--gpu', type=int, default=0, help='Idle physical CUDA/Vulkan GPU index')
+     parser.add_argument('--development-case-reason', help='Required outside default development layouts 20..22')
+@@ -346,6 +352,6 @@
+             parser.error('Unexpected positional arguments')
+         if args.output is None:
+             stamp = datetime.now(ZoneInfo('Asia/Shanghai')).strftime('%Y%m%d-%H%M%S')
+-            args.output = ROOT / 'runs' / (args.task + '-full-tools-' + stamp)
++            args.output = ROOT / 'runs' / (args.task + '-io-250hz-' + stamp)
+         with gpu_lease(args.gpu):
+             raise SystemExit(run(args))

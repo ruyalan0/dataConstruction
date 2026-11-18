@@ -1,0 +1,29 @@
+{
+  "model": "gpt-6-astra",
+  "reasoning_effort": "high",
+  "request_timeout": 300,
+  "credentials": "local/credentials/azure.py",
+  "robot_runtime": "/tmp/robodojo-uv/bin/python",
+  "robodojo_root": "dependencies/RoboDojo",
+  "assets": "local/assets/Assets",
+  "object_assets": "local/assets/Assets/Object/RoboDojo",
+  "memory": "memory/skills.json",
+  "controller": "skills",
+  "max_model_calls": 400,
+  "task": "classify_objects_by_language",
+  "skill_names": [
+    "visual-contact-control",
+    "classify-by-language",
+    "upright-grasp-approach",
+    "direct-posture-adjustment"
+  ],
+  "motion_op": "move_local",
+  "contract_local_ik": true,
+  "public_posture_feedback": true,
+  "direct_posture_action": true,
+  "provider_base_urls": {
+    "azure-astra": "https://azure-astra.example.invalid/v1",
+    "zzz-astra": "https://zzz-astra.example.invalid/v1",
+    "zzy-astra": "https://zzy-astra.example.invalid/v1"
+  }
+}

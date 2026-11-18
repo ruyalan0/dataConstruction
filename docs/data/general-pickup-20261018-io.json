@@ -1,0 +1,571 @@
+{
+  "task": "general_pickup",
+  "layout": 20,
+  "instruction": "Pick up the white toy car by 10 cm.",
+  "source_run": "runs/general-pickup-control-only-20261015-155448/general_pickup/L20",
+  "final_result": [
+    {
+      "task": "general_pickup",
+      "seed_index": 20,
+      "seed_group": 0,
+      "gpu": 0,
+      "mode": "development",
+      "success": true,
+      "status": "native_end",
+      "human_interventions": 0,
+      "started_at": "2026-10-15T07:54:50.641886+00:00",
+      "rgb_memory_enabled": false,
+      "episode_timeout_seconds": null,
+      "policy_returncode": 0,
+      "simulator_returncode": 0,
+      "official_observation": {
+        "steps": 64,
+        "success": true,
+        "score": 100.0,
+        "raw_native_score": 100.0,
+        "valid_sample": true,
+        "unstable": false,
+        "native_terminal": true
+      },
+      "policy": {
+        "status": "native_end",
+        "steps": 64,
+        "model_calls": 11,
+        "seconds": 271.7054524489795,
+        "invalid_actions": 0
+      },
+      "action_count": 64,
+      "wall_seconds": 373.720419660036,
+      "finished_at": "2026-10-15T08:01:04.362306+00:00",
+      "release_unchanged": true
+    }
+  ],
+  "rounds": [
+    {
+      "round": 1,
+      "observation_step": 0,
+      "previous_observation_step": null,
+      "right_wrist_z_m": 0.921500027179718,
+      "previous_right_wrist_z_m": null,
+      "image_names": [
+        "cam_head",
+        "cam_left_wrist",
+        "cam_right_wrist"
+      ],
+      "replayed_previous_cycle": false,
+      "previous_result_status": null,
+      "function_name": "control_arms",
+      "arguments": {
+        "assessment": "The target is the small white toy car with dark windows, just right of image center and left of the folded jeans. Both hands are empty; the right arm has the nearer approach. Its compact home posture is not itself a blockage.",
+        "left": null,
+        "memory": "Task: lift white toy car >=10 cm and retain; no reset required. Target head pixels ~376,268, white body/dark windows, between small yellow round item and jeans. Home joints both approximately zero; grippers open 1. Right arm selected. No contact or retention yet.",
+        "phase": "transit",
+        "plan": "Begin an open-hand raised-elbow approach with a bounded right-arm segment above the table; turn inward and pitch the fingers downward, then inspect before continuing toward the car.",
+        "right": {
+          "control": "joint",
+          "gripper": 1,
+          "joints": [
+            0.55,
+            0.9,
+            0.7,
+            -0.8,
+            0,
+            0
+          ]
+        },
+        "settle": 1,
+        "steps": 10
+      },
+      "actual_feedback": {
+        "status": "completed",
+        "reason": null,
+        "executed_steps": 11
+      },
+      "end_step": 11,
+      "ended": false,
+      "source_request": "runs/general-pickup-control-only-20261015-155448/general_pickup/L20/policy-20/model/0001.request.json",
+      "source_response": "runs/general-pickup-control-only-20261015-155448/general_pickup/L20/policy-20/model/0001.response.json",
+      "source_tool_result": "runs/general-pickup-control-only-20261015-155448/general_pickup/L20/policy-20/model/0001.tool-result.json"
+    },
+    {
+      "round": 2,
+      "observation_step": 11,
+      "previous_observation_step": 0,
+      "right_wrist_z_m": 0.9970809817314148,
+      "previous_right_wrist_z_m": 0.921500027179718,
+      "image_names": [
+        "cam_head",
+        "cam_left_wrist",
+        "cam_right_wrist",
+        "previous_head",
+        "previous_right_wrist"
+      ],
+      "replayed_previous_cycle": true,
+      "previous_result_status": "completed",
+      "function_name": "control_arms",
+      "arguments": {
+        "assessment": "The first segment tracked closely and the right wrist view clearly identifies the white car, including its dark windows and colored racing stripe. It remains on the table ahead of the open fingers; there is no retention yet. The raised elbow leaves room for further approach.",
+        "left": null,
+        "memory": "White car target head ~376,268; right wrist confirms white striped toy car. Step11 right wrist (.217,-.314,.997), open1, no contact. Initial raised approach tracked <2mm. Estimated car region x~.09,y~-.1; refine from next downward view. No reset required.",
+        "phase": "transit",
+        "plan": "Extend through the clear space above the car to a downward-facing pregrasp, keeping the fingers open and stopping above contact for alignment inspection.",
+        "right": {
+          "control": "joint",
+          "gripper": null,
+          "joints": [
+            0.55,
+            2,
+            1.6,
+            -1.1708,
+            0,
+            0.9
+          ]
+        },
+        "settle": 1,
+        "steps": 10
+      },
+      "actual_feedback": {
+        "status": "completed",
+        "reason": null,
+        "executed_steps": 11
+      },
+      "end_step": 22,
+      "ended": false,
+      "source_request": "runs/general-pickup-control-only-20261015-155448/general_pickup/L20/policy-20/model/0002.request.json",
+      "source_response": "runs/general-pickup-control-only-20261015-155448/general_pickup/L20/policy-20/model/0002.response.json",
+      "source_tool_result": "runs/general-pickup-control-only-20261015-155448/general_pickup/L20/policy-20/model/0002.tool-result.json"
+    },
+    {
+      "round": 3,
+      "observation_step": 22,
+      "previous_observation_step": 11,
+      "right_wrist_z_m": 0.965726375579834,
+      "previous_right_wrist_z_m": 0.9970809817314148,
+      "image_names": [
+        "cam_head",
+        "cam_left_wrist",
+        "cam_right_wrist",
+        "previous_head",
+        "previous_right_wrist"
+      ],
+      "replayed_previous_cycle": true,
+      "previous_result_status": "completed",
+      "function_name": "control_arms",
+      "arguments": {
+        "assessment": "The overhead approach tracked well. The car is still supported on the table, offset right and below the wrist-image center. The open jaws currently span too much of its length; rotation above the car is needed before descent.",
+        "left": null,
+        "memory": "Step22 right wrist (.103,-.128,.966), downward; car wrist center ~400,300, long axis up-right. Open1, no contact/retention. Reorient closing axis across car width and shift toward estimated center (.13,-.16). White striped car head~376,268. No reset.",
+        "phase": "transit",
+        "plan": "While visibly above the object, rotate the open fingers across the car's width and retract slightly toward its center, then inspect before descending.",
+        "right": {
+          "control": "joint",
+          "gripper": null,
+          "joints": [
+            0.535,
+            1.84,
+            1.37,
+            -1.1008,
+            0,
+            2.1
+          ]
+        },
+        "settle": 1,
+        "steps": 9
+      },
+      "actual_feedback": {
+        "status": "kinematic_rejection",
+        "reason": "right: joint interpolation exceeds measured-state 0.15 rad bound",
+        "executed_steps": 1
+      },
+      "end_step": 23,
+      "ended": false,
+      "source_request": "runs/general-pickup-control-only-20261015-155448/general_pickup/L20/policy-20/model/0003.request.json",
+      "source_response": "runs/general-pickup-control-only-20261015-155448/general_pickup/L20/policy-20/model/0003.response.json",
+      "source_tool_result": "runs/general-pickup-control-only-20261015-155448/general_pickup/L20/policy-20/model/0003.tool-result.json"
+    },
+    {
+      "round": 4,
+      "observation_step": 23,
+      "previous_observation_step": 22,
+      "right_wrist_z_m": 0.9656654596328735,
+      "previous_right_wrist_z_m": 0.965726375579834,
+      "image_names": [
+        "cam_head",
+        "cam_left_wrist",
+        "cam_right_wrist",
+        "previous_head",
+        "previous_right_wrist"
+      ],
+      "replayed_previous_cycle": true,
+      "previous_result_status": "kinematic_rejection",
+      "function_name": "control_arms",
+      "arguments": {
+        "assessment": "The one-step prefix tracked within 1 mm, but roll lag triggered the interpolation bound. Images show the hand remains clear above the supported car, with no contact.",
+        "left": null,
+        "memory": "Step23 prefix only: right wrist (.106,-.132,.966), roll1.015, open1. Last rotation stopped on measured-state increment bound, not contact; use slower interpolation. Target white striped car still supported. Desired overhead alignment joints [.535,1.84,1.37,-1.1008,0,2.1]. No reset.",
+        "phase": "transit",
+        "plan": "Complete the same clear overhead alignment with smaller per-step roll increments, then inspect alignment before descent.",
+        "right": {
+          "control": "joint",
+          "gripper": null,
+          "joints": [
+            0.535,
+            1.84,
+            1.37,
+            -1.1008,
+            0,
+            2.1
+          ]
+        },
+        "settle": 1,
+        "steps": 12
+      },
+      "actual_feedback": {
+        "status": "completed",
+        "reason": null,
+        "executed_steps": 13
+      },
+      "end_step": 36,
+      "ended": false,
+      "source_request": "runs/general-pickup-control-only-20261015-155448/general_pickup/L20/policy-20/model/0004.request.json",
+      "source_response": "runs/general-pickup-control-only-20261015-155448/general_pickup/L20/policy-20/model/0004.response.json",
+      "source_tool_result": "runs/general-pickup-control-only-20261015-155448/general_pickup/L20/policy-20/model/0004.tool-result.json"
+    },
+    {
+      "round": 5,
+      "observation_step": 36,
+      "previous_observation_step": 23,
+      "right_wrist_z_m": 0.9622712135314941,
+      "previous_right_wrist_z_m": 0.9656654596328735,
+      "image_names": [
+        "cam_head",
+        "cam_left_wrist",
+        "cam_right_wrist",
+        "previous_head",
+        "previous_right_wrist"
+      ],
+      "replayed_previous_cycle": true,
+      "previous_result_status": "completed",
+      "function_name": "control_arms",
+      "arguments": {
+        "assessment": "Alignment completed accurately. The striped white car is centered between the open fingers, with its long axis approximately perpendicular to closing direction. The raised elbow leaves descent room; the car remains table-supported, not retained.",
+        "left": null,
+        "memory": "Step36 right wrist (.130,-.162,.962), downward, joints [.535,1.840,1.370,-1.101,0,2.098], open1. White striped 53 car centered wrist image ~330,240, length vertical. Alignment tracked; no contact yet. Begin short orientation-preserving descent, inspect before closure. No reset required.",
+        "phase": "fine",
+        "plan": "Lower approximately 3–4 cm using coordinated shoulder, elbow and wrist pitch while maintaining downward orientation and open fingers; inspect pad height afterward.",
+        "right": {
+          "control": "joint",
+          "gripper": null,
+          "joints": [
+            0.535,
+            1.872,
+            1.27,
+            -0.9688,
+            0,
+            2.1
+          ]
+        },
+        "settle": 1,
+        "steps": 3
+      },
+      "actual_feedback": {
+        "status": "completed",
+        "reason": null,
+        "executed_steps": 4
+      },
+      "end_step": 40,
+      "ended": false,
+      "source_request": "runs/general-pickup-control-only-20261015-155448/general_pickup/L20/policy-20/model/0005.request.json",
+      "source_response": "runs/general-pickup-control-only-20261015-155448/general_pickup/L20/policy-20/model/0005.response.json",
+      "source_tool_result": "runs/general-pickup-control-only-20261015-155448/general_pickup/L20/policy-20/model/0005.tool-result.json"
+    },
+    {
+      "round": 6,
+      "observation_step": 40,
+      "previous_observation_step": 36,
+      "right_wrist_z_m": 0.9286825656890869,
+      "previous_right_wrist_z_m": 0.9622712135314941,
+      "image_names": [
+        "cam_head",
+        "cam_left_wrist",
+        "cam_right_wrist",
+        "previous_head",
+        "previous_right_wrist"
+      ],
+      "replayed_previous_cycle": true,
+      "previous_result_status": "completed",
+      "function_name": "control_arms",
+      "arguments": {
+        "assessment": "The 3.4 cm descent tracked well, with the car remaining centered and supported. Estimated contact center is now z=0.791 m, near the roof; a small additional descent should place pads alongside the body rather than closing above it.",
+        "left": null,
+        "memory": "Step40 wrist (.131,-.164,.929), contact estimate z.791, open1. White striped 53 car centered between fingers, supported and unchanged in head view; descent tracked <0.4mm final error. Lower another ~15mm for side grip then close separately. No retention yet; no reset required.",
+        "phase": "fine",
+        "plan": "Descend approximately 15 mm with downward orientation preserved and fingers open, then inspect side-pad placement before closure.",
+        "right": {
+          "control": "joint",
+          "gripper": null,
+          "joints": [
+            0.535,
+            1.894,
+            1.236,
+            -0.9128,
+            0,
+            2.1
+          ]
+        },
+        "settle": 1,
+        "steps": 2
+      },
+      "actual_feedback": {
+        "status": "completed",
+        "reason": null,
+        "executed_steps": 3
+      },
+      "end_step": 43,
+      "ended": false,
+      "source_request": "runs/general-pickup-control-only-20261015-155448/general_pickup/L20/policy-20/model/0006.request.json",
+      "source_response": "runs/general-pickup-control-only-20261015-155448/general_pickup/L20/policy-20/model/0006.response.json",
+      "source_tool_result": "runs/general-pickup-control-only-20261015-155448/general_pickup/L20/policy-20/model/0006.tool-result.json"
+    },
+    {
+      "round": 7,
+      "observation_step": 43,
+      "previous_observation_step": 40,
+      "right_wrist_z_m": 0.9231491684913635,
+      "previous_right_wrist_z_m": 0.9286825656890869,
+      "image_names": [
+        "cam_head",
+        "cam_left_wrist",
+        "cam_right_wrist",
+        "previous_head",
+        "previous_right_wrist"
+      ],
+      "replayed_previous_cycle": true,
+      "previous_result_status": "completed",
+      "function_name": "control_arms",
+      "arguments": {
+        "assessment": "The last descent advanced only 5.5 mm with a 9.7 mm residual, suggesting contact or obstruction near the table. The car remains centered between open pads and supported; do not push farther down. Retention is not yet established.",
+        "left": null,
+        "memory": "Step43 right wrist (.132,-.165,.923); descent limited to 5.5mm with 9.7mm residual, possible finger/table contact. White striped 53 car centered, still supported. Stop descent and close at measured joint pose; next test lift must verify retention. Right close command0 now; no reset required.",
+        "phase": "fine",
+        "plan": "Remove downward target pressure by targeting measured joints and close the right fingers around the car; inspect before test lift.",
+        "right": {
+          "control": "joint",
+          "gripper": 0,
+          "joints": [
+            0.53353,
+            1.86913,
+            1.24385,
+            -0.93059,
+            -0.00121,
+            2.09789
+          ]
+        },
+        "settle": 1,
+        "steps": 4
+      },
+      "actual_feedback": {
+        "status": "completed",
+        "reason": null,
+        "executed_steps": 5
+      },
+      "end_step": 48,
+      "ended": false,
+      "source_request": "runs/general-pickup-control-only-20261015-155448/general_pickup/L20/policy-20/model/0007.request.json",
+      "source_response": "runs/general-pickup-control-only-20261015-155448/general_pickup/L20/policy-20/model/0007.response.json",
+      "source_tool_result": "runs/general-pickup-control-only-20261015-155448/general_pickup/L20/policy-20/model/0007.tool-result.json"
+    },
+    {
+      "round": 8,
+      "observation_step": 48,
+      "previous_observation_step": 43,
+      "right_wrist_z_m": 0.9230037927627563,
+      "previous_right_wrist_z_m": 0.9231491684913635,
+      "image_names": [
+        "cam_head",
+        "cam_left_wrist",
+        "cam_right_wrist",
+        "previous_head",
+        "previous_right_wrist"
+      ],
+      "replayed_previous_cycle": true,
+      "previous_result_status": "completed",
+      "function_name": "control_arms",
+      "arguments": {
+        "assessment": "Pads now flank the car, with measured finger positions about 20.2 and 20.6 mm after closure. This supports contact but not retention; no lift has occurred. The upward path is clear.",
+        "left": null,
+        "memory": "Step48 closure completed; white striped 53 car between pads, measured fingers .02018/.02062m, right commanded0. Wrist z.9230 is lift baseline. Retention unconfirmed pending short test lift. Previous descent residual avoided by holding measured pose. No reset required.",
+        "phase": "fine",
+        "plan": "Test lift approximately 27 mm using coordinated shoulder/elbow/wrist pitch changes to preserve downward orientation and grip; compare car motion with pads and table afterward.",
+        "right": {
+          "control": "joint",
+          "gripper": null,
+          "joints": [
+            0.53353,
+            1.82913,
+            1.30585,
+            -1.03259,
+            -0.00121,
+            2.09789
+          ]
+        },
+        "settle": 1,
+        "steps": 3
+      },
+      "actual_feedback": {
+        "status": "completed",
+        "reason": null,
+        "executed_steps": 4
+      },
+      "end_step": 52,
+      "ended": false,
+      "source_request": "runs/general-pickup-control-only-20261015-155448/general_pickup/L20/policy-20/model/0008.request.json",
+      "source_response": "runs/general-pickup-control-only-20261015-155448/general_pickup/L20/policy-20/model/0008.response.json",
+      "source_tool_result": "runs/general-pickup-control-only-20261015-155448/general_pickup/L20/policy-20/model/0008.tool-result.json"
+    },
+    {
+      "round": 9,
+      "observation_step": 52,
+      "previous_observation_step": 48,
+      "right_wrist_z_m": 0.9496663212776184,
+      "previous_right_wrist_z_m": 0.9230037927627563,
+      "image_names": [
+        "cam_head",
+        "cam_left_wrist",
+        "cam_right_wrist",
+        "previous_head",
+        "previous_right_wrist"
+      ],
+      "replayed_previous_cycle": true,
+      "previous_result_status": "completed",
+      "function_name": "control_arms",
+      "arguments": {
+        "assessment": "The wrist rose 26.7 mm with good tracking and fingers remained near 20 mm. The car remains between pads and rose in the head view, but its wrist-view outline changed, suggesting settling or tilt; stable retention is not yet certain. Space above is clear.",
+        "left": null,
+        "memory": "Step52 test lift wrist z.9497 (+26.7mm from .9230 baseline). White striped car remains between pads and appears raised in head view, but changed wrist-view outline suggests settling/tilt; retention provisional, not yet stable. Fingers .01991/.02016m; right close command0 preserved. Next short lift checks stability. No reset required.",
+        "phase": "fine",
+        "plan": "Continue a short approximately 27 mm upward segment with orientation and grip maintained, then inspect whether the car stabilizes relative to the pads.",
+        "right": {
+          "control": "joint",
+          "gripper": null,
+          "joints": [
+            0.53353,
+            1.78913,
+            1.36785,
+            -1.13459,
+            -0.00121,
+            2.09789
+          ]
+        },
+        "settle": 1,
+        "steps": 3
+      },
+      "actual_feedback": {
+        "status": "completed",
+        "reason": null,
+        "executed_steps": 4
+      },
+      "end_step": 56,
+      "ended": false,
+      "source_request": "runs/general-pickup-control-only-20261015-155448/general_pickup/L20/policy-20/model/0009.request.json",
+      "source_response": "runs/general-pickup-control-only-20261015-155448/general_pickup/L20/policy-20/model/0009.response.json",
+      "source_tool_result": "runs/general-pickup-control-only-20261015-155448/general_pickup/L20/policy-20/model/0009.tool-result.json"
+    },
+    {
+      "round": 10,
+      "observation_step": 56,
+      "previous_observation_step": 52,
+      "right_wrist_z_m": 0.9769656658172607,
+      "previous_right_wrist_z_m": 0.9496663212776184,
+      "image_names": [
+        "cam_head",
+        "cam_left_wrist",
+        "cam_right_wrist",
+        "previous_head",
+        "previous_right_wrist"
+      ],
+      "replayed_previous_cycle": true,
+      "previous_result_status": "completed",
+      "function_name": "control_arms",
+      "arguments": {
+        "assessment": "The car continues upward with the fingers in the head view while tabletop features shift in the wrist view. Its width and pad engagement remain stable, although some tilt persists. Measured fingers remain near 20 mm and tracking is good, supporting retention over this interval. The lift is not yet 10 cm.",
+        "left": null,
+        "memory": "Step56: white red/blue-striped toy car held by right pads, head center-right. Retention supported through step56: car accompanies raised hand, background shifts, fingers .01989/.02021m stable; some car tilt/settling remains. Wrist z.97697, +54mm over grasp baseline .9230; object lift not yet 10cm. Right close0 maintained; no reset required.",
+        "phase": "fine",
+        "plan": "Raise another approximately 4 cm through clear space using the proven shoulder/elbow direction and compensating wrist pitch; preserve grip and inspect retention again.",
+        "right": {
+          "control": "joint",
+          "gripper": null,
+          "joints": [
+            0.53353,
+            1.72913,
+            1.46085,
+            -1.28759,
+            -0.00121,
+            2.09789
+          ]
+        },
+        "settle": 1,
+        "steps": 4
+      },
+      "actual_feedback": {
+        "status": "completed",
+        "reason": null,
+        "executed_steps": 5
+      },
+      "end_step": 61,
+      "ended": false,
+      "source_request": "runs/general-pickup-control-only-20261015-155448/general_pickup/L20/policy-20/model/0010.request.json",
+      "source_response": "runs/general-pickup-control-only-20261015-155448/general_pickup/L20/policy-20/model/0010.response.json",
+      "source_tool_result": "runs/general-pickup-control-only-20261015-155448/general_pickup/L20/policy-20/model/0010.tool-result.json"
+    },
+    {
+      "round": 11,
+      "observation_step": 61,
+      "previous_observation_step": 56,
+      "right_wrist_z_m": 1.0180264711380005,
+      "previous_right_wrist_z_m": 0.9769656658172607,
+      "image_names": [
+        "cam_head",
+        "cam_left_wrist",
+        "cam_right_wrist",
+        "previous_head",
+        "previous_right_wrist"
+      ],
+      "replayed_previous_cycle": true,
+      "previous_result_status": "completed",
+      "function_name": "control_arms",
+      "arguments": {
+        "assessment": "Car remains between the pads with nearly constant wrist-view width while background objects move markedly; head view also supports continued retention. Fingers remain stable near 20 mm. Wrist has risen 95 mm, but car settling makes its exact lift uncertain, so add a small margin.",
+        "left": null,
+        "memory": "Step61: right holds white red/blue-striped car at head center-right. Retention supported through61 by stable pad engagement and car scale versus moving tabletop background; mild tilt persists. Fingers .01983/.02024m, close0 maintained. Wrist z1.01803 (+95mm from .9230 grasp baseline). Need extra lift margin for object settling; no reset required.",
+        "phase": "fine",
+        "plan": "Lift about 3 cm more with stable wrist orientation and unchanged grip, then inspect the car and native completion feedback.",
+        "right": {
+          "control": "joint",
+          "gripper": null,
+          "joints": [
+            0.53353,
+            1.68413,
+            1.5306,
+            -1.40234,
+            -0.00121,
+            2.09789
+          ]
+        },
+        "settle": 1,
+        "steps": 3
+      },
+      "actual_feedback": {
+        "status": "episode_ended",
+        "reason": null,
+        "executed_steps": 3
+      },
+      "end_step": 64,
+      "ended": true,
+      "source_request": "runs/general-pickup-control-only-20261015-155448/general_pickup/L20/policy-20/model/0011.request.json",
+      "source_response": "runs/general-pickup-control-only-20261015-155448/general_pickup/L20/policy-20/model/0011.response.json",
+      "source_tool_result": "runs/general-pickup-control-only-20261015-155448/general_pickup/L20/policy-20/model/0011.tool-result.json"
+    }
+  ]
+}

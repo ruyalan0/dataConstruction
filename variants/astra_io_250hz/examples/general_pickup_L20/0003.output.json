@@ -1,0 +1,49 @@
+{
+  "scope": "Offline conversion of historical 25 Hz data; no new model call or 250 Hz execution",
+  "name": "control_arms",
+  "arguments": {
+    "assessment": "The overhead approach tracked well. The car is still supported on the table, offset right and below the wrist-image center. The open jaws currently span too much of its length; rotation above the car is needed before descent.",
+    "left": null,
+    "memory": "Step22 right wrist (.103,-.128,.966), downward; car wrist center ~400,300, long axis up-right. Open1, no contact/retention. Reorient closing axis across car width and shift toward estimated center (.13,-.16). White striped car head~376,268. No reset.",
+    "plan": "While visibly above the object, rotate the open fingers across the car's width and retract slightly toward its center, then inspect before descending.",
+    "right": {
+      "control": "joint",
+      "gripper": null,
+      "joints": [
+        0.535,
+        1.84,
+        1.37,
+        -1.1008,
+        0,
+        2.1
+      ]
+    },
+    "settle": 1,
+    "steps": 9
+  },
+  "decision": {
+    "assessment": "The overhead approach tracked well. The car is still supported on the table, offset right and below the wrist-image center. The open jaws currently span too much of its length; rotation above the car is needed before descent.",
+    "plan": "While visibly above the object, rotate the open fingers across the car's width and retract slightly toward its center, then inspect before descending.",
+    "memory": "Step22 right wrist (.103,-.128,.966), downward; car wrist center ~400,300, long axis up-right. Open1, no contact/retention. Reorient closing axis across car width and shift toward estimated center (.13,-.16). White striped car head~376,268. No reset.",
+    "action": {
+      "control_arms": {
+        "arms": {
+          "right": {
+            "control": "joint",
+            "joints": [
+              0.535,
+              1.84,
+              1.37,
+              -1.1008,
+              0.0,
+              2.1
+            ]
+          }
+        },
+        "steps": 9,
+        "settle": 1
+      }
+    }
+  },
+  "source_response": "/data/lanruya/robodojo/Astra-Robodojo-new/runs/general-pickup-control-only-20261015-155448/general_pickup/L20/policy-20/model/0003.response.json"
+}

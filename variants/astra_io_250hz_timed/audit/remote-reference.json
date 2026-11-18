@@ -1,0 +1,19 @@
+{
+  "host": "nvidia11",
+  "root": "/data/chenxinlong/RoboDojo",
+  "commit": "726e9aabfaa642203722eb126f5eaf0f37f3e1ad",
+  "working_tree_modified": true,
+  "files_sha256": {
+    "src/eval_client/eval_env.py": "74da4f5a95df737c09885f83da39bd513d1013c711006016c4f8ca06d39259bd",
+    "src/eval_client/joint_trajectory.py": "ff230e64defbb751ecf8b1f86eb2ed5da8b89aaecd30dadf23caeb6b49725b2d",
+    "policies/QwenSwift/protocol.py": "124e5b3002cdf8aaadf8996562d9a1c6016f9adf1a116dfca7af25912c858961",
+    "policies/QwenSwift/deploy.py": "a156a9e500d3b7c493ed8a4636ea4a3a1228e0ac31cdf35f6909b4f434c5b02e",
+    "policies/QwenSwift/prompts.json": "ec0af683209b916e94965837c538600a35868d940ab7cb37d0ad0a8c818d853b",
+    "policies/QwenSwift/README.md": "4a6652909768f1cea1b9dbf8b7eddf9ebd66507a65047793c606dedd9dc29c57",
+    "tests/test_qwen_policy.py": "aa9aafd7586f01efd8ad785b0d9cccf03c06924596c56b9ffb1d0bbb98c1307f",
+    "eval_result/RoboDojo/play_tic_tac_toe/QwenSwift/arx_x5/0_ckpt_name=1004_exp7,action_type=joint/2026-10-14_18-36-58_smoke_play_tic_tac_toe/qwen_actions.jsonl": "62801aeb03aacab843cca494e43dd61d3aa83e4ee6142879b24b619ebab2f538",
+    "eval_result/RoboDojo/play_tic_tac_toe/QwenSwift/arx_x5/0_ckpt_name=1004_exp7,action_type=joint/2026-10-14_18-36-58_smoke_play_tic_tac_toe/qwen_config.json": "de7a5b83de9165973cebe777cc7129d18f062eccf9239ab9ab0658521bff5e55",
+    "eval_result/RoboDojo/play_tic_tac_toe/QwenSwift/arx_x5/0_ckpt_name=1004_exp7,action_type=joint/2026-10-14_18-36-58_smoke_play_tic_tac_toe/_result.json": "e484db456d0ad569bd792c141c1f89b92f9ccad840035cdd905125b8dac88344"
+  },
+  "reference_directory": "runs/nvidia11-250hz-reference-20261019-192705"
+}

@@ -1,0 +1,14 @@
+---
+name: swap-t
+description: Remember the initial positions and directed orientations of both T blocks, then exchange their complete poses and return both arms home.
+---
+
+Before touching either T, use current head and wrist views to record an immutable initial-pose ledger in episode memory. For each visually identified color, retain a frame/step reference, a center estimate with its uncertainty, the stem-end and crossbar-end pixel landmarks, and the directed stem-to-crossbar orientation. Retain both initial arm poses/home joints. A T is not rotationally symmetric: the crossbar direction is part of the target.
+
+Define the final mapping explicitly: each color must occupy the other color's INITIAL location AND directed orientation. Carry this original ledger forward in every memory replacement, including observation-only calls. Keep the immutable targets separate from estimates of current object pose; never overwrite an initial target with a moved block's current pose. Use permitted frame review when a target landmark becomes uncertain.
+
+Acquire precision references before moving the blocks. The distant head view is useful for identity and coarse placement, but a few pixels of uncertainty can hide a meaningful angle error. Record a clear, closer wrist view of each original footprint, its camera and robot pose, and both ends of a long straight crossbar edge in addition to the stem landmark. Keep the camera outside the later manipulation path. For final comparison, reproduce that recorded viewing pose with the empty arm and review the original and current frames together; compare corresponding edges and corners, not just two estimated centers. Budget these observations and a correction before the home return. If the coarse comparison remains ambiguous, use the recorded close reference to resolve it rather than treating the original uncertainty band as an acceptance tolerance. Movement of the blocks invalidates new estimates of the original targets, not the saved original images.
+
+Choose a staging location with visible clearance so one T can vacate its original footprint without trapping the other. Move each T with controlled grasp or side contact, checking retention and table support. At the destination, compare stem and crossbar landmarks to the stored target in consistent views; matching centers alone is insufficient. Complete visible angular correction before release and before returning the manipulating arm home. If a correction is needed after home, perform it and return both arms again. Verify both stable table placements, open grippers, and both original arm poses. Do not search hidden tolerances or replace missing visual evidence with a claimed success.
+
+Evidence: task-specific development revision from the operator's 2026-09-21 review and prior failure observations. This is a strategy candidate, not a demonstrated success; resolve concrete poses from the current episode only.

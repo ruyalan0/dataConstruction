@@ -1,0 +1,52 @@
+{
+  "version": "e-plus",
+  "created_at": "2026-11-12T06:26:11.987768+00:00",
+  "parent_variant": "/data/lanruya/robodojo/Astra-Robodojo-new/variants/astra_io_250hz_task_first_e",
+  "speed_reference_variant": "/data/lanruya/robodojo/Astra-Robodojo-new/variants/astra_io_250hz_task_first_e_merged_20261105",
+  "speed_reference_task": "put_bottles_into_dustbin",
+  "parent_source_files": 327,
+  "changes_from_e": [
+    "README.md",
+    "export_swift.py",
+    "harness/configs/joint-goal-controller.json",
+    "parent-e-sha256.json",
+    "run_local.py",
+    "tests/test_transport.py",
+    "verify_originals.py"
+  ],
+  "controller_before": {
+    "mode": "interpolation_comparison_v1",
+    "joint_tolerance_rad": 0.01,
+    "settled_joint_velocity_rad_s": 0.05,
+    "settled_finger_range_m": 0.0002,
+    "settle_window_seconds": 0.1,
+    "stall_timeout_seconds": 0.5,
+    "progress_threshold_rad": 0.001,
+    "max_motion_seconds": 0.8,
+    "gripper_tolerance_m": 0.001,
+    "held_gripper_change_guard_m": 0.003,
+    "joint_velocity_limit_rad_s": 0.6,
+    "joint_acceleration_limit_rad_s2": 3.0,
+    "gripper_close_min_seconds": 0.3,
+    "hold_observation_seconds": 0.24
+  },
+  "controller_after": {
+    "mode": "interpolation_comparison_v1",
+    "joint_tolerance_rad": 0.01,
+    "settled_joint_velocity_rad_s": 0.05,
+    "settled_finger_range_m": 0.0002,
+    "settle_window_seconds": 0.1,
+    "stall_timeout_seconds": 0.5,
+    "progress_threshold_rad": 0.001,
+    "max_motion_seconds": 0.8,
+    "gripper_tolerance_m": 0.001,
+    "held_gripper_change_guard_m": 0.003,
+    "joint_velocity_limit_rad_s": 3.75,
+    "joint_acceleration_limit_rad_s2": 3.0,
+    "gripper_close_min_seconds": 0.3,
+    "hold_observation_seconds": 0.24
+  },
+  "all_skills_byte_identical_to_e": true,
+  "bottle_skill_sha256": "0160e56cfea6cbc7c5bf935e46de69ba79789a15cfef6f169e90e7d6f1e5c6c3",
+  "e_preserved": true
+}

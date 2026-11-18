@@ -1,0 +1,49 @@
+{
+  "scope": "Offline conversion of historical 25 Hz data; no new model call or 250 Hz execution",
+  "name": "control_arms",
+  "arguments": {
+    "assessment": "Car remains between the pads with nearly constant wrist-view width while background objects move markedly; head view also supports continued retention. Fingers remain stable near 20 mm. Wrist has risen 95 mm, but car settling makes its exact lift uncertain, so add a small margin.",
+    "left": null,
+    "memory": "Step61: right holds white red/blue-striped car at head center-right. Retention supported through61 by stable pad engagement and car scale versus moving tabletop background; mild tilt persists. Fingers .01983/.02024m, close0 maintained. Wrist z1.01803 (+95mm from .9230 grasp baseline). Need extra lift margin for object settling; no reset required.",
+    "plan": "Lift about 3 cm more with stable wrist orientation and unchanged grip, then inspect the car and native completion feedback.",
+    "right": {
+      "control": "joint",
+      "gripper": null,
+      "joints": [
+        0.5335,
+        1.6841,
+        1.5306,
+        -1.4023,
+        -0.0012,
+        2.0979
+      ]
+    },
+    "settle": 1,
+    "steps": 3
+  },
+  "decision": {
+    "assessment": "Car remains between the pads with nearly constant wrist-view width while background objects move markedly; head view also supports continued retention. Fingers remain stable near 20 mm. Wrist has risen 95 mm, but car settling makes its exact lift uncertain, so add a small margin.",
+    "plan": "Lift about 3 cm more with stable wrist orientation and unchanged grip, then inspect the car and native completion feedback.",
+    "memory": "Step61: right holds white red/blue-striped car at head center-right. Retention supported through61 by stable pad engagement and car scale versus moving tabletop background; mild tilt persists. Fingers .01983/.02024m, close0 maintained. Wrist z1.01803 (+95mm from .9230 grasp baseline). Need extra lift margin for object settling; no reset required.",
+    "action": {
+      "control_arms": {
+        "arms": {
+          "right": {
+            "control": "joint",
+            "joints": [
+              0.5335,
+              1.6841,
+              1.5306,
+              -1.4023,
+              -0.0012,
+              2.0979
+            ]
+          }
+        },
+        "steps": 3,
+        "settle": 1
+      }
+    }
+  },
+  "source_response": "/data/lanruya/robodojo/Astra-Robodojo-new/runs/general-pickup-control-only-20261015-155448/general_pickup/L20/policy-20/model/0011.response.json"
+}

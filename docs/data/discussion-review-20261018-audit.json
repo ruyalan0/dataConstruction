@@ -1,0 +1,60 @@
+{
+  "scope": "13 episodes referenced by the exported dataset index; read-only audit on 2026-10-19",
+  "counts": {
+    "samples": 1579,
+    "nonempty_input_memory": 1579,
+    "nonempty_output_memory": 1579,
+    "nonempty_previous_observation": 1566,
+    "history_replayed_requests": 1566,
+    "empty_stalled_segments": 1579,
+    "adjacent_pairs": 1566,
+    "previous_state_matches": 1566,
+    "memory_matches_previous_output": 1566,
+    "previous_posture_matches": 1566,
+    "feedback_matches_previous_result": 1566
+  },
+  "tool_calls": {
+    "control_arms": 1579
+  },
+  "by_scope": {
+    "ten_tasks": {
+      "adjacent_pairs": 1543,
+      "previous_state_matches": 1543,
+      "previous_image_references": 2937,
+      "matching_previous_image_hashes": 2937
+    },
+    "general_pickup": {
+      "adjacent_pairs": 23,
+      "previous_state_matches": 23,
+      "previous_image_references": 46,
+      "matching_previous_image_hashes": 46
+    }
+  },
+  "unique_historical_images_hashed": 2983,
+  "failures": [],
+  "dataset_sha256": "8ea1847fc8b5e5e6610562efd0319530b126224f78da03695de24264d906c0c5",
+  "request_structure_recheck": {
+    "scope": "SDK call arguments reconstructed from sealed transport code and original experiment records; not a saved HTTP request",
+    "raw_response_output_type_sequences": {
+      "reasoning,function_call": 1094,
+      "function_call": 484,
+      "reasoning,reasoning,function_call": 1
+    },
+    "general_pickup_round2_input_types": [
+      "user",
+      "reasoning",
+      "function_call",
+      "function_call_output",
+      "user"
+    ],
+    "offline_capture_matches_original_records": {
+      "instructions_match_recorded_round2": true,
+      "previous_context_matches_recorded_round1": true,
+      "current_context_matches_recorded_round2": true,
+      "previous_function_call_matches_recorded_response": true,
+      "tool_result_matches_recorded_result": true,
+      "tools_match_recorded_definitions": true
+    },
+    "reasoning_and_image_payloads_in_readable_capture": "replaced for readability"
+  }
+}

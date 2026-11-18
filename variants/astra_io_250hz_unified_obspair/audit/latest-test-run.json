@@ -1,0 +1,17 @@
+{
+  "output": "/data/lanruya/robodojo/Astra-Robodojo-new/runs/general_pickup-io-250hz-unified-obspair-3layouts-20261021-212005",
+  "command": [
+    "/data/lanruya/robodojo/Astra-Robodojo-new/.venv-policy/bin/python",
+    "-u",
+    "-B",
+    "/data/lanruya/robodojo/Astra-Robodojo-new/variants/astra_io_250hz_unified_obspair/run_batch.py",
+    "--env-gpu",
+    "4",
+    "--layouts",
+    "20",
+    "21",
+    "22",
+    "--output",
+    "/data/lanruya/robodojo/Astra-Robodojo-new/runs/general_pickup-io-250hz-unified-obspair-3layouts-20261021-212005"
+  ]
+}

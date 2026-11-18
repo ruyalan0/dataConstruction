@@ -1,0 +1,64 @@
+{
+  "unit_tests": {
+    "passed": true,
+    "count": 11,
+    "command": ".venv-policy/bin/python -B -m unittest discover -s variants/astra_io_25hz/tests -p test_*.py -v"
+  },
+  "actual_episode": "runs/general_pickup-io-25hz-20261019-181733",
+  "io_audit": {
+    "verified_at": "2026-10-19T10:23:37.029415+00:00",
+    "passed": true,
+    "task": "general_pickup",
+    "layout": 20,
+    "native_result": {
+      "steps": 54,
+      "success": true,
+      "score": 100.0,
+      "raw_native_score": 100.0,
+      "valid_sample": true,
+      "unstable": false,
+      "native_terminal": true
+    },
+    "model_calls": 8,
+    "enabled_tools": [
+      "control_arms"
+    ],
+    "action_hz": 25,
+    "numeric_output_decimal_places": 4,
+    "output_phase_absent": true,
+    "memory_nonempty_in_all_outputs": true,
+    "followup_requests_with_complete_prior_cycle": 7,
+    "five_duplicate_groups_removed_when_present": true,
+    "rounds_requiring_local_precision_rounding": 0,
+    "input_measurements_not_rounded": true,
+    "actual_gpu_selection": {
+      "ISAACSIM_GPU": "4",
+      "env_gpu": 4,
+      "isaac_launcher_device": "cuda:4",
+      "robodojo_device_id": 4,
+      "cuda_visible_devices_present": false,
+      "physics_device": "cpu",
+      "use_fabric": false
+    },
+    "gpu_preflight": {
+      "allow_shared_gpu": true,
+      "memory_used_mib": 816,
+      "utilization_percent": 90,
+      "memory_free_mib": 23309
+    },
+    "original_integrity": {
+      "passed": true,
+      "original_source_files": 546,
+      "historical_log_files": 4711,
+      "differences": []
+    },
+    "parent_250hz_source_integrity": {
+      "passed": true,
+      "files": 286
+    },
+    "video_full_decode": "PASS",
+    "episodes_rerun_after_valid_native_result": 0
+  },
+  "source_files": 285,
+  "execution_guards_identical_to_250hz": true
+}

@@ -1,0 +1,18 @@
+{
+  "uri": "hdfs://storage.example.invalid/REDACTED",
+  "bytes": 10120758745,
+  "sha256": "b6d67ebc50907be5c73ccbbab15be948b1b7a569e745314792c2e241ff267744",
+  "members": 144276,
+  "top_level_members": [
+    "astra-driver-535.183.06",
+    "contact-curobo-source",
+    "contact-isaaclab-source",
+    "robodojo-uv"
+  ],
+  "verification": "Full SHA256 and archive inventory from existing worker4255603 copy; HDFS size checked separately",
+  "runtime_versions": {
+    "packages": {
+      "isaacsim": "5.1.0.0"
+    }
+  }
+}

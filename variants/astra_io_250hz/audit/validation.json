@@ -1,0 +1,33 @@
+{
+  "completed_at": "2026-10-19T08:20:24.402222+00:00",
+  "unit_tests": {
+    "passed": 9,
+    "failed": 0,
+    "command": ".venv-policy/bin/python -B -m unittest discover -s variants/astra_io_250hz/tests -p 'test_*.py' -v"
+  },
+  "python_syntax_files": 188,
+  "preview_rounds_verified": 11,
+  "modified_copies": [
+    "harness/egg_harness/client.py",
+    "harness/egg_harness/native_responses.py",
+    "harness/egg_harness/native_tools.py",
+    "harness/egg_harness/skill_policy.py",
+    "harness/scripts/serve.py",
+    "harness/scripts/server_loop.py"
+  ],
+  "new_harness_modules": [
+    "harness/egg_harness/control_timing.py",
+    "harness/egg_harness/io_contract.py"
+  ],
+  "original_integrity": {
+    "passed": true,
+    "original_source_files": 546,
+    "historical_log_files": 4711,
+    "differences": []
+  },
+  "original_sealed_release_verified": true,
+  "launcher_policy_and_serve_help": "PASS",
+  "live_model_calls": 0,
+  "new_simulator_episodes": 0,
+  "frequency_validation": "Configured dt=0.004, collect_freq=250, render_interval=1; verified upstream interpolation method returns one physics interval rather than ten"
+}

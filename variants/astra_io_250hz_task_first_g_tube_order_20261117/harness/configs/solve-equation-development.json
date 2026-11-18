@@ -1,0 +1,24 @@
+{
+  "model": "gpt-6-astra",
+  "reasoning_effort": "high",
+  "request_timeout": 300,
+  "credentials": "local/credentials/azure.py",
+  "robot_runtime": "/tmp/robodojo-uv/bin/python",
+  "robodojo_root": "dependencies/RoboDojo",
+  "assets": "local/assets/Assets",
+  "object_assets": "local/assets/Assets/Object/RoboDojo",
+  "memory": "memory/skills.json",
+  "controller": "skills",
+  "max_model_calls": 320,
+  "task": "solve_equation",
+  "skill_names": [
+    "visual-contact-control",
+    "solve-equation"
+  ],
+  "motion_op": "move_local",
+  "provider_base_urls": {
+    "azure-astra": "https://azure-astra.example.invalid/v1",
+    "zzz-astra": "https://zzz-astra.example.invalid/v1",
+    "zzy-astra": "https://zzy-astra.example.invalid/v1"
+  }
+}

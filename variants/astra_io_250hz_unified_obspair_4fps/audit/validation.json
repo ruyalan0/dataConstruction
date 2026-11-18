@@ -1,0 +1,52 @@
+{
+  "passed": true,
+  "variant": "astra_io_250hz_unified_obspair_4fps",
+  "offline_tests": {
+    "passed": true,
+    "count": 37,
+    "seconds": 7.683,
+    "command": ".venv-policy/bin/python -B -m unittest discover -s variants/astra_io_250hz_unified_obspair_4fps/tests -p 'test_*.py' -v"
+  },
+  "cli_help_checked": [
+    "run_local.py",
+    "run_batch.py",
+    "export_swift.py",
+    "validate_run.py"
+  ],
+  "live_frequencies_hz": {
+    "physics": 250,
+    "action": 250,
+    "observation": 250,
+    "camera": 250,
+    "task": 250,
+    "reward": 250
+  },
+  "visual_history": {
+    "sample_hz": 4,
+    "window_ms": 5000,
+    "max_request_images": 66
+  },
+  "task_horizon_seconds": 8,
+  "protected_files": 1606,
+  "original_integrity_passed": true,
+  "real_run_performed": false,
+  "scope": "Offline tests with a mock model and deterministic physics; no API or Isaac run.",
+  "changed_from_unified_parent": [
+    "README.md",
+    "export_swift.py",
+    "general_pickup.json",
+    "harness/egg_harness/client.py",
+    "harness/egg_harness/native_responses.py",
+    "harness/egg_harness/observation_pair.py",
+    "harness/egg_harness/skill_policy.py",
+    "harness/egg_harness/visual_history.py",
+    "harness/scripts/server_loop.py",
+    "policy.py",
+    "run_batch.py",
+    "run_local.py",
+    "tests/test_observation_pair.py",
+    "tests/test_visual_history.py",
+    "validate_run.py",
+    "verify_originals.py"
+  ]
+}

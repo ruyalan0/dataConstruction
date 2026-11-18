@@ -1,0 +1,16 @@
+.venv/
+.venv-policy/
+.vscode/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+.env
+artifacts/
+/dependencies/
+/runs/
+/local/
+/experiments/
+/val.jsonl
+/4fps_val.jsonl
+/variants/**/audit/*.log

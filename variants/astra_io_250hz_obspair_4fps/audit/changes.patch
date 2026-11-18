@@ -1,0 +1,1229 @@
+--- variants/astra_io_250hz_obspair/EVALUATION.md
++++ variants/astra_io_250hz_obspair_4fps/EVALUATION.md
+@@ -1,47 +1,34 @@
+-# 两个决策点观测替代整轮消息历史：可行性评估
++# 可行性评估
+ 
+-方案在现有控制架构中可实现，已形成独立版本 `astra_io_250hz_obspair`。两时刻观测用于判断实际运动与接触变化，文字 memory 保留跨多个决策点的任务进度。它是输入策略变更，最终抓取表现仍需新的真实回合验证。
++方案可行，已经实现为独立版本。5 秒图像序列补充两个决策点之间的可见运动，有助于判断物体是否随手移动、是否中途滑动，以及双臂是否互相遮挡；上一决策点与当前的精确状态仍保留，memory 继续概括更早阶段的信息。是否提高任务成功率，需要本版本新的抓取回合验证。
+ 
+-## 参考数据核对
++## 参考数据
+ 
+-`val.jsonl` 共 4,163 条、6 种任务。20 条首轮记录只有当前三图；4,143 条后续记录包含前后三路图，共 24,918 次图片引用。每条都是 system/user/assistant 三条消息，图像占位符与 images 数量相符。History 提供 available、duration_ms、previous_state，决策间隔为 60..500 ms；State 提供当前关节和夹爪信号，以及 last_gripper_command。参考数据本身没有文字 memory，输出为 arms + steps。
++已逐行核对用户提供的 `4fps_val.jsonl`：共 4,444 条、35 种任务文本、260,121 次图像引用。每条均为 system/user/assistant 三条消息；35 条只有当前观测，4,409 条含上一决策点。图像按时序排列，历史范围为 -5,000..0ms；每个时刻三路图，最多 22 个时刻、66 张图片。只有上一决策点与当前时刻附带 State，历史中间帧不带状态。
+ 
+-这些图片路径位于另一台机器的 `/share/workspace/...`，本机未找到原图，因此只核对了用户提供文件的结构和文本。图像内容与来源数据的物理正确性没有据此声称已验证。结构审计见 [audit/val-reference.json](audit/val-reference.json)。
++结构核对结果见 [audit/4fps-reference.json](audit/4fps-reference.json)，原始参考样例见 [首轮](examples/reference-first.json)及[完整窗口](examples/reference-full-window.json)。图片路径指向另一台机器的 `/share/workspace/...`，本机未找到抽查图片；本次验证限于 JSONL 文本结构，未据此验证参考图像内容或物理正确性。
+ 
+-## 与现有控制的对应
++## 与现有版本的对应
+ 
+-| 方面 | 新版本处理 |
++本实现采用相同的输入信息组成，保留当前项目的结构化 JSON、完整测量精度和 control_arms 输出协议。未直接使用参考文件的文本格式或 arms 包装作为运行协议，因此参考文件不能未经输出协议对齐就原样替换当前执行器。
++
++| 情况 | 处理 |
+ |---|---|
+-| 历史输入 | 不再用 `self.previous` 回放旧 user、function_call、function_call_output 或推理 |
+-| 前一时刻 | 上一次已完成决策的**动作开始前观测**，不是前一个 4 ms 物理步 |
+-| 三路图 | head、left wrist、right wrist 都保存；不因只有单臂移动而省略另一个腕部图 |
+-| 当前输入 | 当前测得关节、腕部位姿、手指位置、当前命令、任务与剩余预算 |
+-| memory | 在 `observation.memory` 显式输入；模型仍输出 memory，执行后供下一轮使用 |
+-| 夹爪 | 保留真实手指测量（米）、命令回显和 desired_gripper_commands，分别标注，避免把命令当开度测量 |
+-| 时间 | `history.duration_ms = 实际控制步差 × 4`；保护截断按实际步数计算，零步拒绝时可为 0 |
+-| 控制输出 | 保留 control_arms 的 assessment、plan、memory、left、right、steps、settle 及 null hold 语义 |
+-| 执行器 | 延续 250 Hz 关节目标、25 Hz 任务时钟、8 秒 general_pickup 预算、插值和既有保护 |
++| 动作持续多个采样周期 | 执行途中逐次采样，保留中间真实 RGB |
++| 250ms 不是 4ms 的整数倍 | 交替使用 63/62 个控制周期；记录真实时刻，误差不累积 |
++| 运行不足 5 秒 | 只取已有采样，不补帧、不复制旧图填充 |
++| API 等待 | 按仿真时间计算，不采集重复静止帧 |
++| 两端点与采样时刻相同 | 合并历史/上一决策角色；保留精确的决策图片 |
++| 零步拒绝 | 上一决策和当前可同时间，间隔为 0，保持两端点独立 |
++| 保护提前截断 | 当前状态、实际间隔与历史按实际执行前缀计算 |
++| 上一决策早于 5 秒窗口 | 显式保留上一决策点；周期 RGB 仍只来自窗口内 |
++| 漏采或顺序异常 | 显式报错，不用决策图片伪造中间帧 |
++| 新回合 | 新建采样器和模型会话，不复用上局历史 |
+ 
+-没有直接套用参考数据的输出 schema。若还要以该 `val.jsonl` 原样训练并直接接入，需要额外统一 arms 包装、memory、settle、null 和夹爪目标语义；本次实现仅借鉴两个观测点的输入方式。输入测量保持原精度，没有跟随参考训练集将状态统一截断到四位小数。
++当前模型输入仍有局限：4fps 会遗漏短于采样间隔的接触或滑动，RGB 本身不提供接触力；5 秒以外的历史仍依赖 memory。完整窗口最多输入 66 张图，图像 token 和推理耗时预计高于此前 3/6 图方案，具体开销尚未实测。没有把离线结构检查转换为成功率或费用改善结论。
+ 
+-## 保留与丢失的信息
++## 验证范围
+ 
+-两次关节测量、三视图和实际间隔能够描述动作后的实际状态，并支持比较物体相对手指和背景的变化。更早的阶段完成情况、失败原因假设、对象身份等信息需要通过 memory 压缩保留。
++34 项离线测试通过。测试执行真实 server_loop、client、action_control、NativeToolVision 请求组装及 Swift 导出代码，并使用原生控制队列/验证器；替换 API 和物理环境。长动作案例推进 1,406 个控制周期，验证中间 4fps 捕获、窗口裁剪、不同时间图像和 IPC 字段完整性。另覆盖完整 66 图请求、memory 更新、保护、零步拒绝及输出/输入时间戳篡改拒绝。
+ 
+-两时刻并不是整个过程的充分观测：短暂碰撞、夹爪中间滑动又恢复、保护触发原因和原计划目标都可能在两帧之间不可辨别。新输入按方案不提供上个调用及其完整反馈，因此模型不得把 memory 中的意图当成已完成事实。所有原始响应、执行反馈和逐周期跟踪仍保存在本地日志中用于审计，但不进入下一次模型输入。
+-
+-本版本以全新策略会话启动。原来的 continuation_request 依赖旧问题结构，显式拒绝复用；同一请求的传输失败仍沿用原重试逻辑。新会话不会暗中拼入其他回合的历史。
+-
+-## 验证与文本体积
+-
+-离线测试覆盖实际请求组装、真实 policy 主循环、两帧状态和三路图片的顺序、memory 转移、提前中断、零步拒绝、禁止旧推理与调用回放、会话重置、原数值边界和四位小数规范化；同时复用原生控制队列、计时、回合边界和选卡测试。Swift 导出测试确认一条样本只含一个 user 输入并拒绝被改写的标签。
+-
+-用已经完成的 250 Hz L20/L21/L22 的 39 次决策做离线格式预览：两个版本均引用 225 张次图片。旧 API 输入中的 user 文本及上次调用/反馈文本共 12,250,711 字节，新 user 文本约 663,354 字节，减少约 94.6%。统计排除 system、tools、图片字节和加密推理，不能换算为 API token、延时或费用降幅。明细见 [预览清单](examples/historical-input-preview/manifest.json)。
+-
+-这些是旧轨迹的格式转换；没有用新输入重新请求模型或执行机器人，不能当成新版本成功轨迹或直接据此声称新版本仍然 3/3 成功。该结论需要以新版本入口另行实跑。
+-
+-现有代码、原有 25 Hz/250 Hz 版本、脚本、发布代码和 `val.jsonl` 共 1,328 个文件做了 SHA-256 保护，另复核 4,711 个历史日志；校验由 [verify_originals.py](verify_originals.py) 执行。
+-
+-## 后续真实运行
+-
+-2026-10-20，完成独立的新版本 general_pickup L20/L21/L22 各一局：3/3 成功、均分 100，38 次模型决策，0 次原无效动作，L20 有 5 次夹爪保护中断。两时刻输入、observation.memory、实际 API 消息与训练标签均经过实跑日志核对。三局实际输入为 473,813 token，而此前完整历史版为 5,093,220；不同轨迹与决策数会影响这个整局对比，不能将其直接当作固定策略的频率或输入格式因果效应。完整结果、视频及真实 Swift 数据见 [实跑汇总](../../runs/general_pickup-io-250hz-obspair-3layouts-20261020-111723/SUMMARY.md)。上文 39 条预览仍然只是旧轨迹的离线格式转换，与此次新采集的 38 条样本分开保存。
++原有版本、脚本、发布文件及两个参考 JSONL 共 1,675 个文件进行了 SHA-256 保护；进一步复用上版本原始源码和历史日志校验。只在本新目录写入文件。新版本尚未运行真实 API/Isaac 回合；真实成功率、图像开销和训练模板适配均待实跑验证。
+--- variants/astra_io_250hz_obspair/README.md
++++ variants/astra_io_250hz_obspair_4fps/README.md
+@@ -1,76 +1,78 @@
+-# 250 Hz 两时刻观测输入版
++# 250 Hz：最近 5 秒 4fps 图像 + 两个决策点观测
+ 
+-基于 `astra_io_250hz_timed` 的独立副本。输入采用上一决策点 + 当前决策点观测，memory 位于当前 `observation`。原有代码和用户提供的 `val.jsonl` 均保留。方案评估见 [EVALUATION.md](EVALUATION.md)。
++这是 `astra_io_250hz_obspair` 的独立副本。每次请求提供最近 5 秒、4fps 的三路 RGB，再加上上一决策点和当前时刻的三路 RGB 与关节状态；memory 位于 `observation.memory`。可行性与参考数据核对见 [EVALUATION.md](EVALUATION.md)。原有版本、脚本、`val.jsonl`、`4fps_val.jsonl` 均保留。
+ 
+-每次 API 请求只包含一条 user 消息，结构为：
++## 输入
+ 
+-```json
+-{
+-  "input_protocol": "observation_pair_v1",
+-  "instruction": "当前任务要求",
+-  "history": {
+-    "available": true,
+-    "duration_ms": 332.0,
+-    "previous_observation": {
+-      "step": 0,
+-      "state": {"left_arm_joint_state": [0, 0, 0, 0, 0, 0], "right_arm_joint_state": [0, 0, 0, 0, 0, 0]}
+-    }
+-  },
+-  "observation": {
+-    "step": 83,
+-    "state": {"left_arm_joint_state": [0, 0, 0, 0, 0, 0], "right_arm_joint_state": [0.1, 0, 0, 0, 0, 0]},
+-    "memory": "上一决策返回的文字记忆"
+-  }
+-}
++每次 API 请求仍只有一条 user 消息，包含：
++
++| 字段 | 内容 |
++|---|---|
++| `input_protocol` | `visual_history_5s_4fps_v1` |
++| `visual_history.observations` | 按仿真时间排序的观测列表；记录 step、relative_time_ms、roles 和对应图片名 |
++| `history.previous_observation` | 上一决策点动作开始前的关节、腕部位姿、夹爪测量；首轮为 null |
++| `history.duration_ms` | 上一决策点到当前的真实仿真间隔，按实际执行周期计算 |
++| `observation` | 当前测得状态、memory、当前命令和公共关节语义等 |
++
++每个图像时刻均包含 `cam_head`、`cam_left_wrist`、`cam_right_wrist`，依次命名为 `observation_NN_cam_head` 等。`roles` 区分 `history`、`previous_decision`、`current`；两个端点用 `state_source` 指向对应状态字段。中间历史帧只有 RGB，不补造关节状态，也不加入旧调用、执行反馈或推理。
++
++采样以回合起点为零，目标时刻为 0、250、500、750ms……。250 Hz 的周期为 4ms，因此向后取第一个可达控制时刻，实际为 0、252、500、752ms……；同时记录目标和实际时刻，偏差为 0 或 2ms，不会累积。模型等待期间不推进仿真，也不重复填充图像。
++
++历史窗口为当前时刻前 5 秒，启动不足 5 秒时只使用已有图像；上一决策点即使早于窗口也保留。历史采样与上一决策时间相同时合并角色，使用决策时的原图；当前图单独保留。零步拒绝时允许两个端点同为 0ms。最多 20 组历史 + 2 组端点，即 66 张图片。
++
++## 运行
++
++```bash
++# 示例使用 GPU 3；可改为所需编号。
++ISAACSIM_GPU=3 .venv-policy/bin/python -B variants/astra_io_250hz_obspair_4fps/run_local.py \
++  --seed 20 --env-gpu 3
+ ```
+ 
+-上面是简化结构；实际 state 还包含两臂腕部位姿、夹爪命令回显和实测手指位置，当前 observation 带有原有公共关节语义、姿态和当前命令。完整输入另含控制协议、任务预算及公共任务要求。图像依次为 previous_cam_head、previous_cam_left_wrist、previous_cam_right_wrist、current_cam_head、current_cam_left_wrist、current_cam_right_wrist。首轮 history.available=false、previous_observation=null，只带后三图。
++输出自动进入新目录 `runs/general_pickup-io-250hz-obspair-4fps-<时间>/`。如果需要共享在用的卡，可添加 `--allow-shared-gpu`。
+ 
+-`history` 中只有一个观测快照，不携带旧工具调用、反馈或推理；`recent_executed_segments`、逐周期 tracking、history_references 也不进入输入。原始动作和保护事件继续记入本地日志。memory 仍由模型输出，每轮显式放进新的 observation；同一 memory 不再通过旧调用回放。
+-
+-## 入口
++运行 L20/L21/L22 并自动保存、合并 Swift 输入输出：
+ 
+ ```bash
+-ISAACSIM_GPU=3 .venv-policy/bin/python -B variants/astra_io_250hz_obspair/run_local.py --seed 20 --env-gpu 3
+-# 所有卡都在使用时，可显式添加 --allow-shared-gpu（要求至少 12 GiB 空余显存）
++ISAACSIM_GPU=3 .venv-policy/bin/python -B variants/astra_io_250hz_obspair_4fps/run_batch.py \
++  --env-gpu 3 --layouts 20 21 22 \
++  --output /absolute/path/to/a/new-batch-directory
+ ```
+ 
+-输出目录为新建的 `runs/general_pickup-io-250hz-obspair-<时间>/`。250 Hz 关节控制、25 Hz 任务计时、原 CPU 物理后端、插值、夹爪映射和保护保持原实现；控制输出仍是原 control_arms 工具。旧接口的 continuation_request 不支持直接接入。
+-
+-## 检查与样例
+-
+-```bash
+-.venv-policy/bin/python -B -m unittest discover -s variants/astra_io_250hz_obspair/tests -p 'test_*.py' -v
+-.venv-policy/bin/python -B variants/astra_io_250hz_obspair/verify_originals.py
+-```
+-
+-可先阅读[第二轮完整输入预览](examples/historical-input-preview/L20/0002.input.json)及其[结构化 observation](examples/historical-input-preview/L20/0002.context.json)。39 次历史决策全部转换用于格式预览，未调用 API 或 Isaac；这些预览不是本版本新采集的训练数据。
++250 Hz 关节目标、25 Hz 任务时钟、8 秒 general_pickup 预算、原物理后端与控制保护沿用现有实现。采样在动作执行途中进行，不会为了凑历史而额外运动。`seed-N/visual-history.jsonl` 记录本局所有周期采样的实际时刻和图像路径；服务响应仅携带当前窗口。每个会话重新建立采样器，不复用其他回合图片。
+ 
+ ## Swift 导出
+ 
+-真实回合结束后使用本目录的独立导出器，支持重复 `--run` 合并不同 layout：
+-
+ ```bash
+-.venv-policy/bin/python -B variants/astra_io_250hz_obspair/export_swift.py \
+-  --run /absolute/path/to/new-obspair-run \
++.venv-policy/bin/python -B variants/astra_io_250hz_obspair_4fps/export_swift.py \
++  --run /absolute/path/to/new-4fps-run \
+   --output /absolute/path/to/new-swift-dataset
+ ```
+ 
+-`train.jsonl` / `all.jsonl` 每行包含 system/user/assistant 和 images，user 原样保留一次请求的两个观测点和 observation.memory；没有上一轮调用/反馈块。assistant 标签保留实际执行响应的参数 JSON。验证命令为 `export_swift.py --validate-only --output <数据目录>`。旧版本导出器不应用到本版本日志。
++可重复 `--run` 合并不同 layout。每条 `train.jsonl` 包含 system/user/assistant 和 images，保留实际 API 输入的时间顺序、图像和 `observation.memory`，assistant 为实际生效的 control_arms 参数。导出时核对服务端采样记录、两个端点、实际 API 消息和有效动作响应；修改标签或历史时间戳都会被拒绝。数据不会混入旧双观测版本。
+ 
+-## 主要新实现
++```bash
++.venv-policy/bin/python -B variants/astra_io_250hz_obspair_4fps/export_swift.py \
++  --validate-only --output /absolute/path/to/new-swift-dataset
++```
++
++## 验证
++
++```bash
++.venv-policy/bin/python -B -m unittest discover \
++  -s variants/astra_io_250hz_obspair_4fps/tests -p 'test_*.py' -v
++.venv-policy/bin/python -B variants/astra_io_250hz_obspair_4fps/verify_originals.py
++```
++
++已通过 34 项离线测试，包括实际 server/client 代码及原生控制队列的长动作采样、5 秒裁剪、66 图请求组装、保护与拒绝、memory、Swift 导出和篡改检测。API 使用替身，物理使用确定性测试环境；尚未运行本版本真实 API/Isaac 抓取回合，未生成新的实跑训练数据。之前双观测版的三局成功结果不代表本版本结果。
++
++## 关键文件
+ 
+ | 文件 | 用途 |
+ |---|---|
+-| [observation_pair.py](harness/egg_harness/observation_pair.py) | 两时刻输入、真实间隔、三路图及 memory 组织 |
+-| [native_responses.py](harness/egg_harness/native_responses.py) | 单 user 请求、观测快照生命周期、不回放 self.previous |
+-| [policy.py](policy.py) | 新输入说明及原有重试/工具过滤 |
+-| [run_local.py](run_local.py) | 独立运行、选卡与运行来源标记 |
+-| [export_swift.py](export_swift.py) | 新日志的训练数据导出及校验 |
+-| [test_observation_pair.py](tests/test_observation_pair.py) | 请求、执行主循环与导出验证 |
+-
+-2026-10-20 已完成本版本真实 API/Isaac 测试：general_pickup L20、L21、L22 各一场，均成功、100 分；分别为 22、7、9 次模型调用，6.40、3.00、4.16 秒仿真时间。无效动作均为 0，L20 另有 5 次夹爪保护中断。三场采用相同的 277 个 Harness 文件快照，原有代码与 val.jsonl 校验通过。
+-
+-结果见 [三局汇总](../../runs/general_pickup-io-250hz-obspair-3layouts-20261020-111723/SUMMARY.md)。[合并 Swift train.jsonl](../../runs/general_pickup-io-250hz-obspair-3layouts-20261020-111723/swift-dataset/train.jsonl) 共 38 条真实输入输出，包含 observation.memory、上一决策点与当前状态及图片，无工具历史回放；[可读输入输出样例](../../runs/general_pickup-io-250hz-obspair-3layouts-20261020-111723/swift-dataset/example-followup.json)。全部数据与视频核验见 [final-audit.json](../../runs/general_pickup-io-250hz-obspair-3layouts-20261020-111723/final-audit.json)。
+-
+-三局实际输入 token 共 473,813；之前完整历史版三局为 5,093,220。该比较涉及不同的模型决策和轨迹，不是固定动作下的消融实验。重复运行三布局并自动导出可使用本目录的 `run_batch.py --output <新的批次目录> --env-gpu N --layouts 20 21 22`。
++| [visual_history.py](harness/egg_harness/visual_history.py) | 仿真采样网格、滚动窗口和完整性检查 |
++| [observation_pair.py](harness/egg_harness/observation_pair.py) | 合并采样图与决策端点，构造时序输入 |
++| [server_loop.py](harness/scripts/server_loop.py) | 保存实际采样图和公共窗口 |
++| [action_control.py](harness/egg_harness/action_control.py) | 动作执行途中触发采样 |
++| [native_responses.py](harness/egg_harness/native_responses.py) | 单 user 请求、显式 memory，不回放 self.previous |
++| [policy.py](policy.py) | 对应输入说明及控制入口 |
++| [export_swift.py](export_swift.py) | 完整时序输入输出的 Swift 导出 |
+--- /dev/null
++++ variants/astra_io_250hz_obspair_4fps/audit_reference.py
+@@ -0,0 +1,63 @@
++"""Audit the user's reference JSONL without rewriting it or requiring its RGB files."""
++from collections import Counter
++import hashlib
++import json
++from pathlib import Path
++import re
++
++HERE = Path(__file__).resolve().parent
++ROOT = HERE.parents[1]
++
++
++def audit():
++    path = ROOT / '4fps_val.jsonl'
++    counts = Counter(); roles = Counter(); tasks = Counter(); history_counts = Counter(); issues = []
++    images = 0; first_images = []; offsets = []; examples = {}
++    for number, line in enumerate(path.open(), 1):
++        row = json.loads(line)
++        if [message['role'] for message in row['messages']] != ['system', 'user', 'assistant']:
++            issues.append(dict(line=number, issue='roles'))
++        user = row['messages'][1]['content']
++        observations = []
++        parts = re.split(r'Observation \d+: ', user)[1:]
++        for part in parts:
++            metadata, _, rest = part.partition('\n')
++            value = json.loads(metadata)
++            observations.append(value)
++            roles[','.join(value['roles'])] += 1
++            has_state = '\nState: ' in '\n' + rest
++            if has_state != any(role in value['roles'] for role in ('current', 'previous_decision')):
++                issues.append(dict(line=number, issue='endpoint state placement'))
++        times = [value['relative_time_ms'] for value in observations]
++        if times != sorted(times) or not times or times[-1] != 0 or min(times) < -5000:
++            issues.append(dict(line=number, issue='chronology/window'))
++        if user.count('<image>') != len(row['images']) or len(row['images']) != 3 * len(observations):
++            issues.append(dict(line=number, issue='image count/order'))
++        offsets.extend(times)
++        counts[len(row['images'])] += 1
++        history_counts[sum('history' in value['roles'] for value in observations)] += 1
++        tasks[user.splitlines()[0]] += 1
++        images += len(row['images'])
++        if not first_images: first_images = row['images'][:3]
++        key = 'first' if number == 1 else 'full-window' if len(row['images']) == 66 else None
++        if key and key not in examples:
++            examples[key] = number
++            (HERE / 'examples' / f'reference-{key}.json').write_text(json.dumps(dict(
++                scope='Exact reference row; remote image paths are not copied or verified',
++                source=str(path), source_line=number, sample=row), ensure_ascii=False, indent=2) + '\n')
++    result = dict(passed=not issues, source=str(path), source_sha256=hashlib.sha256(path.read_bytes()).hexdigest(),
++                  rows=sum(counts.values()), image_references=images, tasks=dict(tasks),
++                  image_count_distribution=dict(sorted(counts.items())), observation_roles=dict(roles),
++                  history_observation_count_distribution=dict(sorted(history_counts.items())),
++                  relative_time_ms_range=[min(offsets), max(offsets)],
++                  maximum_observations=max(counts) // 3, issues=issues,
++                  first_image_files_present=[Path(p).is_file() for p in first_images],
++                  scope='Text structure only; image content and physical correctness not verified')
++    (HERE / 'audit/4fps-reference.json').write_text(json.dumps(result, ensure_ascii=False, indent=2) + '\n')
++    return result
++
++
++if __name__ == '__main__':
++    result = audit()
++    print(json.dumps(result, ensure_ascii=False, indent=2))
++    raise SystemExit(0 if result['passed'] else 1)
+--- variants/astra_io_250hz_obspair/export_swift.py
++++ variants/astra_io_250hz_obspair_4fps/export_swift.py
+@@ -1,4 +1,4 @@
+-"""Export actual observation-pair runs; each Swift row has the same one-user input."""
++"""Export actual 5s/4fps observation runs with the exact chronological API input."""
+ import argparse
+ from copy import deepcopy
+ from datetime import datetime, timezone
+@@ -14,7 +14,8 @@
+ ROOT = HERE.parents[1]
+ sys.path[:0] = [str(HERE / 'harness'), str(ROOT / 'scripts')]
+ from egg_harness.control_timing import validate_timing_record
+-from egg_harness.observation_pair import CAMERAS, PROTOCOL
++from egg_harness.observation_pair import CAMERAS, PROTOCOL, build_visual_input
++from egg_harness.visual_history import METADATA, WINDOW_TICKS, validate_window
+ from export_io_variant_ms_swift import NATIVE_PREFIX, TEXT_PREFIX, compact, call_from, digest, require
+ from export_timed_io_ms_swift import validate_arguments
+ 
+@@ -35,11 +36,13 @@
+             and not native['unstable'], 'Only valid native terminal episodes can be exported')
+     require(result['policy_returncode']==result['simulator_returncode']==0 and result['release_unchanged'],
+             'Runtime failed or source changed')
+-    require(launch['io_variant']=='astra_io_250hz_obspair' and launch['input_protocol']==PROTOCOL
++    require(launch['io_variant']=='astra_io_250hz_obspair_4fps' and launch['input_protocol']==PROTOCOL
+             and launch['model_history_replay'] is False, 'Use an actual observation-pair run')
+     layout=result['seed_index'];model=run/f'policy-{layout}/model'
+     timing=read(run/f'seed-{layout}/control-timing.json');validate_timing_record(timing)
+     paths=sorted(model.glob('*.request.json'))
++    audit_frames=[json.loads(line) for line in (run/f'seed-{layout}/visual-history.jsonl').read_text().splitlines()]
++    require(len({frame['sample_index'] for frame in audit_frames})==len(audit_frames), 'Repeated visual sample index')
+     require(len(paths)==result['policy']['model_calls'] and bool(paths), 'Decision count mismatch')
+     tools=read(model/'native-tools.json')['tools']
+     require([tool['name'] for tool in tools]==['control_arms'], 'Unexpected tools')
+@@ -55,29 +58,42 @@
+         require(feedback['call_id']==call['call_id'], 'Feedback call mismatch')
+         args=json.loads(call['arguments']);executed=actual['feedback']['executed_steps']
+         require(actual['step']==end+executed and 0<=executed<=args['steps']+args['settle'], 'Execution boundary mismatch')
+-        expected_names=(['previous_'+name for name in CAMERAS] if previous else [])+['current_'+name for name in CAMERAS]
+-        require([image['name'] for image in request['images']]==expected_names, 'Image order mismatch')
+         if previous:
+             prior=json.loads(previous['request']['question'])['observation']
+             snapshot={key:deepcopy(prior[key]) for key in ('step','state','arm_posture') if key in prior}
+             require(history['available'] and history['previous_observation']==snapshot
+                     and history['duration_ms']==(observation['step']-prior['step'])*4, 'Previous decision observation mismatch')
+             require(observation['memory']==json.loads(previous['call']['arguments'])['memory'], 'Memory was not propagated')
+-            require([image['sha256'] for image in request['images'][:3]]==[
+-                image['sha256'] for image in previous['request']['images'][-3:]], 'Previous images mismatch')
+         else:
+             require(history==dict(available=False,duration_ms=None,previous_observation=None), 'First request has history')
++        current_images={name:image['path'] for name,image in zip(CAMERAS,request['images'][-3:])}
++        raw_context=dict(observation, instruction=value['instruction'], control_timing=value['control_timing'],
++                         budget=value['budget'], action_interface=value['action_interface'],
++                         visual_history=dict(METADATA,frames=[frame for frame in audit_frames
++                             if end-WINDOW_TICKS<=frame['step']<=end]))
++        if 'public_task_requirements' in value:
++            raw_context['public_task_requirements']=value['public_task_requirements']
++        prior_snapshot=None
++        if previous:
++            prior_snapshot=dict(snapshot,cameras={name:image['path'] for name,image in
++                zip(CAMERAS,previous['request']['images'][-3:])})
++        expected,expected_images,_=build_visual_input(raw_context,current_images,prior_snapshot)
++        require(value==expected, 'Visual history timestamps, endpoints or public state differ from captured evidence')
++        require([(item['name'],item['path']) for item in request['images']]==[
++            (name,str(Path(path).resolve())) for name,path in expected_images.items()], 'Chronological image order/source mismatch')
+         content=[dict(type='input_text',text=request['question'])]
+         for image in request['images']:
+             require(digest(Path(image['path']))==image['sha256'], 'Source image changed')
+             content.extend([dict(type='input_text',text=image['name']),
+                             dict(type='input_image',detail='high',image_sha256=image['sha256'])])
+         require(read(model/f'{stem}.api-input.readable.json')['input']==[dict(role='user',content=content)],
+-                'Actual API input differs from observation pair')
++                'Actual API input differs from chronological visual observations')
+         row=dict(run=run,layout=layout,stem=stem,request=request,call=call,feedback=feedback,
+                  end_step=actual['step'],tool=tools[0])
+         output.append(row);previous=row;end=actual['step']
+     require(end==result['action_count']==native['steps'] and actual['ended'], 'Final native result mismatch')
++    validate_window(dict(METADATA,frames=[frame for frame in audit_frames
++        if end-WINDOW_TICKS<=frame['step']<=end]),end)
+     return output
+ 
+ 
+@@ -85,7 +101,7 @@
+     request=record['request'];system=request['system']
+     require(system.count(NATIVE_PREFIX)==1,'Unknown system prompt')
+     system=system.replace(NATIVE_PREFIX,TEXT_PREFIX,1)+'\nOutput only the control_arms argument JSON; no Markdown. '
+-    system+='Keep observation.memory and compare the previous/current observations. No tool history is serialized.\n'
++    system+='Keep observation.memory; compare 5s/4fps visual history and previous/current states. No tool history is serialized.\n'
+     system+='Output schema:\n'+compact(record['tool'])
+     text=request['question'];images=[]
+     for index,image in enumerate(request['images']):
+@@ -112,13 +128,16 @@
+     if len(samples)>1:save(output/'example-followup.json',samples[1])
+     save(output/'manifest.json',dict(source_runs=list(map(str,runs)),samples=len(samples),input_protocol=PROTOCOL,
+          memory_location='observation.memory',action_hz=250,observation_hz=25,model_history_replay=False,
++         visual_history_window_ms=5000,visual_history_fps=4,
+          format='ms-swift messages + images JSONL',labels='exact effective function_call.arguments',
+-         source_sha256={str(path):digest(path) for run in runs for path in sorted(run.rglob('*.json'))
++         source_sha256={str(path):digest(path) for run in runs for path in sorted([
++                        *run.rglob('*.json'), *run.glob('seed-*/visual-history.jsonl')])
+                         if path.is_file() and 'runtime-assets' not in path.parts
+                         and not path.is_relative_to(output) and 'swift-dataset' not in path.parts}))
+-    (output/'README.md').write_text('# Observation-pair Swift data\n\n'
+-        f'{len(samples)} samples from actual completed observation-pair runs. Each row has system/user/assistant '
+-        'messages and ordered images. The user message contains two measured observations and observation.memory; '
++    (output/'README.md').write_text('# 5s / 4fps observation-pair Swift data\n\n'
++        f'{len(samples)} samples from actual completed visual-history runs. Each row has system/user/assistant '
++        'messages and chronological three-camera images from the last 5s at 4fps, plus the previous/current '
++        'decision observations and observation.memory; '
+         'no previous tool cycle. Labels preserve exact effective arguments. steps/settle use 4 ms control ticks.\n\n'
+         'Image paths are absolute; update them when moving the dataset. train.jsonl and all.jsonl are identical.\n\n'
+         f'Use --dataset {output/"train.jsonl"} --split_dataset_ratio 0.\n')
+@@ -140,6 +159,7 @@
+             with Image.open(image) as picture:picture.load()
+     report=dict(passed=True,validated_at=datetime.now(timezone.utc).isoformat(),samples=len(samples),
+                 exact_source_inputs_and_labels=True,memory_in_observation=True,tool_history_replayed=False,
++                chronological_visual_history=True,visual_history_window_ms=5000,visual_history_fps=4,
+                 dataset_sha256=digest(output/'train.jsonl'),model_template_tested=False)
+     save(output/'validation.json',report);return report
+ 
+--- variants/astra_io_250hz_obspair/general_pickup.json
++++ variants/astra_io_250hz_obspair_4fps/general_pickup.json
+@@ -103,7 +103,7 @@
+     ],
+     "decision_format": "native_function"
+   },
+-  "io_variant": "astra_io_250hz_obspair",
++  "io_variant": "astra_io_250hz_obspair_4fps",
+   "action_hz": 250,
+   "observation_hz": 25,
+   "timing_protocol": "timed_joint_v1",
+@@ -113,7 +113,9 @@
+   "history_deduplication": false,
+   "explicit_episode_memory": true,
+   "model_history_replay": false,
+-  "rgb_memory_enabled": false,
+-  "input_protocol": "observation_pair_v1",
+-  "memory_location": "observation.memory"
++  "rgb_memory_enabled": true,
++  "input_protocol": "visual_history_5s_4fps_v1",
++  "memory_location": "observation.memory",
++  "visual_history_window_ms": 5000,
++  "visual_history_fps": 4
+ }
+--- variants/astra_io_250hz_obspair/harness/egg_harness/action_control.py
++++ variants/astra_io_250hz_obspair_4fps/harness/egg_harness/action_control.py
+@@ -7,6 +7,7 @@
+ from .segments import compile_segment
+ from .storage import check_configured_storage
+ from .control_timing import MAX_ACTION_STEPS, TICKS_PER_TASK_STEP
++from .visual_history import is_sample_tick
+ 
+ ARMS = ('left', 'right')
+ SETTINGS = {'tcp': {'tcp'}, 'joint': {'joint'}, 'both': {'tcp', 'joint'}}
+@@ -149,7 +150,8 @@
+         log('actions.jsonl', {'command': command['id'], 'step': before + 1, 'action': native,
+                              'cartesian_target': cartesian, 'controls': feedback['controls']})
+         measured = robot_state()
+-        if (before + 1) % TICKS_PER_TASK_STEP == 0 or env.is_episode_end():
++        if ((before + 1) % TICKS_PER_TASK_STEP == 0 or is_sample_tick(before + 1)
++                or env.is_episode_end()):
+             observe(f'step-{before + 1:04d}')
+         interrupted = False
+         for arm in ARMS:
+--- variants/astra_io_250hz_obspair/harness/egg_harness/client.py
++++ variants/astra_io_250hz_obspair_4fps/harness/egg_harness/client.py
+@@ -144,6 +144,9 @@
+         expected_fields = {'step', 'state', 'cameras', 'instruction', 'ended', 'budget', 'control_timing'}
+         from .control_timing import validate_timing_record
+         validate_timing_record(obs.get('control_timing'))
++        from .visual_history import validate_window
++        validate_window(obs.get('visual_history'), obs['step'])
++        expected_fields.add('visual_history')
+         if 'action_interface' in obs:
+             from .action_control import action_interface
+             action_interface(obs)
+--- variants/astra_io_250hz_obspair/harness/egg_harness/native_responses.py
++++ variants/astra_io_250hz_obspair_4fps/harness/egg_harness/native_responses.py
+@@ -15,7 +15,7 @@
+ from .storage import check_configured_storage
+ from .vision import failure_record
+ from .io_contract import readable_input, round_output
+-from .observation_pair import PROTOCOL, build_pair
++from .observation_pair import PROTOCOL, build_visual_input
+ 
+ TOOL_INSTRUCTIONS = '''Use exactly one of the supplied native function tools for your next operation.
+ The action:{...} notation in the skills describes the existing operation semantics;
+@@ -23,11 +23,13 @@
+ Include your brief assessment, plan and updated episode memory in the call.
+ Do not emit phase. Numeric action outputs have at most four decimal places.
+ Null optional fields mean hold/omit, never a guessed value. Inspect the actual measured
+-observation pair before the next operation. Only enabled
++visual history and decision observations before the next operation. Only enabled
+ tools are callable; there is no shell, arbitrary file access or hidden-state query.
+-Each request is one self-contained user observation. history contains only the
+-preceding decision-point observation; observation contains current measurements
+-and the latest explicit memory. Previous calls, results and reasoning are not replayed.
++Each request is one self-contained user observation. visual_history lists RGB
++observations in chronological order: 4 fps from the last 5 simulation seconds,
++plus the exact preceding decision and current observation. history contains the
++preceding decision state; observation contains current state and explicit memory.
++Previous calls, results and reasoning are not replayed.
+ '''
+ 
+ 
+@@ -48,7 +50,7 @@
+         self.pending = None
+         if (config.get('model_history_replay') is not False
+                 or config.get('input_protocol') != PROTOCOL):
+-            raise ValueError('Use observation_pair_v1 with model_history_replay=false')
++            raise ValueError('Use visual_history_5s_4fps_v1 with model_history_replay=false')
+         self.last_observation = None
+         self.last_memory = None
+         self.last_images = {}
+@@ -60,7 +62,8 @@
+         (self.trace / 'native-tools.json').write_text(json.dumps({
+             'api': 'responses', **self.provider.audit(), 'tools': self.registry.definitions,
+             'session_id': self.session_id, 'reasoning_effort': effort,
+-            'history_policy': 'previous/current decision observations; memory in observation',
++            'history_policy': '5s RGB at 4fps plus previous/current decisions; memory in observation',
++            'visual_history_window_ms': 5000, 'visual_history_fps': 4,
+             'input_protocol': PROTOCOL, 'model_history_replay': False,
+             'parallel_tool_calls': False, 'max_retries': 0}, indent=2))
+ 
+@@ -95,7 +98,7 @@
+         context = json.loads(question)
+         if self.last_memory is not None and context.get('memory') != self.last_memory:
+             raise ValueError('observation.memory must equal the latest executed decision memory')
+-        context, images, current_snapshot = build_pair(context, images, self.last_observation)
++        context, images, current_snapshot = build_visual_input(context, images, self.last_observation)
+         question = json.dumps(context, allow_nan=False)
+         content = [{'type': 'input_text', 'text': question}]
+         manifest = []
+--- variants/astra_io_250hz_obspair/harness/egg_harness/observation_pair.py
++++ variants/astra_io_250hz_obspair_4fps/harness/egg_harness/observation_pair.py
+@@ -2,7 +2,7 @@
+ from copy import deepcopy
+ import math
+ 
+-PROTOCOL = 'observation_pair_v1'
++PROTOCOL = 'visual_history_5s_4fps_v1'
+ CAMERAS = ('cam_head', 'cam_left_wrist', 'cam_right_wrist')
+ CURRENT_FIELDS = ('home', 'home_joints', 'joint_semantics', 'arm_posture',
+                   'desired_gripper_commands', 'contact_estimates')
+@@ -67,3 +67,47 @@
+     if 'public_task_requirements' in context:
+         payload['public_task_requirements'] = deepcopy(context['public_task_requirements'])
+     return payload, ordered_images, current
++
++
++def build_visual_input(context, images, previous=None):
++    """Merge sampled RGB with the two exact decision observations, chronologically.
++
++    Sampled frames have no joint state. The existing history/observation fields
++    retain the exact endpoint measurements and observation.memory.
++    """
++    from .visual_history import METADATA, TICK_MS, validate_window
++    payload, _, current = build_pair(context, images, previous)
++    frames = validate_window(context.get('visual_history'), current['step'])
++    entries = []
++    for frame in frames:
++        if frame['step'] < current['step']:
++            entries.append(dict(step=frame['step'], roles=['history'], cameras=frame['cameras'],
++                                sample_index=frame['sample_index'], target_time_ms=frame['target_time_ms']))
++    if previous is not None:
++        prior = snapshot(previous, previous['cameras'])
++        match = next((row for row in entries if row['step'] == prior['step']), None)
++        if match is None:
++            entries.append(dict(step=prior['step'], roles=['previous_decision'], cameras=prior['cameras']))
++        else:
++            match['roles'].append('previous_decision')
++            # Use the exact pre-action decision pictures when its time is sampled.
++            match['cameras'] = prior['cameras']
++    entries.append(dict(step=current['step'], roles=['current'], cameras=current['cameras']))
++    entries.sort(key=lambda row: row['step'])  # Stable: previous precedes current even for zero motion.
++    ordered_images = {}
++    observations = []
++    for index, entry in enumerate(entries):
++        names = []
++        for camera in CAMERAS:
++            name = f'observation_{index:02d}_{camera}'
++            ordered_images[name] = entry['cameras'][camera]
++            names.append(name)
++        row = {key: deepcopy(value) for key, value in entry.items() if key != 'cameras'}
++        row.update(relative_time_ms=(entry['step'] - current['step']) * TICK_MS, images=names)
++        if 'previous_decision' in entry['roles']:
++            row['state_source'] = 'history.previous_observation.state'
++        if 'current' in entry['roles']:
++            row['state_source'] = 'observation.state'
++        observations.append(row)
++    payload['visual_history'] = dict(METADATA, observations=observations)
++    return payload, ordered_images, current
+--- variants/astra_io_250hz_obspair/harness/egg_harness/skill_policy.py
++++ variants/astra_io_250hz_obspair_4fps/harness/egg_harness/skill_policy.py
+@@ -255,6 +255,7 @@
+             images.update(review_images)
+             context={'step':robot.obs['step'],'state':robot.obs['state'],'home':robot.home,'instruction':robot.obs['instruction'],'memory':memory,'desired_gripper_commands':commanded_grip,'contact_estimates':{arm:(np.asarray(robot.obs['state'][arm+'_ee_pose'][:3])+Rotation.from_quat(np.asarray(robot.obs['state'][arm+'_ee_pose'])[ [4,5,6,3] ]).apply([.138,0,0])).tolist() for arm in ('left','right')}}
+             context['control_timing']=robot.obs['control_timing']
++            context['visual_history']=robot.obs['visual_history']
+             context['previous_observation']=previous_state
+             context['review_capability']='Zero-motion action:{review:[{step:recorded_native_step,camera:cam_head|cam_left_wrist|cam_right_wrist}]};1..6 frames. Historical RGB and original public poses appear on your next decision alongside current views. No future, other-episode or hidden state. Use before declaring past contact unknowable.'
+             context['reviewed_observations']=review_records
+--- /dev/null
++++ variants/astra_io_250hz_obspair_4fps/harness/egg_harness/visual_history.py
+@@ -0,0 +1,80 @@
++"""Causal three-camera samples on a 4 fps simulation-time grid, kept for 5 s."""
++from collections import deque
++from copy import deepcopy
++import json
++
++CAMERAS = ('cam_head', 'cam_left_wrist', 'cam_right_wrist')
++WINDOW_MS = 5000
++SAMPLE_HZ = 4
++TICK_MS = 4
++WINDOW_TICKS = WINDOW_MS // TICK_MS
++METADATA = dict(window_ms=WINDOW_MS, sample_hz=SAMPLE_HZ, clock='simulation',
++                sampling='first_control_tick_at_or_after_250ms_grid')
++
++
++def sample_tick(index):
++    # 250 ms / 4 ms = 62.5 ticks: 0, 63, 125, 188, 250, ...
++    return (125 * index + 1) // 2
++
++
++def is_sample_tick(step):
++    return step >= 0 and step == sample_tick(step * 2 // 125)
++
++
++def expected_indices(step):
++    last = step * 2 // 125
++    first = max(0, (step - WINDOW_TICKS) * 2 // 125)
++    return [i for i in range(first, last + 1) if step - WINDOW_TICKS <= sample_tick(i) <= step]
++
++
++def validate_window(window, step):
++    """Require every due sample, real timestamps and only public RGB paths."""
++    if not isinstance(window, dict) or set(window) != set(METADATA) | {'frames'}:
++        raise ValueError('Missing or unexpected visual_history fields')
++    if any(window[key] != value for key, value in METADATA.items()):
++        raise ValueError('Visual history must use 5 seconds, 4 fps and simulation time')
++    frames = window['frames']
++    indices = expected_indices(step)
++    if not isinstance(frames, list) or len(frames) != len(indices):
++        raise ValueError('Missing 4 fps samples in the current 5 second window')
++    for frame, index in zip(frames, indices):
++        if (not isinstance(frame, dict) or set(frame) != {'sample_index', 'step', 'target_time_ms', 'time_ms', 'cameras'}
++                or type(frame['sample_index']) is not int or frame['sample_index'] != index
++                or type(frame['step']) is not int or frame['step'] != sample_tick(index)
++                or frame['target_time_ms'] != index * 250 or frame['time_ms'] != frame['step'] * TICK_MS
++                or not isinstance(frame['cameras'], dict) or set(frame['cameras']) != set(CAMERAS)
++                or any(not isinstance(p, str) or not p for p in frame['cameras'].values())):
++            raise ValueError('Invalid or noncausal 4 fps sample')
++    return deepcopy(frames)
++
++
++class RollingVisualHistory:
++    """One fresh episode, bounded memory; the optional index is durable audit data."""
++    def __init__(self, audit_path=None):
++        self.frames = deque()
++        self.next_index = 0
++        self.last_step = -1
++        self.audit_path = audit_path
++
++    def observe(self, step, cameras):
++        if type(step) is not int or step < self.last_step or step < 0:
++            raise ValueError('Visual history cannot rewind simulation time')
++        due = sample_tick(self.next_index)
++        if step > due:
++            raise ValueError(f'Missed required 4 fps capture at control tick {due}')
++        if step == due:
++            if set(cameras) != set(CAMERAS):
++                raise ValueError('A 4 fps sample requires all three cameras')
++            frame = dict(sample_index=self.next_index, step=step, target_time_ms=self.next_index * 250,
++                         time_ms=step * TICK_MS, cameras={name: str(cameras[name]) for name in CAMERAS})
++            self.frames.append(frame)
++            self.next_index += 1
++            if self.audit_path is not None:
++                with self.audit_path.open('a') as stream:
++                    stream.write(json.dumps(frame, allow_nan=False) + '\n')
++        self.last_step = step
++        while self.frames and self.frames[0]['step'] < step - WINDOW_TICKS:
++            self.frames.popleft()
++        result = dict(METADATA, frames=deepcopy(list(self.frames)))
++        validate_window(result, step)
++        return result
+--- variants/astra_io_250hz_obspair/harness/scripts/server_loop.py
++++ variants/astra_io_250hz_obspair_4fps/harness/scripts/server_loop.py
+@@ -15,6 +15,7 @@
+ from egg_harness.multiview import MultiViewGeometry
+ from egg_harness.contraction import solve_contracted
+ from egg_harness.storage import check_configured_storage
++from egg_harness.visual_history import RollingVisualHistory
+ from egg_harness.posture_action import validate_posture_action,upright_joint_target,posture_increment
+ from egg_harness.posture_recovery import validate_recovery, plan_recovery, check_envelope
+ from egg_harness.joint_control import (joint_increment_with_holds, validate_joint_action, joint_increment, joint_preview,
+@@ -68,8 +69,10 @@
+     save(output / 'initial-state.json', env.get_obs()['state'])
+     save(output / 'provenance.json', dict(seeds=seeds, task=task,
+          privileged_diagnostics=mode=='development', depth_calibration=False, object_teleportation=False,
+-         mode=mode, action_interface=action_interface, io_variant='astra_io_250hz_obspair',
++         mode=mode, action_interface=action_interface, io_variant='astra_io_250hz_obspair_4fps',
+          control_timing=json.loads((output / 'control-timing.json').read_text())))
++
++    visual_history = RollingVisualHistory(output / 'visual-history.jsonl')
+ 
+     def observe(tag):
+         raw = capture_public_observation(env)
+@@ -79,8 +82,10 @@
+             stem = output / 'frames' / f'{tag}-{name}'
+             Image.fromarray(camera['color']).save(str(stem) + '.jpg', quality=90)
+             cameras[name] = str(stem) + '.jpg'
++        history_window = visual_history.observe(int(env.take_action_cnt[0]), cameras)
+         ended = env.is_episode_end()
+         result = dict(step=int(env.take_action_cnt[0]), state=robot_state(), cameras=cameras,
++                      visual_history=history_window,
+                       control_timing=json.loads((output / 'control-timing.json').read_text()),
+                       camera_calibration_id=camera_calibration_id, action_interface=action_interface,
+                       instruction=raw['instruction'], ended=ended,
+--- variants/astra_io_250hz_obspair/policy.py
++++ variants/astra_io_250hz_obspair_4fps/policy.py
+@@ -37,15 +37,24 @@
+ are finger positions in metres, not contact sensors. Verify retention by object
+ motion relative to the fingers and background in more than one view. Explain
+ uncertainty. Return home only when the public task requires it.
+-Each request has one user observation with two measured decision points.
++Each request has one user message with a chronological visual_history: three
++camera images sampled at 4 fps over the last 5 seconds of SIMULATION time, plus
++the exact previous decision observation and the current observation. Read each
++entry's step, relative_time_ms, roles and ordered image names. The 250 ms sample
++grid is rounded up to the next 4 ms control tick (at most 2 ms later). Historical
++samples contain RGB only; joint state is supplied at the two decision endpoints.
++Fewer samples exist at episode start. A previous decision older than 5 seconds
++is still included as an explicit endpoint. Entries sharing a sampled time and
++the previous decision are merged; a rejected zero-motion action may leave two
++decision endpoints at the same time. Do not infer movement merely from ordering.
+ observation.state is the current robot state; observation.memory is the latest
+ explicit episode memory. history.previous_observation contains the PRECEDING
+-DECISION POINT'S measured state, not the previous physics tick. Previous and
+-current images are named previous_cam_head, previous_cam_left_wrist,
+-previous_cam_right_wrist and current_cam_head, current_cam_left_wrist,
+-current_cam_right_wrist. history.duration_ms gives actual elapsed
++DECISION POINT'S measured state, not the previous physics tick. Images are named
++observation_NN_cam_head, observation_NN_cam_left_wrist and
++observation_NN_cam_right_wrist, in visual_history.observations order.
++history.duration_ms gives actual elapsed
+ simulation time between these decisions; the first decision has no prior view.
+-Compare both measured joint states and all three views to infer movement and
++Compare the visual sequence, both measured joint states and all three views to infer movement and
+ retention. State gripper command echoes and observation.desired_gripper_commands
+ are commands, not measured apertures; use gripper_measured_joints for fingers.
+ No previous function call, result, reasoning or action sequence is supplied.
+@@ -79,8 +88,9 @@
+             path = self.trace / 'native-tools.json'
+             record = json.loads(path.read_text())
+             record.update(tools=self.registry.definitions, enabled_tools=['control_arms'],
+-                          history_policy='previous/current observations only; memory in observation',
+-                          io_variant='astra_io_250hz_obspair', input_protocol='observation_pair_v1',
++                          history_policy='5s RGB at 4fps plus previous/current decision observations; memory in observation',
++                          visual_history_window_ms=5000, visual_history_fps=4,
++                          io_variant='astra_io_250hz_obspair_4fps', input_protocol='visual_history_5s_4fps_v1',
+                           model_history_replay=False, memory_location='observation.memory', action_hz=250, observation_hz=25,
+                           timing_protocol='timed_joint_v1', max_action_steps=2500,
+                           numeric_output_decimal_places=4,
+--- variants/astra_io_250hz_obspair/run_batch.py
++++ variants/astra_io_250hz_obspair_4fps/run_batch.py
+@@ -78,9 +78,10 @@
+         gpus=subprocess.check_output(['nvidia-smi', '--query-gpu=index,name,memory.used,memory.free,utilization.gpu',
+                                       '--format=csv,noheader'], text=True),
+         output_free_bytes=shutil.disk_usage(batch).free, cgroup=Path('/proc/self/cgroup').read_text()))
+-    state = dict(task='general_pickup', variant='astra_io_250hz_obspair', action_hz=250, observation_hz=25,
++    state = dict(task='general_pickup', variant='astra_io_250hz_obspair_4fps', action_hz=250, observation_hz=25,
++                 visual_history_window_ms=5000, visual_history_fps=4,
+                  physics_hz=250, timing_protocol='timed_joint_v1', gpu=args.env_gpu, allow_shared_gpu=True,
+-                 concurrency=1, input_protocol='observation_pair_v1', memory_location='observation.memory',
++                 concurrency=1, input_protocol='visual_history_5s_4fps_v1', memory_location='observation.memory',
+                  model_history_replay=False, model='gpt-6-astra', reasoning_effort='high', enabled_tools=['control_arms'],
+                  requested_layouts=args.layouts, status='running', started_at=now(), pid=os.getpid(),
+                  active=None, episodes=[episode_row(run.resolve(), True) for run in args.include_run])
+@@ -132,8 +133,8 @@
+         state['finished_at'] = now()
+         save(batch / 'batch.json', state)
+         save(batch / 'summary.json', state)
+-        lines = ['# general_pickup：250 Hz 双观测输入，L20/L21/L22', '',
+-                 'L20、L21、L22 各全新运行一场，串行执行；双观测输入，memory 位于 observation。',
++        lines = ['# general_pickup：250 Hz 双观测 + 最近 5 秒 4fps 图像，L20/L21/L22', '',
++                 'L20、L21、L22 各全新运行一场，串行执行；双观测 + 最近 5 秒 4fps 图像，memory 位于 observation。',
+                  '250 Hz 关节控制，25 Hz 任务/观测，原生预算 8 秒；Astra gpt-6-astra / high。', '',
+                  '| Layout | 结果 | 分数 | 控制周期 | 仿真秒 | 模型调用 | 数据 |',
+                  '|---|---|---:|---:|---:|---:|---|']
+--- variants/astra_io_250hz_obspair/run_local.py
++++ variants/astra_io_250hz_obspair_4fps/run_local.py
+@@ -160,7 +160,7 @@
+     result = {'task': args.task, 'seed_index': args.seed, 'seed_group': 0,
+               'gpu': args.gpu, 'mode': 'development',
+               'success': False, 'status': 'starting', 'human_interventions': 0,
+-              'started_at': datetime.now(timezone.utc).isoformat(), 'rgb_memory_enabled': False}
++              'started_at': datetime.now(timezone.utc).isoformat(), 'rgb_memory_enabled': True}
+     result['episode_timeout_seconds'] = args.episode_timeout or None
+     sim = policy = None
+     storage = EpisodeStorage(output)
+@@ -173,11 +173,12 @@
+         config = read(args.task_config)
+         if config.get('task') != args.task:
+             raise ValueError('--task must match the selected task configuration')
+-        config.update(io_variant='astra_io_250hz_obspair', action_hz=250, observation_hz=25,
++        config.update(io_variant='astra_io_250hz_obspair_4fps', action_hz=250, observation_hz=25,
+                       timing_protocol='timed_joint_v1', max_action_steps=2500,
+                       numeric_output_decimal_places=4,
+                       model_output_phase=False, history_deduplication=False,
+-                      input_protocol='observation_pair_v1', memory_location='observation.memory')
++                      input_protocol='visual_history_5s_4fps_v1', memory_location='observation.memory',
++                      visual_history_window_ms=5000, visual_history_fps=4)
+         retry_policy = config.get('transport_retry')
+         retry_wrapper = VARIANT / 'policy.py'
+         MODES = {'control_only': {'control_arms'}}
+@@ -186,7 +187,7 @@
+             raise ValueError('Unknown tool ablation mode')
+         if ablation_mode == 'control_only':
+             memory_policy = dict(explicit_episode_memory=True, model_history_replay=False,
+-                                 rgb_memory_enabled=False)
++                                 rgb_memory_enabled=True)
+             config.update(memory_policy)
+             config['tool_ablation'].update(memory_policy)
+         from full_tool_retry_policy import RETRY_POLICY
+@@ -209,7 +210,7 @@
+         save(output / f'source-{args.seed}.json', {'source': str(HARNESS), 'files': source_files})
+         save(output / 'layout-provenance.json', {'seed_group': 0, 'layout_index': args.seed,
+              'path': str(layout), 'sha256': hashlib.sha256(layout.read_bytes()).hexdigest()})
+-        save(output / 'launch-record.json', {'task': args.task, 'source': str(HARNESS), 'io_variant': 'astra_io_250hz_obspair',
++        save(output / 'launch-record.json', {'task': args.task, 'source': str(HARNESS), 'io_variant': 'astra_io_250hz_obspair_4fps',
+              'action_hz': 250, 'observation_hz': 25, 'timing_protocol': 'timed_joint_v1',
+              'max_action_steps': 2500, 'numeric_output_decimal_places': 4, 'model_output_phase': False,
+              'hostname': os.uname().nodename, 'gpu': args.gpu, 'gpu_uuid': gpu_uuid,
+@@ -218,8 +219,9 @@
+                                'memory_free_mib': int(gpu[4])},
+              'seed_group': 0, 'layout_indices': [args.seed],
+              'model': config['model'], 'reasoning_effort': config['reasoning_effort'],
+-             'rgb_memory_enabled': False, 'original_sdk_max_retries': 0,
+-             'input_protocol': 'observation_pair_v1', 'memory_location': 'observation.memory',
++             'visual_history_window_ms': 5000, 'visual_history_fps': 4,
++             'rgb_memory_enabled': True, 'original_sdk_max_retries': 0,
++             'input_protocol': 'visual_history_5s_4fps_v1', 'memory_location': 'observation.memory',
+              'explicit_episode_memory': config.get('explicit_episode_memory', True),
+              'model_history_replay': config.get('model_history_replay', False),
+              'episode_timeout_seconds': args.episode_timeout or None,
+@@ -229,7 +231,7 @@
+              'launcher': str(Path(__file__).resolve()),
+              'launcher_sha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+              'tool_ablation': config['tool_ablation'],
+-             'scope': '250 Hz timed joint goals, original 25 Hz task horizon, four decimal output, observation pairs and explicit observation memory',
++             'scope': '250 Hz timed joint goals, original 25 Hz task horizon, four decimal output, 5s visual history at 4fps, decision pairs and explicit observation memory',
+              'device_routing': {'selection': 'ISAACSIM_GPU / --env-gpu', 'isaacsim_gpu': args.gpu,
+                                 'isaac_launcher_device': f'cuda:{args.gpu}', 'robodojo_device_id': args.gpu,
+                                 'physics_backend': 'original RoboDojo simulation configuration',
+@@ -278,7 +280,7 @@
+                     '--config', str(output / f'config-{args.seed}.json'), '--episode', str(episode),
+                     '--trace', str(trace)], cwd=HARNESS, env=environment, stdout=log,
+                     stderr=subprocess.STDOUT, start_new_session=True)
+-            print('[release] Simulator ready; 250 Hz variant policy started with previous/current observations and explicit observation memory', flush=True)
++            print('[release] Simulator ready; 250 Hz variant policy started with 5s RGB history at 4fps, decision observations and explicit memory', flush=True)
+             policy_started = time.monotonic()
+             while policy.poll() is None:
+                 storage.check()
+@@ -376,6 +378,6 @@
+             parser.error('Unexpected positional arguments')
+         if args.output is None:
+             stamp = datetime.now(ZoneInfo('Asia/Shanghai')).strftime('%Y%m%d-%H%M%S')
+-            args.output = ROOT / 'runs' / (args.task + '-io-250hz-obspair-' + stamp)
++            args.output = ROOT / 'runs' / (args.task + '-io-250hz-obspair-4fps-' + stamp)
+         with gpu_lease(args.gpu):
+             raise SystemExit(run(args))
+--- variants/astra_io_250hz_obspair/tests/test_observation_pair.py
++++ variants/astra_io_250hz_obspair_4fps/tests/test_observation_pair.py
+@@ -30,8 +30,13 @@
+     return result
+ 
+ 
+-def context(step=0, value=0., memory='fresh memory'):
+-    return dict(step=step, state=state(value), instruction='Pick up the target.', memory=memory,
++def context(step=0, value=0., memory='fresh memory', images=None):
++    from egg_harness.visual_history import METADATA, expected_indices, sample_tick
++    images=images or {name:name+'.jpg' for name in CAMERAS}
++    frames=[dict(sample_index=i,step=sample_tick(i),target_time_ms=i*250,
++                 time_ms=sample_tick(i)*4,cameras={name:str(images[name]) for name in CAMERAS})
++            for i in expected_indices(step)]
++    return dict(visual_history=dict(METADATA,frames=frames),step=step, state=state(value), instruction='Pick up the target.', memory=memory,
+                 action_interface='joint', control_timing=timing_record(),
+                 budget=dict(total_control_ticks=2000, executed_control_ticks=step),
+                 desired_gripper_commands=dict(left=.4, right=.4),
+@@ -93,6 +98,9 @@
+ 
+ 
+ class TransportTests(unittest.TestCase):
++    def context(self, *args, **kwargs):
++        return context(*args, images=self.images, **kwargs)
++
+     def setUp(self):
+         self.temporary=tempfile.TemporaryDirectory()
+         self.folder=Path(self.temporary.name)
+@@ -123,7 +131,7 @@
+     def test_three_real_calls_use_only_observation_pairs_and_latest_memory(self):
+         memory='fresh memory'
+         for number,step in enumerate((0,83,83),1):
+-            decision=self.model.ask(json.dumps(context(step,step/1000,memory)),self.images)
++            decision=self.model.ask(json.dumps(self.context(step,step/1000,memory)),self.images)
+             self.assertEqual(decision['action']['control_arms']['arms']['right']['joints'][0],.1235)
+             self.model.observe(dict(status='completed' if number==1 else 'rejected_before_motion',
+                                     executed_steps=83 if number==1 else 0),83,False)
+@@ -139,7 +147,7 @@
+             if number>1:
+                 self.assertEqual(text['history']['previous_observation']['step'],0 if number==2 else 83)
+                 self.assertEqual(text['history']['duration_ms'],332 if number==2 else 0)
+-                self.assertEqual(len([p for p in request['input'][0]['content'] if p['type']=='input_image']),6)
++                self.assertEqual(len([p for p in request['input'][0]['content'] if p['type']=='input_image']),9 if number==2 else 12)
+             memory=decision['memory']
+         self.assertFalse(hasattr(self.model,'previous'))
+         self.assertNotIn('output',self.model.pending or {})
+@@ -150,18 +158,39 @@
+         self.assertNotEqual(raw['output'][-1]['arguments'],effective['output'][-1]['arguments'])
+ 
+     def test_pending_result_is_required_and_stale_memory_is_rejected(self):
+-        self.model.ask(json.dumps(context()),self.images)
+-        with self.assertRaisesRegex(RuntimeError,'execution result'):self.model.ask(json.dumps(context()),self.images)
++        self.model.ask(json.dumps(self.context()),self.images)
++        with self.assertRaisesRegex(RuntimeError,'execution result'):self.model.ask(json.dumps(self.context()),self.images)
+         self.model.observe(dict(status='completed',executed_steps=1),1,False)
+         with self.assertRaisesRegex(ValueError,'latest executed decision memory'):
+-            self.model.ask(json.dumps(context(1)),self.images)
++            self.model.ask(json.dumps(self.context(1)),self.images)
+ 
+     def test_failed_pending_action_does_not_commit_a_new_previous_observation(self):
+-        self.model.ask(json.dumps(context()),self.images)
++        self.model.ask(json.dumps(self.context()),self.images)
+         self.model.fail_pending(RuntimeError('partial failure'),10)
+         self.assertIsNone(self.model.last_observation)
+         self.assertIsNone(self.model.pending)
+         self.assertEqual(json.loads((self.folder/'model/0001.tool-result.json').read_text())['status'],'aborted')
++
++    def test_full_five_second_input_sends_all_66_images_in_one_user_message(self):
++        create=self.model.client.responses.create
++        def long_segment(**kwargs):
++            response=create(**kwargs)
++            raw=response.model_dump();args=json.loads(raw['output'][-1]['arguments'])
++            args['steps']=1751;raw['output'][-1]['arguments']=json.dumps(args)
++            return SimpleNamespace(status='completed',usage=None,model_dump=lambda **options:deepcopy(raw))
++        self.model.client.responses.create=long_segment
++        decision=self.model.ask(json.dumps(self.context()),self.images)
++        self.model.observe(dict(status='completed',executed_steps=1751),1751,False)
++        self.model.ask(json.dumps(self.context(1751,memory=decision['memory'])),self.images)
++        request=self.payloads[-1]
++        self.assertEqual(len(request['input']),1)
++        content=request['input'][0]['content']
++        self.assertEqual(sum(p['type']=='input_image' for p in content),66)
++        value=json.loads(content[0]['text'])
++        self.assertEqual(len(value['visual_history']['observations']),22)
++        self.assertEqual(value['visual_history']['observations'][0]['roles'],['previous_decision'])
++        self.assertEqual(value['history']['previous_observation']['step'],0)
++        self.assertNotIn('NEVER_REPLAY_THIS',json.dumps(request))
+ 
+     def test_invalid_raw_gripper_cannot_round_into_bounds(self):
+         def bad(**kwargs):
+@@ -170,13 +199,13 @@
+                     right=dict(control='joint',joints=[0.]*6,gripper=1.00001))))])
+             return SimpleNamespace(status='completed',usage=None,model_dump=lambda **options:raw)
+         self.model.client.responses.create=bad
+-        with self.assertRaises(ValueError):self.model.ask(json.dumps(context()),self.images)
++        with self.assertRaises(ValueError):self.model.ask(json.dumps(self.context()),self.images)
+ 
+     def test_new_instance_has_no_observations_from_another_episode(self):
+-        self.model.ask(json.dumps(context()),self.images)
++        self.model.ask(json.dumps(self.context()),self.images)
+         self.model.observe(dict(status='completed',executed_steps=1),1,False)
+         other=native_responses.NativeToolVision(self.config,self.folder/'other-model')
+-        other.ask(json.dumps(context(memory='another episode')),self.images)
++        other.ask(json.dumps(self.context(memory='another episode')),self.images)
+         text=json.loads(self.payloads[-1]['input'][0]['content'][0]['text'])
+         self.assertFalse(text['history']['available'])
+         self.assertEqual(text['observation']['memory'],'another episode')
+@@ -185,14 +214,16 @@
+         import export_swift
+         memory='fresh memory'
+         for number,step in enumerate((0,83),1):
+-            decision=self.model.ask(json.dumps(context(step,memory=memory)),self.images)
++            decision=self.model.ask(json.dumps(self.context(step,memory=memory)),self.images)
+             self.model.observe(dict(status='completed' if number==1 else 'episode_ended',
+                                     executed_steps=83 if number==1 else 7),83 if number==1 else 90,number==2)
+             memory=decision['memory']
+         run=self.folder/'completed-run';(run/'policy-20').mkdir(parents=True);(run/'seed-20').mkdir()
+         shutil.copytree(self.folder/'model',run/'policy-20/model')
+         export_swift.save(run/'seed-20/control-timing.json',timing_record())
+-        export_swift.save(run/'launch-record.json',dict(io_variant='astra_io_250hz_obspair',input_protocol=PROTOCOL,
++        (run/'seed-20/visual-history.jsonl').write_text(''.join(json.dumps(frame)+'\n'
++            for frame in self.context(83)['visual_history']['frames']))
++        export_swift.save(run/'launch-record.json',dict(io_variant='astra_io_250hz_obspair_4fps',input_protocol=PROTOCOL,
+                                                         model_history_replay=False))
+         export_swift.save(run/'results.json',[dict(seed_index=20,status='native_end',action_count=90,
+             official_observation=dict(native_terminal=True,valid_sample=True,unstable=False,steps=90),
+@@ -202,7 +233,7 @@
+         self.assertTrue(result['passed'])
+         samples=[json.loads(line) for line in (output/'train.jsonl').read_text().splitlines()]
+         self.assertEqual(len(samples[0]['images']),3)
+-        self.assertEqual(len(samples[1]['images']),6)
++        self.assertEqual(len(samples[1]['images']),9)
+         source=json.loads((run/'policy-20/model/0002.request.json').read_text())
+         self.assertTrue(samples[1]['messages'][1]['content'].startswith(source['question']))
+         self.assertNotIn('preceding_function_call',samples[1]['messages'][1]['content'])
+@@ -210,6 +241,16 @@
+         contents=''.join(json.dumps(row)+'\n' for row in samples)
+         for name in ('train.jsonl','all.jsonl'):(output/name).write_text(contents)
+         with self.assertRaisesRegex(ValueError,'Source input or label mismatch'):export_swift.validate(output)
++        # An altered user input must also fail, even if its readable API audit agrees.
++        value=json.loads(source['question'])
++        value['visual_history']['observations'][0]['relative_time_ms']+=4
++        source['question']=json.dumps(value)
++        export_swift.save(run/'policy-20/model/0002.request.json',source)
++        api=export_swift.read(run/'policy-20/model/0002.api-input.readable.json')
++        api['input'][0]['content'][0]['text']=source['question']
++        export_swift.save(run/'policy-20/model/0002.api-input.readable.json',api)
++        with self.assertRaisesRegex(ValueError,'Visual history timestamps'):
++            export_swift.records_for(run)
+ 
+     def test_real_policy_loop_moves_memory_and_actual_prefix_into_second_request(self):
+         from egg_harness import skill_policy
+@@ -222,11 +263,11 @@
+             def __init__(robot,episode,trace):
+                 robot.home,robot.home_joints=initial['home'],initial['home_joints']
+                 robot.obs=dict(step=0,state=initial['state'],instruction=initial['instruction'],
+-                    budget=initial['budget'],control_timing=timing_record(),action_interface='joint',ended=False,cameras=images)
++                    budget=initial['budget'],visual_history=self.context()['visual_history'],control_timing=timing_record(),action_interface='joint',ended=False,cameras=images)
+                 robot.episode=episode
+             def command(robot,operation,**kwargs):
+                 observations.append(deepcopy(robot.obs));step=83 if len(observations)==1 else 90
+-                robot.obs={**robot.obs,'step':step,'ended':len(observations)==2,
++                robot.obs={**robot.obs,'step':step,'visual_history':self.context(step)['visual_history'],'ended':len(observations)==2,
+                     'action_feedback':dict(status='tracking_or_gripper_change' if step==83 else 'episode_ended',
+                                           executed_steps=83 if step==83 else 7)}
+         config=dict(self.config,memory=str(HERE/'harness/memory/skills.json'),skills_root=str(HERE/'harness/skills'))
+--- variants/astra_io_250hz_obspair/tests/test_timed_joint.py
++++ variants/astra_io_250hz_obspair_4fps/tests/test_timed_joint.py
+@@ -177,7 +177,7 @@
+         self.assertEqual(len(feedback['tracking']), 254)
+         self.assertEqual(len(actions), 127)
+         self.assertEqual(native.take_action_cnt, [12])
+-        self.assertEqual(captures, [*range(10, 121, 10), 127])
++        self.assertEqual(captures, sorted([*range(10, 121, 10), 63, 125, 127]))
+         self.assertAlmostEqual(native.frames[0]['left_arm_joint_state']['position'][0], 1/125)
+         self.assertEqual(native.frames[0]['left_ee_joint_state']['position'], [.044, .044])
+         for frame in native.frames[124:]:
+--- /dev/null
++++ variants/astra_io_250hz_obspair_4fps/tests/test_visual_history.py
+@@ -0,0 +1,193 @@
++"""Verify causal sampling, endpoint union and capture during native action segments."""
++from copy import deepcopy
++import json
++from pathlib import Path
++import sys
++import tempfile
++import unittest
++from unittest.mock import patch
++
++import numpy as np
++from PIL import Image
++
++HERE = Path(__file__).resolve().parents[1]
++sys.path[:0] = [str(HERE), str(HERE / 'harness'), str(HERE / 'harness/scripts')]
++from egg_harness.observation_pair import CAMERAS, build_visual_input, snapshot
++from egg_harness.visual_history import (METADATA, RollingVisualHistory, expected_indices,
++                                       is_sample_tick, sample_tick, validate_window)
++from test_observation_pair import context
++from test_timed_joint import PhysicsFixture
++
++
++def pictures(step):
++    return {name: f'/public/frame-{step}-{name}.jpg' for name in CAMERAS}
++
++
++def window_until(step):
++    sampler = RollingVisualHistory()
++    for tick in range(step + 1):
++        if is_sample_tick(tick):
++            sampler.observe(tick, pictures(tick))
++    return sampler.observe(step, pictures(step))
++
++
++class WindowTests(unittest.TestCase):
++    def test_grid_cannot_accumulate_62_or_63_tick_rounding_drift(self):
++        self.assertEqual([sample_tick(i) for i in range(9)], [0, 63, 125, 188, 250, 313, 375, 438, 500])
++        for i in range(1000):
++            self.assertIn(sample_tick(i) * 4 - i * 250, (0, 2))
++            self.assertTrue(is_sample_tick(sample_tick(i)))
++        self.assertFalse(is_sample_tick(62))
++        self.assertFalse(is_sample_tick(64))
++
++    def test_sliding_window_startup_boundary_pruning_and_duplicate_captures(self):
++        sampler = RollingVisualHistory()
++        for tick in range(4001):
++            if is_sample_tick(tick):
++                window = sampler.observe(tick, pictures(tick))
++                self.assertEqual(window, sampler.observe(tick, pictures(tick + 1)))
++            else:
++                window = sampler.observe(tick, pictures(tick))
++            self.assertLessEqual(len(sampler.frames), 21)
++            self.assertEqual([f['sample_index'] for f in window['frames']], expected_indices(tick))
++            self.assertTrue(all(tick - 1250 <= f['step'] <= tick for f in window['frames']))
++        self.assertEqual(len(window['frames']), 21)
++        self.assertEqual(window['frames'][0]['step'], 2750)
++        self.assertEqual(window['frames'][-1]['step'], 4000)
++
++    def test_missing_sample_rewind_and_wrong_camera_are_explicit_errors(self):
++        sampler = RollingVisualHistory()
++        with self.assertRaisesRegex(ValueError, 'Missed'): sampler.observe(1, pictures(1))
++        with self.assertRaisesRegex(ValueError, 'three'): sampler.observe(0, {'cam_head': 'a'})
++        sampler.observe(0, pictures(0))
++        sampler.observe(60, pictures(60))
++        with self.assertRaisesRegex(ValueError, 'Missed'): sampler.observe(64, pictures(64))
++        sampler.observe(63, pictures(63))
++        with self.assertRaisesRegex(ValueError, 'rewind'): sampler.observe(62, pictures(62))
++
++    def test_tampering_future_sample_metadata_and_state_leak_are_rejected(self):
++        original = window_until(100)
++        for mutate in (lambda w: w['frames'].pop(),
++                       lambda w: w.update(clock='wall'),
++                       lambda w: w['frames'][0].update(step=101),
++                       lambda w: w['frames'][0].update(state={'hidden': 1}),
++                       lambda w: w['frames'].reverse()):
++            value = deepcopy(original); mutate(value)
++            with self.assertRaises(ValueError): validate_window(value, 100)
++
++
++class InputTests(unittest.TestCase):
++    def build(self, step, previous=None):
++        source = context(step, images=pictures(step))
++        return build_visual_input(source, pictures(step), previous)
++
++    def test_first_input_has_only_current_three_images_and_memory(self):
++        payload, images, _ = self.build(0)
++        self.assertEqual(len(images), 3)
++        self.assertEqual(payload['visual_history']['observations'][0]['roles'], ['current'])
++        self.assertEqual(payload['observation']['memory'], 'fresh memory')
++        self.assertFalse(payload['history']['available'])
++
++    def test_chronological_union_has_rgb_only_history_and_exact_endpoint_states(self):
++        prior = snapshot(context(110, value=.15), pictures(110))
++        payload, images, _ = self.build(1700, prior)
++        entries = payload['visual_history']['observations']
++        self.assertEqual(len(entries), 22)
++        self.assertEqual(len(images), 66)
++        self.assertEqual(entries[0]['step'], 110)  # Explicit previous decision older than 5 seconds.
++        self.assertEqual(entries[0]['roles'], ['previous_decision'])
++        self.assertEqual(entries[-1]['step'], 1700)
++        self.assertEqual(payload['history']['duration_ms'], 6360)
++        self.assertEqual(payload['history']['previous_observation']['state'], prior['state'])
++        for entry in entries:
++            self.assertLessEqual(entry['relative_time_ms'], 0)
++            if entry['roles'] == ['history']:
++                self.assertGreaterEqual(entry['relative_time_ms'], -5000)
++                self.assertNotIn('state', entry)
++                self.assertNotIn('state_source', entry)
++        self.assertEqual(list(images), [name for entry in entries for name in entry['images']])
++        self.assertTrue(all('memory' not in entry for entry in entries))
++
++    def test_previous_decision_merges_with_sample_but_keeps_exact_decision_pictures(self):
++        prior = snapshot(context(63), pictures('decision-63'))
++        payload, images, _ = self.build(125, prior)
++        entries = payload['visual_history']['observations']
++        self.assertEqual([entry['step'] for entry in entries], [0, 63, 125])
++        self.assertEqual(entries[1]['roles'], ['history', 'previous_decision'])
++        self.assertEqual([images[name] for name in entries[1]['images']], list(pictures('decision-63').values()))
++
++    def test_rejected_zero_motion_keeps_both_endpoints_and_zero_duration(self):
++        prior = snapshot(context(83), pictures('previous-83'))
++        payload, images, _ = self.build(83, prior)
++        self.assertEqual(payload['history']['duration_ms'], 0)
++        entries = payload['visual_history']['observations']
++        self.assertEqual([entry['step'] for entry in entries], [0, 63, 83, 83])
++        self.assertEqual(entries[-2]['roles'], ['previous_decision'])
++        self.assertEqual(entries[-1]['roles'], ['current'])
++        self.assertEqual(len(images), 12)
++
++    def test_raw_history_is_required_and_not_synthesized_from_decisions(self):
++        source = context(83); source.pop('visual_history')
++        with self.assertRaisesRegex(ValueError, 'visual_history'):
++            build_visual_input(source, pictures(83))
++
++
++class ServerIntegrationTests(unittest.TestCase):
++    def test_long_native_segment_captures_all_samples_and_exposes_only_public_rgb(self):
++        import server_loop
++        from egg_harness.timed_joint import TimedJointEnvironment
++        from egg_harness.control_timing import timing_record
++        native = PhysicsFixture()
++        native.success = [False]
++        native.get_obs = lambda: dict(state=native.state())
++        env = TimedJointEnvironment(native)
++        with tempfile.TemporaryDirectory() as directory:
++            folder = Path(directory)
++            (folder / 'control-timing.json').write_text(json.dumps(timing_record()))
++            captures = []
++            def capture(environment):
++                tick = env.take_action_cnt[0]
++                captures.append(tick)
++                if len(captures) == 1:
++                    for name, command in (
++                        ('0001', dict(op='control_action', phase='transit', action=dict(arms={}, steps=1401, settle=0))),
++                        ('0002', dict(op='control_action', phase='transit', action=dict(arms={}, steps=5, settle=0))),
++                        ('zz-runner-finish', dict(op='finish'))):
++                        (folder / 'commands' / (name + '.json')).write_text(json.dumps(dict(id=name, **command)))
++                return dict(state=native.state(), instruction='Observe motion', vision={name: dict(
++                    color=np.full((8, 8, 3), (tick // 10) % 255, dtype=np.uint8)) for name in CAMERAS})
++            with patch.object(server_loop, 'capture_public_observation', side_effect=capture), \
++                 patch.object(server_loop, 'validate_camera_rig', return_value='a' * 64), \
++                 patch('egg_harness.action_control.check_configured_storage'):
++                server_loop.run_server(env, folder, [0], 'frozen', 'general_pickup')
++            response = json.loads((folder / 'responses/0001.json').read_text())
++            audit = [json.loads(line) for line in (folder / 'visual-history.jsonl').read_text().splitlines()]
++            self.assertEqual([row['step'] for row in audit], [sample_tick(i) for i in range(23)])
++            self.assertIn(63, captures)
++            self.assertIn(125, captures)
++            self.assertIn(188, captures)
++            self.assertEqual(len(native.frames), 1406)
++            self.assertEqual(native.take_action_cnt, [140])
++            self.assertEqual(response['action_feedback']['executed_steps'], 1401)
++            self.assertEqual(response['visual_history']['frames'][0]['step'], 188)
++            self.assertEqual(response['visual_history']['frames'][-1]['step'], 1375)
++            self.assertNotIn('state', response['visual_history']['frames'][0])
++            for row in response['visual_history']['frames']:
++                self.assertTrue(all(Path(path).is_file() for path in row['cameras'].values()))
++            first = response['visual_history']['frames'][0]['cameras']['cam_head']
++            last = response['visual_history']['frames'][-1]['cameras']['cam_head']
++            with Image.open(first) as a, Image.open(last) as b:
++                self.assertNotEqual(a.getpixel((0, 0)), b.getpixel((0, 0)))
++            validate_window(response['visual_history'], 1401)
++            # Exercise the actual IPC reader's allowlist and feedback validation.
++            from egg_harness.client import Robot
++            robot = Robot.__new__(Robot)
++            robot.episode = folder; robot.trace = folder; robot.counter = 0; robot.session = 'fixture'
++            robot.obs = dict(step=0)
++            (folder / 'responses/policy-fixture-00001.json').write_text(json.dumps(response))
++            received = robot.command('control_action', phase='transit', action=dict(arms={}, steps=1401, settle=0))
++            self.assertEqual(received['visual_history'], response['visual_history'])
++
++
++if __name__ == '__main__':
++    unittest.main()
+--- variants/astra_io_250hz_obspair/verify_originals.py
++++ variants/astra_io_250hz_obspair_4fps/verify_originals.py
+@@ -12,7 +12,7 @@
+     hashes = json.loads((HERE / 'audit/protected-originals-sha256.json').read_text())
+     changed = [name for name, digest in hashes.items() if not (ROOT / name).is_file()
+                or hashlib.sha256((ROOT / name).read_bytes()).hexdigest() != digest]
+-    parent = runpy.run_path(str(HERE.parent / 'astra_io_250hz_timed/verify_originals.py'))['verify']()
++    parent = runpy.run_path(str(HERE.parent / 'astra_io_250hz_obspair/verify_originals.py'))['verify']()
+     return dict(passed=not changed and parent['passed'], protected_files=len(hashes),
+                 differences=changed, parent_integrity=parent)
+ 

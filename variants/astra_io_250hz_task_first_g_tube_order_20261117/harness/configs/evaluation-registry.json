@@ -1,0 +1,71 @@
+{
+  "batches": [
+    {
+      "task": "align_blocks",
+      "plan": "artifacts/align-evaluation-plan.json",
+      "runs": [
+        "artifacts/align-frozen23-v1",
+        "artifacts/align-frozen24-v1",
+        "artifacts/align-frozen25-v1"
+      ]
+    }
+  ],
+  "user_acceptances": [
+    {
+      "task": "general_pickup",
+      "accepted_at": "2026-09-15T10:02:19.063822+00:00",
+      "authority": "explicit_user_instruction",
+      "instruction": "pickup\u6211\u770b\u4e86\uff0c\u662f23\u548c25\u4e0d\u9002\u5408\u5939\uff0c\u53ef\u4ee5\u7b97\u901a\u8fc7\u4e86\u3002",
+      "reason": "User reviewed layouts23 and25 and accepted task despite unsuitable grasp configurations.",
+      "scope": "Task acceptance override only; native scores and failed/interrupted attempts remain unchanged.",
+      "automatic_benchmark_pass": false,
+      "evidence_runs": [
+        "artifacts/general-pickup-frozen23-posture-v1",
+        "artifacts/general-pickup-frozen24-posture-v1",
+        "artifacts/general-pickup-frozen25-posture-v1"
+      ]
+    }
+  ],
+  "two_scene_acceptances": [
+    {
+      "task": "classify_objects_by_language",
+      "accepted_at": "2026-09-15T12:06:20.668374+00:00",
+      "runs": [
+        "artifacts/classify-language-dev20-bilateral-v1",
+        "artifacts/classify-language-dev21-bilateral-v1"
+      ]
+    },
+    {
+      "task": "solve_equation",
+      "accepted_at": "2026-09-15T12:06:20.668374+00:00",
+      "runs": [
+        "artifacts/solve-equation-dev21-handoff-v1",
+        "artifacts/solve-equation-dev22-handoff-v1"
+      ]
+    },
+    {
+      "task": "stack_blocks",
+      "accepted_at": "2026-09-15T12:06:20.668374+00:00",
+      "runs": [
+        "artifacts/stack-blocks-dev20-posture-v1",
+        "artifacts/stack-blocks-case23-development-v1"
+      ]
+    },
+    {
+      "task": "arrange_largest_number",
+      "accepted_at": "2026-09-15T13:39:41.423492+00:00",
+      "runs": [
+        "artifacts/arrange-largest-number-dev20-handoff-v1",
+        "artifacts/arrange-largest-number-dev21-rapid-v1"
+      ]
+    },
+    {
+      "task": "play_tic_tac_toe",
+      "accepted_at": "2026-09-15T15:13:28.371517+00:00",
+      "runs": [
+        "artifacts/play-tic-tac-toe-dev20-retry1",
+        "artifacts/play-tic-tac-toe-dev22-visible-v4"
+      ]
+    }
+  ]
+}

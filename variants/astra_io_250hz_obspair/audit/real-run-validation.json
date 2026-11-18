@@ -1,0 +1,20 @@
+{
+  "verified_at": "2026-10-20T03:39:41.736939+00:00",
+  "batch": "/data/lanruya/robodojo/Astra-Robodojo-new/runs/general_pickup-io-250hz-obspair-3layouts-20261020-111723",
+  "summary": "/data/lanruya/robodojo/Astra-Robodojo-new/runs/general_pickup-io-250hz-obspair-3layouts-20261020-111723/SUMMARY.md",
+  "swift_dataset": "/data/lanruya/robodojo/Astra-Robodojo-new/runs/general_pickup-io-250hz-obspair-3layouts-20261020-111723/swift-dataset/train.jsonl",
+  "samples": 38,
+  "image_references": 219,
+  "successes": 3,
+  "episodes": 3,
+  "mean_score": 100,
+  "invalid_actions": 0,
+  "protection_interruptions": 5,
+  "input_tokens": 473813,
+  "source_files_unchanged": true,
+  "input_protocol": "observation_pair_v1",
+  "memory_location": "observation.memory",
+  "actual_api_history_replayed": false,
+  "final_audit": "/data/lanruya/robodojo/Astra-Robodojo-new/runs/general_pickup-io-250hz-obspair-3layouts-20261020-111723/final-audit.json",
+  "exporter_sha256": "573a8129b0c0f3176117a0511af77b9dda74567403baf892043a4b8f22e9d62b"
+}

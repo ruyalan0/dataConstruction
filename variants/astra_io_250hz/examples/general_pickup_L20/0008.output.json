@@ -1,0 +1,49 @@
+{
+  "scope": "Offline conversion of historical 25 Hz data; no new model call or 250 Hz execution",
+  "name": "control_arms",
+  "arguments": {
+    "assessment": "Pads now flank the car, with measured finger positions about 20.2 and 20.6 mm after closure. This supports contact but not retention; no lift has occurred. The upward path is clear.",
+    "left": null,
+    "memory": "Step48 closure completed; white striped 53 car between pads, measured fingers .02018/.02062m, right commanded0. Wrist z.9230 is lift baseline. Retention unconfirmed pending short test lift. Previous descent residual avoided by holding measured pose. No reset required.",
+    "plan": "Test lift approximately 27 mm using coordinated shoulder/elbow/wrist pitch changes to preserve downward orientation and grip; compare car motion with pads and table afterward.",
+    "right": {
+      "control": "joint",
+      "gripper": null,
+      "joints": [
+        0.5335,
+        1.8291,
+        1.3059,
+        -1.0326,
+        -0.0012,
+        2.0979
+      ]
+    },
+    "settle": 1,
+    "steps": 3
+  },
+  "decision": {
+    "assessment": "Pads now flank the car, with measured finger positions about 20.2 and 20.6 mm after closure. This supports contact but not retention; no lift has occurred. The upward path is clear.",
+    "plan": "Test lift approximately 27 mm using coordinated shoulder/elbow/wrist pitch changes to preserve downward orientation and grip; compare car motion with pads and table afterward.",
+    "memory": "Step48 closure completed; white striped 53 car between pads, measured fingers .02018/.02062m, right commanded0. Wrist z.9230 is lift baseline. Retention unconfirmed pending short test lift. Previous descent residual avoided by holding measured pose. No reset required.",
+    "action": {
+      "control_arms": {
+        "arms": {
+          "right": {
+            "control": "joint",
+            "joints": [
+              0.5335,
+              1.8291,
+              1.3059,
+              -1.0326,
+              -0.0012,
+              2.0979
+            ]
+          }
+        },
+        "steps": 3,
+        "settle": 1
+      }
+    }
+  },
+  "source_response": "/data/lanruya/robodojo/Astra-Robodojo-new/runs/general-pickup-control-only-20261015-155448/general_pickup/L20/policy-20/model/0008.response.json"
+}

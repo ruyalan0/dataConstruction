@@ -1,0 +1,17 @@
+[project]
+name = "dojo-astra"
+version = "0.1.0"
+description = "Evidence-driven Astra policy for RoboDojo ARX X5"
+requires-python = ">=3.11"
+dependencies = ["numpy>=1.26", "scipy>=1.12", "pillow>=10", "openai>=1.100", "pydantic>=2.10"]
+[dependency-groups]
+dev = ["pytest>=8", "ruff>=0.11"]
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+[tool.hatch.build.targets.wheel]
+packages = ["src/dojo_astra"]
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+[tool.ruff]
+line-length = 110

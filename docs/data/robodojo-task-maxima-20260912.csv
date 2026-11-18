@@ -1,0 +1,55 @@
+task,variant,reported_models,max_score,score_leaders,max_success_rate,success_rate_leaders
+align_blocks,standard,38,0,A1; AHA-WAM; ABot-M0; DM0; Dexora-1B; EventVLA; Fast-WAM; GalaxeaVLA (G0.5); GO-1; GROOT-N1.7; GalaxeaVLA (G0); GigaWorld-Policy-0; H-RDT; InternVLA-A1; InternVLA-A1.5; LDA-1B; LingBot-VLA; Meituan-Robotics-0; MolmoAct2; DM0.5; OpenVLA-OFT; OpenWAM-α; Pi-0; Pi-05; Spatial Forcing; RDT; Spirit v1.5; TinyVLA; X-VLA; X-WAM; Xiaomi-Robotics-0; Xiaomi-Robotics-1; Hy-Embodied-0.5-VLA; StarVLA; StarVLA-GR00T; StarVLA-OFT; StarVLA-PI_v3; VLAct,0,A1; AHA-WAM; ABot-M0; DM0; Dexora-1B; EventVLA; Fast-WAM; GalaxeaVLA (G0.5); GO-1; GROOT-N1.7; GalaxeaVLA (G0); GigaWorld-Policy-0; H-RDT; InternVLA-A1; InternVLA-A1.5; LDA-1B; LingBot-VLA; Meituan-Robotics-0; MolmoAct2; DM0.5; OpenVLA-OFT; OpenWAM-α; Pi-0; Pi-05; Spatial Forcing; RDT; Spirit v1.5; TinyVLA; X-VLA; X-WAM; Xiaomi-Robotics-0; Xiaomi-Robotics-1; Hy-Embodied-0.5-VLA; StarVLA; StarVLA-GR00T; StarVLA-OFT; StarVLA-PI_v3; VLAct
+arrange_largest_number,standard,40,19.8,Xiaomi-Robotics-1,9.33,Xiaomi-Robotics-1
+arrange_largest_number_random,random,40,2.07,OpenWAM-α,0,A1; ACT (Single Task); AHA-WAM; ABot-M0; DM0; Dexora-1B; EventVLA; Fast-WAM; GalaxeaVLA (G0.5); GO-1; GROOT-N1.7; GalaxeaVLA (G0); GigaWorld-Policy-0; H-RDT; InternVLA-A1; InternVLA-A1.5; LDA-1B; LingBot-VLA; Meituan-Robotics-0; MolmoAct2; DM0.5; OpenVLA-OFT; OpenWAM-α; Pi-0; Pi-05; Spatial Forcing; RDT; SmolVLA (Single Task); Spirit v1.5; TinyVLA; X-VLA; X-WAM; Xiaomi-Robotics-0; Xiaomi-Robotics-1; Hy-Embodied-0.5-VLA; StarVLA; StarVLA-GR00T; StarVLA-OFT; StarVLA-PI_v3; VLAct
+build_tower,standard,40,82.93,GalaxeaVLA (G0.5),78.67,GalaxeaVLA (G0.5)
+classify_objects,standard,40,26.83,DM0.5,16.67,DM0.5
+classify_objects_by_language,standard,38,2.47,Meituan-Robotics-0,0.67,Meituan-Robotics-0; Xiaomi-Robotics-1
+cover_blocks,standard,40,100,DM0.5,100,DM0.5
+deposit_coin,standard,40,24.67,Xiaomi-Robotics-1,19.33,Xiaomi-Robotics-1
+fasten_screws,standard,40,40.2,DM0.5,12.67,DM0.5
+fill_egg_holder,standard,40,11.67,Xiaomi-Robotics-1,0.67,Xiaomi-Robotics-1
+fill_pen_holder,standard,40,44.73,Xiaomi-Robotics-1,22,Xiaomi-Robotics-1
+fold_clothes,standard,40,88.27,OpenWAM-α,86.67,OpenWAM-α
+fold_clothes_random,random,40,29.87,MolmoAct2,25.33,Spatial Forcing
+general_pickup,standard,38,35.33,MolmoAct2,35.33,MolmoAct2
+hang_mugs,standard,40,29.4,OpenWAM-α,10.67,OpenWAM-α
+hang_mugs_random,random,40,6.6,Xiaomi-Robotics-1,0,A1; ACT (Single Task); AHA-WAM; ABot-M0; DM0; Dexora-1B; EventVLA; Fast-WAM; GalaxeaVLA (G0.5); GO-1; GROOT-N1.7; GalaxeaVLA (G0); GigaWorld-Policy-0; H-RDT; InternVLA-A1; InternVLA-A1.5; LDA-1B; LingBot-VLA; Meituan-Robotics-0; MolmoAct2; DM0.5; OpenVLA-OFT; OpenWAM-α; Pi-0; Pi-05; Spatial Forcing; RDT; SmolVLA (Single Task); Spirit v1.5; TinyVLA; X-VLA; X-WAM; Xiaomi-Robotics-0; Xiaomi-Robotics-1; Hy-Embodied-0.5-VLA; StarVLA; StarVLA-GR00T; StarVLA-OFT; StarVLA-PI_v3; VLAct
+imitate_sorting_sequence,standard,40,2.9,OpenWAM-α,0.67,OpenWAM-α; Xiaomi-Robotics-1
+insert_key,standard,40,14.9,GalaxeaVLA (G0.5),0,A1; ACT (Single Task); AHA-WAM; ABot-M0; DM0; Dexora-1B; EventVLA; Fast-WAM; GalaxeaVLA (G0.5); GO-1; GROOT-N1.7; GalaxeaVLA (G0); GigaWorld-Policy-0; H-RDT; InternVLA-A1; InternVLA-A1.5; LDA-1B; LingBot-VLA; Meituan-Robotics-0; MolmoAct2; DM0.5; OpenVLA-OFT; OpenWAM-α; Pi-0; Pi-05; Spatial Forcing; RDT; SmolVLA (Single Task); Spirit v1.5; TinyVLA; X-VLA; X-WAM; Xiaomi-Robotics-0; Xiaomi-Robotics-1; Hy-Embodied-0.5-VLA; StarVLA; StarVLA-GR00T; StarVLA-OFT; StarVLA-PI_v3; VLAct
+insert_tubes,standard,40,71.73,DM0.5,59.33,DM0.5
+make_kong,standard,40,90,GalaxeaVLA (G0.5),90,GalaxeaVLA (G0.5)
+make_toast,standard,40,22.33,Xiaomi-Robotics-1,10.67,Xiaomi-Robotics-1
+make_toast_random,random,40,10.67,GalaxeaVLA (G0.5),1.33,GalaxeaVLA (G0.5); InternVLA-A1.5; OpenWAM-α
+match_and_pick_from_conveyor,standard,40,70.67,DM0.5,70.67,DM0.5
+organize_table,standard,40,62.5,OpenWAM-α,14.67,Xiaomi-Robotics-1
+pack_objects_into_box,standard,40,30.67,OpenWAM-α,9.33,OpenWAM-α
+pack_objects_into_box_random,random,40,15.4,Pi-05,5.33,Meituan-Robotics-0
+pick_from_conveyor_by_image,standard,38,1.33,Pi-05,1.33,Pi-05
+play_Xylophone,standard,40,6.67,EventVLA; X-WAM,6.67,EventVLA; X-WAM
+play_stacking_toy,standard,40,1.2,DM0.5,0,A1; ACT (Single Task); AHA-WAM; ABot-M0; DM0; Dexora-1B; EventVLA; Fast-WAM; GalaxeaVLA (G0.5); GO-1; GROOT-N1.7; GalaxeaVLA (G0); GigaWorld-Policy-0; H-RDT; InternVLA-A1; InternVLA-A1.5; LDA-1B; LingBot-VLA; Meituan-Robotics-0; MolmoAct2; DM0.5; OpenVLA-OFT; OpenWAM-α; Pi-0; Pi-05; Spatial Forcing; RDT; SmolVLA (Single Task); Spirit v1.5; TinyVLA; X-VLA; X-WAM; Xiaomi-Robotics-0; Xiaomi-Robotics-1; Hy-Embodied-0.5-VLA; StarVLA; StarVLA-GR00T; StarVLA-OFT; StarVLA-PI_v3; VLAct
+play_tic_tac_toe,standard,40,65.23,GalaxeaVLA (G0.5),58.67,OpenWAM-α
+plug_in_charger,standard,40,4,OpenWAM-α; Xiaomi-Robotics-1,4,OpenWAM-α; Xiaomi-Robotics-1
+pour_balls_into_vase,standard,40,46,Xiaomi-Robotics-1,46,Xiaomi-Robotics-1
+pour_by_language,standard,38,0,A1; AHA-WAM; ABot-M0; DM0; Dexora-1B; EventVLA; Fast-WAM; GalaxeaVLA (G0.5); GO-1; GROOT-N1.7; GalaxeaVLA (G0); GigaWorld-Policy-0; H-RDT; InternVLA-A1; InternVLA-A1.5; LDA-1B; LingBot-VLA; Meituan-Robotics-0; MolmoAct2; DM0.5; OpenVLA-OFT; OpenWAM-α; Pi-0; Pi-05; Spatial Forcing; RDT; Spirit v1.5; TinyVLA; X-VLA; X-WAM; Xiaomi-Robotics-0; Xiaomi-Robotics-1; Hy-Embodied-0.5-VLA; StarVLA; StarVLA-GR00T; StarVLA-OFT; StarVLA-PI_v3; VLAct,0,A1; AHA-WAM; ABot-M0; DM0; Dexora-1B; EventVLA; Fast-WAM; GalaxeaVLA (G0.5); GO-1; GROOT-N1.7; GalaxeaVLA (G0); GigaWorld-Policy-0; H-RDT; InternVLA-A1; InternVLA-A1.5; LDA-1B; LingBot-VLA; Meituan-Robotics-0; MolmoAct2; DM0.5; OpenVLA-OFT; OpenWAM-α; Pi-0; Pi-05; Spatial Forcing; RDT; Spirit v1.5; TinyVLA; X-VLA; X-WAM; Xiaomi-Robotics-0; Xiaomi-Robotics-1; Hy-Embodied-0.5-VLA; StarVLA; StarVLA-GR00T; StarVLA-OFT; StarVLA-PI_v3; VLAct
+pour_liquid_into_cup,standard,40,64,Xiaomi-Robotics-1,64,Xiaomi-Robotics-1
+pour_liquid_into_cup_random,random,40,30.67,DM0.5,30.67,DM0.5
+press_by_number,standard,40,95.33,DM0.5,95.33,DM0.5
+push_T,standard,40,1.33,Xiaomi-Robotics-1,1.33,Xiaomi-Robotics-1
+push_T_random,random,40,0,A1; ACT (Single Task); AHA-WAM; ABot-M0; DM0; Dexora-1B; EventVLA; Fast-WAM; GalaxeaVLA (G0.5); GO-1; GROOT-N1.7; GalaxeaVLA (G0); GigaWorld-Policy-0; H-RDT; InternVLA-A1; InternVLA-A1.5; LDA-1B; LingBot-VLA; Meituan-Robotics-0; MolmoAct2; DM0.5; OpenVLA-OFT; OpenWAM-α; Pi-0; Pi-05; Spatial Forcing; RDT; SmolVLA (Single Task); Spirit v1.5; TinyVLA; X-VLA; X-WAM; Xiaomi-Robotics-0; Xiaomi-Robotics-1; Hy-Embodied-0.5-VLA; StarVLA; StarVLA-GR00T; StarVLA-OFT; StarVLA-PI_v3; VLAct,0,A1; ACT (Single Task); AHA-WAM; ABot-M0; DM0; Dexora-1B; EventVLA; Fast-WAM; GalaxeaVLA (G0.5); GO-1; GROOT-N1.7; GalaxeaVLA (G0); GigaWorld-Policy-0; H-RDT; InternVLA-A1; InternVLA-A1.5; LDA-1B; LingBot-VLA; Meituan-Robotics-0; MolmoAct2; DM0.5; OpenVLA-OFT; OpenWAM-α; Pi-0; Pi-05; Spatial Forcing; RDT; SmolVLA (Single Task); Spirit v1.5; TinyVLA; X-VLA; X-WAM; Xiaomi-Robotics-0; Xiaomi-Robotics-1; Hy-Embodied-0.5-VLA; StarVLA; StarVLA-GR00T; StarVLA-OFT; StarVLA-PI_v3; VLAct
+put_bottles_into_dustbin,standard,40,97.7,Xiaomi-Robotics-1,96.67,Xiaomi-Robotics-1
+solve_equation,standard,38,0,A1; AHA-WAM; ABot-M0; DM0; Dexora-1B; EventVLA; Fast-WAM; GalaxeaVLA (G0.5); GO-1; GROOT-N1.7; GalaxeaVLA (G0); GigaWorld-Policy-0; H-RDT; InternVLA-A1; InternVLA-A1.5; LDA-1B; LingBot-VLA; Meituan-Robotics-0; MolmoAct2; DM0.5; OpenVLA-OFT; OpenWAM-α; Pi-0; Pi-05; Spatial Forcing; RDT; Spirit v1.5; TinyVLA; X-VLA; X-WAM; Xiaomi-Robotics-0; Xiaomi-Robotics-1; Hy-Embodied-0.5-VLA; StarVLA; StarVLA-GR00T; StarVLA-OFT; StarVLA-PI_v3; VLAct,0,A1; AHA-WAM; ABot-M0; DM0; Dexora-1B; EventVLA; Fast-WAM; GalaxeaVLA (G0.5); GO-1; GROOT-N1.7; GalaxeaVLA (G0); GigaWorld-Policy-0; H-RDT; InternVLA-A1; InternVLA-A1.5; LDA-1B; LingBot-VLA; Meituan-Robotics-0; MolmoAct2; DM0.5; OpenVLA-OFT; OpenWAM-α; Pi-0; Pi-05; Spatial Forcing; RDT; Spirit v1.5; TinyVLA; X-VLA; X-WAM; Xiaomi-Robotics-0; Xiaomi-Robotics-1; Hy-Embodied-0.5-VLA; StarVLA; StarVLA-GR00T; StarVLA-OFT; StarVLA-PI_v3; VLAct
+sort_nesting_dolls_by_size,standard,40,25.33,Xiaomi-Robotics-1,25.33,Xiaomi-Robotics-1
+sort_nesting_dolls_by_size_random,random,40,1.33,Xiaomi-Robotics-1,1.33,Xiaomi-Robotics-1
+stack_blocks,standard,40,49.67,GalaxeaVLA (G0.5),42.67,GalaxeaVLA (G0.5)
+stack_blocks_by_language,standard,38,4.8,DM0.5,2.67,DM0.5
+stack_blocks_random,random,40,3.6,Xiaomi-Robotics-1,0,A1; ACT (Single Task); AHA-WAM; ABot-M0; DM0; Dexora-1B; EventVLA; Fast-WAM; GalaxeaVLA (G0.5); GO-1; GROOT-N1.7; GalaxeaVLA (G0); GigaWorld-Policy-0; H-RDT; InternVLA-A1; InternVLA-A1.5; LDA-1B; LingBot-VLA; Meituan-Robotics-0; MolmoAct2; DM0.5; OpenVLA-OFT; OpenWAM-α; Pi-0; Pi-05; Spatial Forcing; RDT; SmolVLA (Single Task); Spirit v1.5; TinyVLA; X-VLA; X-WAM; Xiaomi-Robotics-0; Xiaomi-Robotics-1; Hy-Embodied-0.5-VLA; StarVLA; StarVLA-GR00T; StarVLA-OFT; StarVLA-PI_v3; VLAct
+stack_bowls,standard,40,89.6,OpenWAM-α,88,OpenWAM-α
+stack_bowls_random,random,40,24.4,Xiaomi-Robotics-1,16,Xiaomi-Robotics-1
+store_laptop_and_headphones,standard,40,44.27,OpenWAM-α,28,Xiaomi-Robotics-1
+store_laptop_and_headphones_random,random,40,45.33,Xiaomi-Robotics-1,17.33,Xiaomi-Robotics-1
+store_tools_in_toolbox,standard,38,0.33,OpenWAM-α,0,A1; AHA-WAM; ABot-M0; DM0; Dexora-1B; EventVLA; Fast-WAM; GalaxeaVLA (G0.5); GO-1; GROOT-N1.7; GalaxeaVLA (G0); GigaWorld-Policy-0; H-RDT; InternVLA-A1; InternVLA-A1.5; LDA-1B; LingBot-VLA; Meituan-Robotics-0; MolmoAct2; DM0.5; OpenVLA-OFT; OpenWAM-α; Pi-0; Pi-05; Spatial Forcing; RDT; Spirit v1.5; TinyVLA; X-VLA; X-WAM; Xiaomi-Robotics-0; Xiaomi-Robotics-1; Hy-Embodied-0.5-VLA; StarVLA; StarVLA-GR00T; StarVLA-OFT; StarVLA-PI_v3; VLAct
+swap_T,standard,40,0,A1; ACT (Single Task); AHA-WAM; ABot-M0; DM0; Dexora-1B; EventVLA; Fast-WAM; GalaxeaVLA (G0.5); GO-1; GROOT-N1.7; GalaxeaVLA (G0); GigaWorld-Policy-0; H-RDT; InternVLA-A1; InternVLA-A1.5; LDA-1B; LingBot-VLA; Meituan-Robotics-0; MolmoAct2; DM0.5; OpenVLA-OFT; OpenWAM-α; Pi-0; Pi-05; Spatial Forcing; RDT; SmolVLA (Single Task); Spirit v1.5; TinyVLA; X-VLA; X-WAM; Xiaomi-Robotics-0; Xiaomi-Robotics-1; Hy-Embodied-0.5-VLA; StarVLA; StarVLA-GR00T; StarVLA-OFT; StarVLA-PI_v3; VLAct,0,A1; ACT (Single Task); AHA-WAM; ABot-M0; DM0; Dexora-1B; EventVLA; Fast-WAM; GalaxeaVLA (G0.5); GO-1; GROOT-N1.7; GalaxeaVLA (G0); GigaWorld-Policy-0; H-RDT; InternVLA-A1; InternVLA-A1.5; LDA-1B; LingBot-VLA; Meituan-Robotics-0; MolmoAct2; DM0.5; OpenVLA-OFT; OpenWAM-α; Pi-0; Pi-05; Spatial Forcing; RDT; SmolVLA (Single Task); Spirit v1.5; TinyVLA; X-VLA; X-WAM; Xiaomi-Robotics-0; Xiaomi-Robotics-1; Hy-Embodied-0.5-VLA; StarVLA; StarVLA-GR00T; StarVLA-OFT; StarVLA-PI_v3; VLAct
+swap_blocks,standard,40,18.67,DM0.5,18.67,DM0.5
+sweep_blocks,standard,40,6.67,DM0.5,6.67,DM0.5
+sweep_blocks_random,random,40,1.33,GalaxeaVLA (G0.5); DM0.5,1.33,GalaxeaVLA (G0.5); DM0.5
